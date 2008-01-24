@@ -1,0 +1,19 @@
+<tal:block tal:define="view options/view;">
+  <div id="contextnav" class="xhtml2-nl">
+    <p class="label">
+      <a href="#" title="Profile of A. User" class="fn"
+        tal:attributes="href view/userUrl;
+          title string:Profile of ${view/userName};">Profile</a>
+    </p>
+    <ul>
+      <tal:block repeat="page python:view.pages.keys()">
+        <li>
+          <a href="#" tal:attributes="href page; 
+              class python:view.pageClass(page);"
+            tal:content="python:view.pages[page]">Page Name</a>
+        </li>
+      </tal:block>
+    </ul>
+  </div><!--contextnav-->
+</tal:block>
+

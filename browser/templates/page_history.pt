@@ -1,0 +1,22 @@
+<tal:block tal:define="view options/view; history view/history">
+  <div id="history" class="history">
+    <p class="label">History Entries</p>
+    <table tal:condition="history">
+    	<tr>
+    		<th>&#160;</th>
+    		<th>Edited By</th>
+    		<th>Size</th>
+    		<th>Changed</th>
+		</tr>
+		<tr tal:repeat="entry history">
+			<td>
+				<img border="0" tal:condition="entry/published" src="images/published.png"/>
+				<a href="publish.html" tal:condition="python:not entry.published" class="publish"><img border="0" src="images/publish.png"/></a>
+			</td>
+			<td tal:content="entry/editor"/>
+			<td tal:content="entry/size"/>
+			<td tal:content="entry/modified"/>
+		</tr>			
+	</table>
+  </div>
+</tal:block>
