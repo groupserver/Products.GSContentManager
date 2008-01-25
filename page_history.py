@@ -1,8 +1,9 @@
-import os
+import os, zope
 from interfaces import *
-from zope.interface import implements, alsoProvides
+from zope.interface import implements
 from zope.component import adapts
 from Products.GSContent.interfaces import IGSContentFolder
+from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 from OFS.OrderedFolder import OrderedFolder
 from lxml import etree
 from StringIO import StringIO
@@ -11,9 +12,8 @@ import interfaces
 class GSContentPageHistoryContentProvider(object):
     """ Provides the history of a page """
     
-    implements(IGSContentPageHistory)
-    zope.interface.implements( IGSContentPageHistoryContentProvider )
-    zope.component.adapts(zope.interface.Interface,
+    implements( IGSContentPageHistoryContentProvider )
+    adapts(zope.interface.Interface,
         zope.publisher.interfaces.browser.IDefaultBrowserLayer,
         zope.interface.Interface)
     
@@ -37,6 +37,14 @@ class GSContentPageHistoryContentProvider(object):
         pageTemplate = PageTemplateFile(self.pageTemplateFileName)
         return pageTemplate(view=self)
 
+    @property
+    def history(self):
+        return self.get_history()
+        
+    @property
+    def published_revision(self):
+        return self.get_published_revision()
+        
     #########################################
     # Non standard methods below this point #
     #########################################
@@ -44,18 +52,20 @@ class GSContentPageHistoryContentProvider(object):
         """ Gets all history entries of the page """
         objects = []
         for item in self.context.objectValues():
-            if item.meta_type != 'XML Template' and item.getId() != self.content_template:
-                entry = {'editor': 'editor',
-                         'size': 'size',
-                         'modified': 'modified'
+            if item.meta_type == 'XML Template' and item.getId() != self.content_template:
+                entry = {'editor': getattr(item, 'editor', None),
+                         'size': item.get_size(),
+                         'modified': item.bobobase_modification_time,
+                         'id': item.getId()
                          }
                 objects.append(entry)
                 
+        objects.reverse()
         return objects
     
-    @property
-    def history(self):
-        return self.get_history()
+    def get_published_revision (self):
+        """ Get the id of the currently published revision """
+        return self.context.published_revision
         
 zope.component.provideAdapter(GSContentPageHistoryContentProvider,
     provides=zope.contentprovider.interfaces.IContentProvider,

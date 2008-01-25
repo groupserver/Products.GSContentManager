@@ -5,6 +5,10 @@
   xmlns:sqlos="http://namespaces.sqlobject.org/sqlos"
   xmlns:five="http://namespaces.zope.org/five">
 
+  <browser:resourceDirectory name="gscontenteditor-20080125"
+    directory="./browser/" 
+    permission="zope2.Public" />
+    
   <!-- declare a marker interface on the Folder class to allow us 
     to add marker Interfaces, views and adaptation -->
   <five:implements 
@@ -43,12 +47,6 @@
                 for="Products.GSContent.interfaces.IGSContentFolder"
                 permission="zope2.Public"
                 factory=".page.GSContentPage"
-                /> 
-
-  <adapter provides=".interfaces.IGSContentPageHistory"
-                for="Products.GSContent.interfaces.IGSContentFolder"
-                permission="zope2.Public"
-                factory=".page_history.GSContentPageHistory"
                 /> 
 
 </configure>

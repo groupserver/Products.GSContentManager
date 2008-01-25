@@ -1,7 +1,7 @@
-<tal:block tal:define="view options/view; history view/history">
+<tal:block tal:define="view options/view; history view/history" tal:condition="history">
   <div id="history" class="history">
-    <p class="label">History Entries</p>
-    <table tal:condition="history">
+    <p class="label">Page History</p>
+    <table class="history" tal:condition="history">
     	<tr>
     		<th>&#160;</th>
     		<th>Edited By</th>
@@ -10,8 +10,12 @@
 		</tr>
 		<tr tal:repeat="entry history">
 			<td>
-				<img border="0" tal:condition="entry/published" src="images/published.png"/>
-				<a href="publish.html" tal:condition="python:not entry.published" class="publish"><img border="0" src="images/publish.png"/></a>
+				<img border="0" tal:condition="python:entry['id'] == view.published_revision"
+					src="/++resource++gscontenteditor-20080125/images/published.png"
+					title="This is the currently published revision"/>
+				<a href="publish.html" tal:condition="python:entry['id'] != view.published_revision" class="publish">
+					<img border="0" src="/++resource++gscontenteditor-20080125/images/publish.png" title="Click to publish this revision"/>
+				</a>
 			</td>
 			<td tal:content="entry/editor"/>
 			<td tal:content="entry/size"/>

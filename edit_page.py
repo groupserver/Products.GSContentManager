@@ -83,6 +83,9 @@ class EditPageForm(PageForm):
                          for datum in getFieldsInOrder(self.interface)
                          if data[datum[0]] != getattr(self.context, datum[0])]
         
+        # Save the current revision in the history
+        self.content_page.add_to_history()
+        
         # Update the content object
         changed = form.applyChanges(self.context, self.form_fields, data)
         

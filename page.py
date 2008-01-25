@@ -1,5 +1,6 @@
 import os
 from interfaces import *
+from time import gmtime, time, strftime
 from zope.interface import implements, alsoProvides
 from zope.component import adapts
 from Products.GSContent.interfaces import IGSContentFolder
@@ -78,6 +79,37 @@ class GSContentPage(object):
             filename = os.path.join(os.path.join(template_path, 'config'), self.initial_content_file)
             self.context.manage_addProduct['DataTemplates'].manage_addXMLTemplate(self.content_template, file(filename))
 
+    def add_to_history (self):
+        """ Creates a history entry for the context object """
+        history_obj_name = '%s_%s' % (self.content_template, strftime("%Y%m%d%H%M%S", gmtime(time())))
+        if not getattr(self.context.aq_explicit, history_obj_name, None):
+            content_obj = getattr(self.context.aq_explicit, self.content_template, None)
+            assert content_obj
+            history_obj = self.context.manage_clone(content_obj, history_obj_name)  
+            
+            # Add the last editor (as indicated by the last history entry for the page)
+            # as a property on the history entry just created.
+            last_editor = self.get_last_editor()
+            history_obj.manage_addProperty('editor', last_editor, 'string')
+            
+            # If the currently published revision is the latest one, set the published revision to the
+            # newly created historical revision.
+            if getattr(self.context, 'published_revision', None) == self.content_template:
+                self.context.published_revision = history_obj_name
+            
+            return history_obj
+    
+    def get_last_editor (self):
+        """ Get the last editor of the context object """
+        try:
+            # Get the last history entry
+            r = self.context._p_jar.db().history(self.context._p_oid, None, 1)
+            if r:
+                editor = r[0]['user_name'].split(' ')[1]
+                return editor
+        except:
+            return ''
+    
     #------------------------------------------------------------------------
     # Properties
     #------------------------------------------------------------------------
@@ -131,17 +163,17 @@ class GSContentPage(object):
     
     title = property(_getTitle, _setTitle)    
 
-    # Title property
-    def _setVisible(self, value):
+    # Hidden property
+    def _setHidden(self, value):
         try:
-            self.context.visible = value
+            self.context.hidden = value
         except:
             pass
         
-    def _getVisible(self):
-        return self.context.visible
+    def _getHidden(self):
+        return self.context.hidden
     
-    visible = property(_getVisible, _setVisible)    
+    hidden = property(_getHidden, _setHidden)    
 
     # Description property
     def _setDescription(self, value):
@@ -154,3 +186,15 @@ class GSContentPage(object):
         return self.context.description
 
     description = property(_getDescription, _setDescription)
+
+    # Published_revision property
+    def _setPublishedRevision(self, value):
+        try:
+            self.context.published_revision = value
+        except:
+            pass
+        
+    def _getPublishedRevision(self):
+        return self.context.published_revision
+
+    published_revision = property(_getPublishedRevision, _setPublishedRevision)

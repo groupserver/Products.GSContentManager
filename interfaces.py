@@ -21,15 +21,16 @@ class IGSContentPage(Interface):
         description=u'The description of this page, which will appear in the META description tag on the page.',
         required=True)
     
-    visible = Bool(title=u'Visible',
-        description=u'Whether the page is visible or not.',
+    hidden = Bool(title=u'Hidden',
+        description=u'Whether the page is hidden from anonymous users or not.',
         required=True,
-        default=False)
+        default=True)
     
     published_revision = ASCIILine(title=u'Published Revision',
         description=u'The published revision of the page.',
         required=False,
-        default='content_en')
+        default='content_en',
+        readonly=True)
     
     content = Text(title=u'Page content',
         description=u'The content of this page.',
