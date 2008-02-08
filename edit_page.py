@@ -29,6 +29,7 @@ class EditPageForm(PageForm):
         # Adapt the context object to a content page object
         self.interface = interface = getattr(interfaces, 'IGSContentPage')
         self.context = self.content_page = interface(context)
+        self.request = request
 
         PageForm.__init__(self, self.content_page.context, request)
 
@@ -38,7 +39,7 @@ class EditPageForm(PageForm):
         assert hasattr(site_root, 'GlobalConfiguration')
         config = site_root.GlobalConfiguration
         
-        self.form_fields = form.Fields(interface, render_context=True)
+        self.form_fields = form.Fields(interface, render_context=True, omit_readonly=True)
 
         self.form_fields['content'].custom_widget = wym_editor_widget
         
@@ -79,24 +80,61 @@ class EditPageForm(PageForm):
         assert self.context
         assert self.form_fields
 
-        alteredFields = [datum[0] 
-                         for datum in getFieldsInOrder(self.interface)
-                         if data[datum[0]] != getattr(self.context, datum[0])]
+        alteredFields = []
+        for datum in getFieldsInOrder(self.interface):
+            if data.has_key(datum[0]):
+                if data[datum[0]] != getattr(self.context, datum[0]):
+                    alteredFields.append(datum[0])
         
-        # Save the current revision in the history
-        self.content_page.add_to_history()
+        # If the page ID has changed, we need to rename the page and redirect to
+        # the new page in edit mode.
+        try:
+            new_id = data[alteredFields[alteredFields.index('id')]]
+        except:
+            new_id = None
+       
+        page_renamed = False
+        if new_id:
+            try:
+                current_id = self.content_page.id
+                folder = self.content_page.context.aq_parent
+                if getattr(folder.aq_explicit, new_id, None):
+                    self.status = u'A page with ID \'%s\' already exists here' % new_id
+                    return
+    
+                folder.manage_renameObject(current_id, new_id)
+                new_page = getattr(folder.aq_explicit, new_id, None)
+                self.content_page.context = new_page
+                page_renamed = True
+            except:
+                self.status = u'There was problem renaming this page'
+                return
+                                
+        # Handle publishing of a selected revision.
+        published_revision = self.request.get('published_revision', None)
+        if published_revision:
+            self.content_page.copy_revision_to_current(published_revision)
+            self.status = u'Revision %s has been copied to the current revision and published.' % published_revision
+            return
+        else:
+            # Save the current revision in the history
+            self.content_page.add_to_history()    
         
-        # Update the content object
-        changed = form.applyChanges(self.context, self.form_fields, data)
+            # Update the content object
+            changed = form.applyChanges(self.context, self.form_fields, data)
+        
+        # If we've renamed the page, redirect to the new edit page URL.
+        if page_renamed:
+            self.request.response.redirect('%s/%s' % (new_page.absolute_url(0), 'edit_page.html'))
+            return
         
         if changed:
             fields = [self.interface.get(name).title
                       for name in alteredFields]
             f = ' and '.join([i for i in (', '.join(fields[:-1]), fields[-1])
                               if i])
-            retval = u'Changed %s' % f
+            self.status = u'Changed %s' % f
         else:
-            retval = u"No fields changed."
-        assert retval
-        assert type(retval) == unicode
-        self.status = retval
+            self.status = u"No fields changed."
+        assert self.status
+        assert type(self.status) == unicode

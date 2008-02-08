@@ -52,14 +52,20 @@ class GSContentPageHistoryContentProvider(object):
         """ Gets all history entries of the page """
         objects = []
         for item in self.context.objectValues():
-            if item.meta_type == 'XML Template' and item.getId() != self.content_template:
+            if item.meta_type == 'XML Template':
                 entry = {'editor': getattr(item, 'editor', None),
-                         'size': item.get_size(),
-                         'modified': item.bobobase_modification_time,
-                         'id': item.getId()
-                         }
-                objects.append(entry)
-                
+                            'size': item.get_size(),
+                            'modified': item.bobobase_modification_time,
+                            'id': item.getId()
+                            }
+                if item.getId() == self.content_template:
+                    current = entry
+                else:
+                    objects.append(entry)
+
+        # Append the current template so it's at the top when reverse sorted.
+        objects.append(current)
+
         objects.reverse()
         return objects
     

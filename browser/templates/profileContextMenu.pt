@@ -1,19 +1,48 @@
-<tal:block tal:define="view options/view;">
-  <div id="contextnav" class="xhtml2-nl">
-    <p class="label">
-      <a href="#" title="Profile of A. User" class="fn"
-        tal:attributes="href view/userUrl;
-          title string:Profile of ${view/userName};">Profile</a>
-    </p>
-    <ul>
-      <tal:block repeat="page python:view.pages.keys()">
-        <li>
-          <a href="#" tal:attributes="href page; 
-              class python:view.pageClass(page);"
-            tal:content="python:view.pages[page]">Page Name</a>
-        </li>
-      </tal:block>
-    </ul>
-  </div><!--contextnav-->
-</tal:block>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<nl xmlns:tal="http://xml.zope.org/namespaces/tal"
+  xmlns:metal="http://xml.zope.org/namespaces/metal"
+  xmlns="http://www.w3.org/2002/06/xhtml2/"
+  id="contextnav"
+  tal:define="view options/view; context view/context; division_url python:view.get_division_url('');
+  firstLevelFolder python:view.get_firstLevelFolder(context.aq_parent.aq_parent);
+  folderTypes python:('Folder','Folder (Ordered)', 'Filesystem Directory View');
+  folders python:view.get_object_values(firstLevelFolder.aq_explicit, folderTypes);
+  mark_current python:lambda x: int(view.compare_url(template, x));
+  can_see_hidden_objects python:view.check_has_permission(view.get_division_object(), 'Change Page Templates')">
 
+  <label tal:condition="firstLevelFolder" class="label"
+    tal:define="name firstLevelFolder/title_or_id;
+    url python:'%s/%s/' %(division_url, firstLevelFolder.absolute_url(1))"
+    tal:attributes="href url"
+    tal:content="name">Name of the Menu</label>
+
+  <tal:block tal:omit-tag="" tal:condition="firstLevelFolder"
+    tal:repeat="object folders">
+
+    <li tal:condition="python:not object.getProperty('hidden', False) or can_see_hidden_objects"
+      tal:define="url python:'%s/%s/' % (division_url, object.absolute_url(1)); 
+      current python:int(view.compare_url(template, object.absolute_url(1)));
+      currentClass python:current and 'current' or 'not-current'">
+      <a class="foo" href="#"
+        tal:attributes="class currentClass;href url"
+        tal:content="python:object.title_or_id()"/>
+      
+      <tal:block tal:condition="current"
+        tal:define="objs python:view.get_object_values(object.aq_explicit, folderTypes);">
+        <ul tal:condition="objs">
+        <tal:block
+          tal:repeat="object objs">
+          <li tal:condition="python:not object.getProperty('hidden', False) or can_see_hidden_objects"
+            tal:define="hidden python:object.getProperty('hidden', False); url python:'%s/%s/' % (division_url, object.absolute_url(1));
+              current python:int(view.compare_url(template, url));
+              class python:'%s %s' % (current and 'current' or 'not-current', hidden and 'hidden' or '')">
+              <a class="foo" href="#"
+                tal:attributes="class class; href url"
+                tal:content="python:object.title_or_id()"/> 
+            </li>
+          </tal:block>
+        </ul>
+      </tal:block>
+    </li>
+  </tal:block>
+</nl>

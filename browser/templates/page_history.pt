@@ -1,4 +1,4 @@
-<tal:block tal:define="view options/view; history view/history" tal:condition="history">
+<tal:block tal:define="view options/view; history view/history; published_revision view/published_revision" tal:condition="history">
   <div id="history" class="history">
     <p class="label">Page History</p>
     <table class="history" tal:condition="history">
@@ -10,10 +10,13 @@
 		</tr>
 		<tr tal:repeat="entry history">
 			<td>
-				<img border="0" tal:condition="python:entry['id'] == view.published_revision"
+				<img border="0" tal:condition="python:entry['id'] == published_revision"
 					src="/++resource++gscontenteditor-20080125/images/published.png"
 					title="This is the currently published revision"/>
-				<a href="publish.html" tal:condition="python:entry['id'] != view.published_revision" class="publish">
+				<a href="javascript:void(0)"
+					tal:condition="python:entry['id'] != published_revision"
+					tal:attributes="onclick python:'return publish_revision(\'%s\')' % entry['id']"
+					class="publish">
 					<img border="0" src="/++resource++gscontenteditor-20080125/images/publish.png" title="Click to publish this revision"/>
 				</a>
 			</td>
@@ -22,5 +25,14 @@
 			<td tal:content="entry/modified"/>
 		</tr>			
 	</table>
+	<!-- We assume this is a component on a form - probably should be a custom widget at some stage -->
+    <input type="hidden" name="published_revision" id="published_revision" class="published_revision_class"/>
   </div>
+  <script type="text/javascript">
+	function publish_revision(revision) { 
+		jQuery.noConflict();
+		jQuery('.published_revision_class').val(revision);
+		jQuery('.editpageclass').submit();
+	}
+  </script>
 </tal:block>

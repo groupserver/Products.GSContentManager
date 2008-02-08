@@ -35,13 +35,13 @@
     </div>
     <tal:block metal:fill-slot="contextnavigation">
       <span 
-        tal:replace="structure provider:groupserver.ProfileContextMenu">
+        tal:replace="structure provider:groupserver.ContentManagerContextMenu">
         Context Menu
       </span>
     </tal:block>
     <tal:block metal:fill-slot="body">
       <form enctype="multipart/form-data"  method="post" action="."
-        tal:attributes="action request/URL" id="edit-profile">
+        tal:attributes="action request/URL" id="editpage" class="editpageclass">
         
         <h1 tal:content="view/label">Edit Page</h1>
         
@@ -83,13 +83,19 @@
             </label>
           </div><!--form-widget-->
         </tal:block>
+	<!-- We're overrinding the display of the form action because we need to be able to
+	trigger a different action client-side and using javascript to fire button click events
+	is a right royal pita -->
         <div class="buttons" tal:condition="view/availableActions">
           <tal:block repeat="action view/actions">
             <div class="formelementbutton">
-              <span tal:replace="structure action/render">Button</span>
+		<input type="hidden" id="form.actions.edit" name="form.actions.edit" value="Edit"/>
+		<input type="submit" id="submitbutton" name="submitbutton" value="Edit" class="button" />
+		<!-- <span tal:replace="structure action/render">Button</span> -->
             </div>
           </tal:block>
-        </div><!--buttons-->
+        </div>
+	<!--buttons-->
       </form>
     </tal:block>
     <tal:block metal:fill-slot="javascript">

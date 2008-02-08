@@ -99,6 +99,22 @@ class GSContentPage(object):
             
             return history_obj
     
+    def copy_revision_to_current (self, revision):
+        """ Copy the revision with the specified ID to the current revision """
+
+        # Move the current object to a revision.
+        self.add_to_history()
+
+        # Copy the contents of the specified revision to the current revision
+        rev_template = getattr(self.context.aq_explicit, revision, None)
+
+        if rev_template:
+            content_obj = getattr(self.context.aq_explicit, self.content_template, None)
+            content_obj.write(rev_template._text)
+
+        # Update the published revision
+        self.published_revision = self.content_template
+    
     def get_last_editor (self):
         """ Get the last editor of the context object """
         try:

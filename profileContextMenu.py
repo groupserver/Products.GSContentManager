@@ -6,7 +6,7 @@ from Products.XWFCore import XWFUtils, ODict
 from interfaces import *
 
 class GSContentManagerContextMenuContentProvider(object):
-    """GroupServer context-menu for the user profile area.
+    """GroupServer context-menu for content editing
     """
 
     zope.interface.implements( IGSContentManagerContextMenuContentProvider )
@@ -30,8 +30,6 @@ class GSContentManagerContextMenuContentProvider(object):
         self.groupsInfo = createObject('groupserver.GroupsInfo', 
           self.context)
 
-        self.__pages__ = self.get_pages()
-
         self.requestBase = self.request.URL.split('/')[-1]
         self.userId = self.context.getId()
         self.userName = XWFUtils.get_user_realnames(self.context)
@@ -46,70 +44,88 @@ class GSContentManagerContextMenuContentProvider(object):
     #########################################
     # Non standard methods below this point #
     #########################################
-    def get_pages(self):
-        assert self.view
-        config = self.__get_global_config()
-        showEmail = config.getProperty('showEmailAddressTo','nobody')
-        showEmail = showEmail.lower()
-        
-        if (self.viewingUser.has_role('Authenticated')
-            and (self.context.getId() == self.viewingUser.getId())):
-            return self.get_edit_pages()
-        elif (self.viewingUser.has_role('Authenticated')
-            and (showEmail == 'request')):
-            return self.get_request_pages()
-        else:
-            return ODict()
-
     def __get_global_config(self):
         site_root = self.context.site_root()
         assert hasattr(site_root, 'GlobalConfiguration')
         config = site_root.GlobalConfiguration
         assert config
         return config        
-    def get_edit_pages(self):
-        pages = ODict()
-        pages['edit.html']     = 'Edit Profile'
-        pages['image.html']    = 'Edit Image'
-        pages['useremail']     = 'Edit Email Settings'
-        pages['password.html'] = 'Set Password'
-        return pages        
 
-    def get_request_pages(self):
-        pages = ODict()
-        pages['user-request-contact'] = 'Request Contact'
-        return pages
+    def get_firstLevelFolder(self, object):
+        try:
+            while object:
+                if getattr(object.aq_explicit, 'menu_root', 0) or getattr(object.aq_parent.aq_explicit, 'is_division', 0):
+                    return object
+                object = object.aq_parent.aq_explicit
+        except:
+            return None
         
-    @property
-    def viewingUser(self):
-        assert hasattr(self, 'request')
-        assert hasattr(self.request, 'AUTHENTICATED_USER')
-        retval = self.request.AUTHENTICATED_USER
-        return retval
+    def get_object_values(self, ocontainer, otypes):
+        objects = []
+        if not ocontainer:
+            return objects
+        
+        for object_id in ocontainer.objectIds(otypes):
+            try:
+                object = getattr(ocontainer, object_id)
+                objects.append(object)
+            except:
+                pass
+
+        return objects        
     
-    @property
-    def userUrl(self):
-        retval = '/contacts/%s' % self.userId
-        assert type(retval) == str
-        assert retval
-        return retval
+    def compare_url(self, caller, url, exact_match=0):
 
-    @property
-    def pages(self):
-        return self.__pages__
+        request = self.context.REQUEST
         
-    def page_is_current(self, pageId):
-        return self.requestBase == pageId
-
-    def pageClass(self, pageId):
-        if self.page_is_current(pageId):
-            retval = 'current'
+        final_path = request.URL0.split(request.BASE0)[1].split('/')[1:]
+        virt_path = list(getattr(request, 'VirtualRootPhysicalPath', []))
+        
+        curr_path = filter(None, virt_path+final_path)
+        nice_url = filter(None, virt_path+str(url).split('/'))
+        
+        if exact_match:
+            return int(curr_path == nice_url)
         else:
-            retval = 'not-current'
-        assert retval
-        return retval
+            for i in range(len(nice_url)):
+                if i == 0:
+                    match = curr_path == nice_url
+                else:
+                    match = curr_path[:-i] == nice_url
+                if match:
+                    return 1
+            return 0
+        
+    def get_division_url (self, nodivision='/'):
+        division_object = self.get_division_object()
+        
+        if division_object:
+            absolute_url = division_object.absolute_url(1)
+            if absolute_url == '':
+                return absolute_url
+            else:
+                return '/%s' % division_object.absolute_url(1)
+        return no_division     
+    
+    def get_division_object (self):
+        division_object = self.context
+        while division_object:
+            try:
+                division_object = division_object.aq_parent
+                if getattr(division_object.aq_inner.aq_explicit, 'is_division', 0):
+                    break
+            except:
+                return None
+
+        return division_object.aq_inner.aq_explicit
+    
+    def check_has_permission (self, object, permission):
+        if not object or not permission:
+            return False
+        
+        return self.request.AUTHENTICATED_USER.has_permission(permission, self.context)        
 
 zope.component.provideAdapter(GSContentManagerContextMenuContentProvider,
     provides=zope.contentprovider.interfaces.IContentProvider,
-    name="groupserver.ProfileContextMenu")
+    name="groupserver.ContentManagerContextMenu")
 
