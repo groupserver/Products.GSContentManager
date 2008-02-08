@@ -4,7 +4,7 @@
   xmlns="http://www.w3.org/2002/06/xhtml2/"
   id="contextnav"
   tal:define="view options/view; context view/context; division_url python:view.get_division_url('');
-  firstLevelFolder python:view.get_firstLevelFolder(context.aq_parent.aq_parent);
+  firstLevelFolder python:view.get_firstLevelFolder(context);
   folderTypes python:('Folder','Folder (Ordered)', 'Filesystem Directory View');
   folders python:view.get_object_values(firstLevelFolder and firstLevelFolder.aq_explicit or None, folderTypes);
   mark_current python:lambda x: int(view.compare_url(template, x));
