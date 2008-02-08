@@ -42,6 +42,9 @@ class EditPageForm(PageForm):
         self.form_fields = form.Fields(interface, render_context=True, omit_readonly=True)
 
         self.form_fields['content'].custom_widget = wym_editor_widget
+
+        self.add_url = '%s/add_page.html' % self.content_page.context.absolute_url(0)
+        self.mode = 'edit'
         
     @property
     def id(self):

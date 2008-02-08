@@ -44,9 +44,11 @@
         tal:attributes="action request/URL" id="editpage" class="editpageclass">
         
         <h1 tal:content="view/label">Edit Page</h1>
+
+        <p tal:condition="python:view.mode == 'edit'"><a href="#" tal:attributes="href view/add_url">Add a page</a></p>
         
         <!-- Page History -->
-        <div tal:replace="structure provider:groupserver.ContentPageHistory"/>
+        <div tal:condition="python:view.mode == 'edit'" tal:replace="structure provider:groupserver.ContentPageHistory"/>
         
         <!-- Widgets -->
         <tal:block repeat="widget view/widgets">
@@ -88,10 +90,13 @@
 	is a right royal pita -->
         <div class="buttons" tal:condition="view/availableActions">
           <tal:block repeat="action view/actions">
-            <div class="formelementbutton">
-		<input type="hidden" id="form.actions.edit" name="form.actions.edit" value="Edit"/>
-		<input type="submit" id="submitbutton" name="submitbutton" value="Edit" class="button" />
-		<!-- <span tal:replace="structure action/render">Button</span> -->
+            <div tal:condition="python:view.mode == 'edit'" class="formelementbutton">
+        		<input type="hidden" id="form.actions.edit" name="form.actions.edit" value="Edit"/>
+        		<input type="submit" id="submitbutton" name="submitbutton" value="Save" class="button" />
+            </div>
+            <div tal:condition="python:view.mode == 'add'" class="formelementbutton">
+        		<input type="hidden" id="form.actions.add" name="form.actions.add" value="Add"/>
+        		<input type="submit" id="submitbutton" name="submitbutton" value="Add" class="button" />
             </div>
           </tal:block>
         </div>

@@ -6,7 +6,7 @@
   tal:define="view options/view; context view/context; division_url python:view.get_division_url('');
   firstLevelFolder python:view.get_firstLevelFolder(context.aq_parent.aq_parent);
   folderTypes python:('Folder','Folder (Ordered)', 'Filesystem Directory View');
-  folders python:view.get_object_values(firstLevelFolder.aq_explicit, folderTypes);
+  folders python:view.get_object_values(firstLevelFolder and firstLevelFolder.aq_explicit or None, folderTypes);
   mark_current python:lambda x: int(view.compare_url(template, x));
   can_see_hidden_objects python:view.check_has_permission(view.get_division_object(), 'Change Page Templates')">
 
@@ -20,7 +20,7 @@
     tal:repeat="object folders">
 
     <li tal:condition="python:not object.getProperty('hidden', False) or can_see_hidden_objects"
-      tal:define="url python:'%s/%s/' % (division_url, object.absolute_url(1)); 
+      tal:define="url python:'%s/%s/edit_page.html' % (division_url, object.absolute_url(1)); 
       current python:int(view.compare_url(template, object.absolute_url(1)));
       currentClass python:current and 'current' or 'not-current'">
       <a class="foo" href="#"
@@ -33,7 +33,7 @@
         <tal:block
           tal:repeat="object objs">
           <li tal:condition="python:not object.getProperty('hidden', False) or can_see_hidden_objects"
-            tal:define="hidden python:object.getProperty('hidden', False); url python:'%s/%s/' % (division_url, object.absolute_url(1));
+            tal:define="hidden python:object.getProperty('hidden', False); url python:'%s/%s/edit_page.html' % (division_url, object.absolute_url(1));
               current python:int(view.compare_url(template, url));
               class python:'%s %s' % (current and 'current' or 'not-current', hidden and 'hidden' or '')">
               <a class="foo" href="#"

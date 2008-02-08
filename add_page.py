@@ -39,10 +39,12 @@ class AddPageForm(AddForm):
         assert hasattr(site_root, 'GlobalConfiguration')
         config = site_root.GlobalConfiguration
         
-        self.form_fields = form.Fields(interface, render_context=True)
+        self.form_fields = form.Fields(interface, render_context=True, omit_readonly=True)
 
         self.form_fields['content'].custom_widget = wym_editor_widget
         self.form_fields['content'].field.default = u'<p>Enter content here.</p>'
+
+        self.mode = 'add'
         
     @property
     def id(self):
@@ -81,9 +83,11 @@ class AddPageForm(AddForm):
         assert self.context
         assert self.form_fields
 
-        alteredFields = [datum[0] 
-                         for datum in getFieldsInOrder(self.interface)
-                         if data[datum[0]] != getattr(self.context, datum[0])]
+        alteredFields = []
+        for datum in getFieldsInOrder(self.interface):
+            if data.has_key(datum[0]):
+                if data[datum[0]] != getattr(self.context, datum[0]):
+                    alteredFields.append(datum[0])
         
         # Create the content folder and object and apply changes.
         folder = GSContentPage(self.context, mode='add', id=data['id'])
