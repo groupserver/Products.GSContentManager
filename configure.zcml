@@ -35,7 +35,7 @@
     for="Products.GSContent.interfaces.IGSContentFolder"
     name="edit_page.html"
     class=".edit_page.EditPageForm"
-    permission="zope2.View" />
+    permission="zope2.ManageProperties" />
 
   <browser:page 
     for="Products.GSContent.interfaces.IGSContentFolder"

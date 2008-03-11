@@ -2,28 +2,38 @@
   <div id="history" class="history">
     <p class="label">Page History</p>
     <table class="history" tal:condition="history">
-    	<tr>
-    		<th>&#160;</th>
-    		<th>Edited By</th>
-    		<th>Size</th>
-    		<th>Changed</th>
-		</tr>
-		<tr tal:repeat="entry history">
-			<td>
-				<img border="0" tal:condition="python:entry['id'] == published_revision"
-					src="/++resource++gscontenteditor-20080125/images/published.png"
-					title="This is the currently published revision"/>
-				<a href="javascript:void(0)"
-					tal:condition="python:entry['id'] != published_revision"
-					tal:attributes="onclick python:'return publish_revision(\'%s\')' % entry['id']"
-					class="publish">
-					<img border="0" src="/++resource++gscontenteditor-20080125/images/publish.png" title="Click to publish this revision"/>
-				</a>
-			</td>
-			<td tal:content="entry/editor"/>
-			<td tal:content="entry/size"/>
-			<td tal:content="entry/modified"/>
-		</tr>			
+      <thead>
+      	<tr>
+      		<th>&#160;</th>
+      		<th>Edited By</th>
+      		<th>Size</th>
+      		<th>Changed</th>
+    		</tr>
+  		</thead>
+  		<tbody>
+    		<tr tal:repeat="entry history">
+    			<td>
+    				<img border="0" 
+    				  tal:condition="python:entry['id'] == published_revision"
+    					src="/++resource++gscontenteditor-20080125/images/published.png"
+    					title="This is the currently published revision"/>
+    				<a href="javascript:void(0)"
+    					tal:condition="python:entry['id'] != published_revision"
+    					tal:attributes="onclick python:'return publish_revision(\'%s\')' % entry['id']"
+    					class="publish">
+    					<img border="0" src="/++resource++gscontenteditor-20080125/images/publish.png" 
+    					  title="Click to publish this revision"/>
+    				</a>
+    			</td>
+    			<td class="fn">
+    			  <a href="#" tal:omit-tag="not:entry/editor/id"
+    			    tal:content="entry/editor/name"
+    			    tal:attributes="href entry/editor/url"/>
+    			</td>
+    			<td tal:content="entry/size"/>
+    			<td tal:content="entry/modified"/>
+  		</tr>
+		</tbody>
 	</table>
 	<!-- We assume this is a component on a form - probably should be a custom widget at some stage -->
     <input type="hidden" name="published_revision" id="published_revision" class="published_revision_class"/>

@@ -15,6 +15,9 @@ from zope.schema import *
 from Products.XWFCore import XWFUtils
 import interfaces
 
+import logging
+log = logging.getLogger('GSContentManager')
+
 def wym_editor_widget(field, request):
     retval = TextAreaWidget(field, request)
     retval.cssClass = 'wymeditor'
@@ -71,6 +74,9 @@ class EditPageForm(PageForm):
     #   label, but it helps with readability.
     @form.action(label=u'Edit', failure='handle_set_action_failure')
     def handle_set(self, action, data):
+        m = 'handle_set: Editing page %s (%s)' % \
+          (self.title, self.request.URL)
+        log.info(m)
         return self.set_data(data)
         
     def handle_set_action_failure(self, action, data, errors):

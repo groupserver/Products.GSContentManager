@@ -51,13 +51,27 @@ class GSContentPageHistoryContentProvider(object):
     def get_history (self):
         """ Gets all history entries of the page """
         objects = []
+        acl_users = self.context.site_root().acl_users
         for item in self.context.objectValues():
             if item.meta_type == 'XML Template':
-                entry = {'editor': getattr(item, 'editor', None),
-                            'size': item.get_size(),
-                            'modified': item.bobobase_modification_time,
-                            'id': item.getId()
-                            }
+                uid = getattr(item, 'editor', '')
+                user = uid and acl_users.getUser(uid) or None
+                editor = {
+                  'name' : u'No user',
+                  'id':    '',
+                  'url':  ''
+                }
+                if user:
+                    editor = {
+                      'name' : user.getProperty('fn', ''),
+                      'id':    uid,
+                      'url':  '/contacts/%s' % uid
+                    }
+                entry = {'editor': editor,
+                         'size': item.get_size(),
+                         'modified': item.bobobase_modification_time,
+                         'id': item.getId()
+                         }
                 if item.getId() == self.content_template:
                     current = entry
                 else:
