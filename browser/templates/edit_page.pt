@@ -58,7 +58,7 @@
             tal:attributes="id string:widget-${widget/name};
               class string:form-widget ${style}">
             <label for="abc123" title="The hint for the widget"
-              tal:condition="python:(not hasattr(widget, 'type')) or widget.type != 'checkbox'"
+              tal:condition="python:widget.type != 'checkbox'"
               tal:attributes="for widget/name; title widget/hint"
               tal:content="widget/label">
               A label
@@ -69,22 +69,19 @@
               Error message
             </p>
             
-            <span
-              tal:condition="python:hasattr(widget, 'tag')"
+            <span id="abc123" 
               tal:replace="structure widget">Widget</span>
               
-            <span class="readonlyWidget"
-              tal:condition="python:not(hasattr(widget, 'tag'))"
-              tal:content="structure widget"/>
-            
             <label for="abc123" title="The hint for the widget"
-              tal:condition="python:hasattr(widget, 'type') and widget.type == 'checkbox'"
+              class="checkboxLabel"
+              tal:condition="python:widget.type == 'checkbox'"
               tal:attributes="for widget/name; title widget/hint"
               tal:content="widget/label">
               A label
             </label>
           </div><!--form-widget-->
         </tal:block>
+
 	<!-- We're overrinding the display of the form action because we need to be able to
 	trigger a different action client-side and using javascript to fire button click events
 	is a right royal pita -->
