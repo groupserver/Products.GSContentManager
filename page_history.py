@@ -3,6 +3,7 @@ from interfaces import *
 from zope.interface import implements
 from zope.component import adapts
 from Products.GSContent.interfaces import IGSContentFolder
+from Products.XWFCore.XWFUtils import munge_date
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 from OFS.OrderedFolder import OrderedFolder
 from lxml import etree
@@ -67,9 +68,11 @@ class GSContentPageHistoryContentProvider(object):
                       'id':    uid,
                       'url':  '/contacts/%s' % uid
                     }
+                d = munge_date(self.context, 
+                               item.bobobase_modification_time())
                 entry = {'editor': editor,
                          'size': item.get_size(),
-                         'modified': item.bobobase_modification_time,
+                         'modified': d,
                          'id': item.getId()
                          }
                 if item.getId() == self.content_template:
