@@ -34,7 +34,8 @@ class GSContentPage(object):
                 # Check that we don't have an existing page with this ID in the
                 # container.
                 if getattr(self.context, id, None):
-                    self.status = {'error': True, 'msg': 'A page with id %s already exists' % id}
+                    m = 'A page with id %s already exists' % id
+                    self.status = {'error': True, 'msg': m}
                     return
                 
                 # All good, so create the folder.

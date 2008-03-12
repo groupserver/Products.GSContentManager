@@ -14,11 +14,11 @@
     		<tr tal:repeat="entry history">
     			<td>
     				<img border="0" 
-    				  tal:condition="python:entry['id'] == published_revision"
+    				  tal:condition="entry/current"
     					src="/++resource++gscontenteditor-20080125/images/published.png"
     					title="This is the currently published revision"/>
     				<a href="javascript:void(0)"
-    					tal:condition="python:entry['id'] != published_revision"
+    					tal:condition="not:entry/current"
     					tal:attributes="onclick python:'return publish_revision(\'%s\')' % entry['id']"
     					class="publish">
     					<img border="0" src="/++resource++gscontenteditor-20080125/images/publish.png" 

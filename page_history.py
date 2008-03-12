@@ -53,43 +53,76 @@ class GSContentPageHistoryContentProvider(object):
         """ Gets all history entries of the page """
         objects = []
         acl_users = self.context.site_root().acl_users
-        for item in self.context.objectValues():
-            if item.meta_type == 'XML Template':
-                uid = getattr(item, 'editor', '')
-                user = uid and acl_users.getUser(uid) or None
+        
+        cvdt = self.get_current_version().bobobase_modification_time()
+        
+        for item in self.get_versions():
+        
+            uid = getattr(item, 'editor', '')
+            user = uid and acl_users.getUser(uid) or None
+            if user:
                 editor = {
+                  'name' : user.getProperty('fn', ''),
+                  'id':    uid,
+                  'url':  '/contacts/%s' % uid
+                }
+            else:
+               editor = {
                   'name' : u'No user',
                   'id':    '',
                   'url':  ''
                 }
-                if user:
-                    editor = {
-                      'name' : user.getProperty('fn', ''),
-                      'id':    uid,
-                      'url':  '/contacts/%s' % uid
-                    }
-                d = munge_date(self.context, 
-                               item.bobobase_modification_time())
-                entry = {'editor': editor,
-                         'size': item.get_size(),
-                         'modified': d,
-                         'id': item.getId()
-                         }
-                if item.getId() == self.content_template:
-                    current = entry
-                else:
-                    objects.append(entry)
 
-        # Append the current template so it's at the top when reverse sorted.
-        objects.append(current)
-
-        objects.reverse()
+            bbbmt = item.bobobase_modification_time()
+            entry = {'editor': editor,
+                      'size': item.get_size(),
+                      'modified': munge_date(self.context, bbbmt),
+                      'id': item.getId(),
+                      'current': bbbmt == cvdt
+                      }
+            objects.append(entry)
         return objects
     
     def get_published_revision (self):
         """ Get the id of the currently published revision """
         return self.context.published_revision
         
+    def get_versions(self):
+        """Get the verisions of the document.
+        """
+        retval = [i for i in self.context.objectValues('XML Template')
+                  if i.getId()[:11] == self.history_template[:11]]
+        retval.sort(bobobase_sorter)
+        assert retval
+        assert [i.meta_type == 'XML Template' for i in retval]
+        return retval
+        
+    def get_current_version(self):
+        self.context.objectValues('XML Template')
+        retval = [i for i in self.context.objectValues('XML Template')
+                  if i.getId() == self.content_template]
+        retval = retval[0]
+        assert retval
+        return retval
+        
+def bobobase_sorter(a, b):
+    assert a
+    assert a.bobobase_modification_time
+    assert b
+    assert b.bobobase_modification_time
+    
+    ta = a.bobobase_modification_time()
+    tb = b.bobobase_modification_time()
+    
+    retval = 0
+    if a > b:
+        retval = -1
+    elif a < b:
+        retval = 1
+            
+    assert retval in (-1, 0, 1)
+    return retval
+    
 zope.component.provideAdapter(GSContentPageHistoryContentProvider,
     provides=zope.contentprovider.interfaces.IContentProvider,
     name="groupserver.ContentPageHistory")
