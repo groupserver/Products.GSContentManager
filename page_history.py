@@ -54,8 +54,6 @@ class GSContentPageHistoryContentProvider(object):
         objects = []
         acl_users = self.context.site_root().acl_users
         
-        cvdt = self.get_current_version().bobobase_modification_time()
-        
         for item in self.get_versions():
         
             uid = getattr(item, 'editor', '')
@@ -73,15 +71,19 @@ class GSContentPageHistoryContentProvider(object):
                   'url':  ''
                 }
 
-            bbbmt = item.bobobase_modification_time()
+            dt = munge_date(self.context, item.bobobase_modification_time())
+            size = pretty_size(item.get_size())
+            iid = item.getId()
             entry = {'editor': editor,
-                      'size': item.get_size(),
-                      'modified': munge_date(self.context, bbbmt),
-                      'id': item.getId(),
-                      'current': bbbmt == cvdt
+                      'size': size,
+                      'modified': dt,
+                      'id': iid,
+                      'current': iid == self.content_template
                       }
             objects.append(entry)
         return objects
+    
+
     
     def get_published_revision (self):
         """ Get the id of the currently published revision """
@@ -91,10 +93,13 @@ class GSContentPageHistoryContentProvider(object):
         """Get the verisions of the document.
         """
         retval = [i for i in self.context.objectValues('XML Template')
-                  if i.getId()[:11] == self.history_template[:11]]
+                  if i.getId()[:10] == self.history_template[:10]]
         retval.sort(bobobase_sorter)
-        assert retval
-        assert [i.meta_type == 'XML Template' for i in retval]
+        if retval[1].bobobase_modification_time() < \
+           retval[-1].bobobase_modification_time():
+           retval.reverse()
+        assert (retval and [i.meta_type == 'XML Template' for i in retval])\
+          or (retval == [])
         return retval
         
     def get_current_version(self):
@@ -121,6 +126,17 @@ def bobobase_sorter(a, b):
         retval = 1
             
     assert retval in (-1, 0, 1)
+    return retval
+
+def pretty_size(size):
+    if size < 5000:
+        retval = u'tiny'
+    elif size < 1000000:
+        retval = u'%sKB' % (size/1024)
+    else:
+        retval = u'%sMB' % (size/(1024*1024))
+
+    assert type(retval) == unicode
     return retval
     
 zope.component.provideAdapter(GSContentPageHistoryContentProvider,

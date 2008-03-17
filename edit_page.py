@@ -31,22 +31,25 @@ class EditPageForm(PageForm):
     def __init__(self, context, request):
         # Adapt the context object to a content page object
         self.interface = interface = getattr(interfaces, 'IGSContentPage')
-        self.context = self.content_page = interface(context)
+        self.context = self.content_page = content_page = interface(context)
         self.request = request
 
-        PageForm.__init__(self, self.content_page.context, request)
+        PageForm.__init__(self, content_page.context, request)
 
-        self.siteInfo = createObject('groupserver.SiteInfo', self.content_page.context)
-        site_root = self.content_page.context.site_root()
+        self.siteInfo = createObject('groupserver.SiteInfo',
+          content_page.context)
+        site_root = content_page.context.site_root()
 
         assert hasattr(site_root, 'GlobalConfiguration')
         config = site_root.GlobalConfiguration
         
-        self.form_fields = form.Fields(interface, render_context=True, omit_readonly=True)
+        self.form_fields = form.Fields(interface, render_context=True,
+          omit_readonly=True)
 
         self.form_fields['content'].custom_widget = wym_editor_widget
 
-        self.add_url = '%s/add_page.html' % self.content_page.context.absolute_url(0)
+        currUrl = content_page.context.absolute_url(0)
+        self.add_url = '%s/add_page.html' % currUrl
         self.mode = 'edit'
         
     @property
@@ -65,17 +68,13 @@ class EditPageForm(PageForm):
     def content(self):
         return self.content_page.content
     
-    # --=mpj17=--
-    # The "form.action" decorator creates an action instance, with
-    #   "handle_reset" set to the success handler,
-    #   "handle_reset_action_failure" as the failure handler, and adds the
-    #   action to the "actions" instance variable (creating it if 
-    #   necessary). I did not need to explicitly state that "Edit" is the 
-    #   label, but it helps with readability.
     @form.action(label=u'Edit', failure='handle_set_action_failure')
     def handle_set(self, action, data):
-        m = 'handle_set: Editing page %s (%s)' % \
-          (self.title, self.request.URL)
+        loggedInUser = self.request.AUTHENTICATED_USER
+        user = self.context.site_root().acl_users.getUser(loggedInUser.getId())
+        m = 'handle_set: Editing page %s (%s) for %s (%s)' % \
+          (self.title, self.request.URL, 
+           user.getProperty('fn',''), user.getId())
         log.info(m)
         return self.set_data(data)
         
@@ -107,8 +106,10 @@ class EditPageForm(PageForm):
             try:
                 current_id = self.content_page.id
                 folder = self.content_page.context.aq_parent
-                if getattr(folder.aq_explicit, new_id, None):
-                    self.status = u'A page with ID \'%s\' already exists here' % new_id
+                if hasattr(folder.aq_explicit, new_id):
+                    self.status = u'<a href="%s">A page with identifier '\
+                    '<code class="page">%s</code></a> already exists '\
+                    u'in this folder' % (new_id, new_id)
                     return
     
                 folder.manage_renameObject(current_id, new_id)

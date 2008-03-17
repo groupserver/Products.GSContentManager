@@ -11,7 +11,8 @@
     		</tr>
   		</thead>
   		<tbody>
-    		<tr tal:repeat="entry history">
+    		<tr tal:repeat="entry history"
+    		  tal:attributes="id entry/id">
     			<td>
     				<img border="0" 
     				  tal:condition="entry/current"
