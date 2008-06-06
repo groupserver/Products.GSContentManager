@@ -53,6 +53,7 @@ class GSContentPageHistoryContentProvider(object):
         """ Gets all history entries of the page """
         objects = []
         acl_users = self.context.site_root().acl_users
+        prev = self.get_published_revision()
         
         for item in self.get_versions():
         
@@ -78,24 +79,31 @@ class GSContentPageHistoryContentProvider(object):
                       'size': size,
                       'modified': dt,
                       'id': iid,
-                      'current': iid == self.content_template
+                      'current': iid == prev
                       }
             objects.append(entry)
+            
         return objects
-    
-
     
     def get_published_revision (self):
         """ Get the id of the currently published revision """
-        return self.context.published_revision
+        prev = self.context.published_revision
+        if not prev:
+            return self.content_template
+        else:
+            return prev
         
     def get_versions(self):
-        """Get the verisions of the document.
+        """Get the versions of the document.
         """
         retval = [i for i in self.context.objectValues('XML Template')
                   if i.getId()[:10] == self.history_template[:10]]
+        
+        if len(retval) == 0:
+            return retval
+        
         retval.sort(bobobase_sorter)
-        if retval[1].bobobase_modification_time() < \
+        if retval[0].bobobase_modification_time() < \
            retval[-1].bobobase_modification_time():
            retval.reverse()
         assert (retval and [i.meta_type == 'XML Template' for i in retval])\

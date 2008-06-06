@@ -41,7 +41,7 @@
     for="Products.GSContent.interfaces.IGSContentFolder"
     name="add_page.html"
     class=".add_page.AddPageForm"
-    permission="zope2.View" />
+    permission="zope2.ManageProperties" />
 
   <adapter provides=".interfaces.IGSContentPage"
                 for="Products.GSContent.interfaces.IGSContentFolder"

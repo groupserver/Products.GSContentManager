@@ -120,11 +120,18 @@ class EditPageForm(PageForm):
                 self.status = u'There was problem renaming this page'
                 return
                                 
-        # Handle publishing of a selected revision.
+        copied_revision = self.request.get('copied_revision', None)
         published_revision = self.request.get('published_revision', None)
+
         if published_revision:
-            self.content_page.copy_revision_to_current(published_revision)
-            self.status = u'Revision %s has been copied to the current revision and published.' % published_revision
+            # Handle publishing of a selected revision.
+            self.content_page.publish_revision(published_revision)
+            self.status = u'Revision %s has been made the published revision.' % published_revision
+            return
+        elif copied_revision:
+            # Handle copying of a selected revision to current
+            self.content_page.copy_revision_to_current(copied_revision)
+            self.status = u'Revision %s has been copied to current for editing.' % copied_revision
             return
         else:
             # Save the current revision in the history
@@ -145,6 +152,7 @@ class EditPageForm(PageForm):
                               if i])
             self.status = u'Changed %s' % f
         else:
-            self.status = u"No fields changed."
+            self.status = u"The current content has been updated."
+            
         assert self.status
         assert type(self.status) == unicode

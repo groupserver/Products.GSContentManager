@@ -17,13 +17,23 @@
     				<img border="0" 
     				  tal:condition="entry/current"
     					src="/++resource++gscontenteditor-20080125/images/published.png"
-    					title="This is the currently published revision"/>
+    					title="This is the currently published revision"
+    					tal:attributes="title python:'This is the currently published revision (%s)' % entry['id']"/>
     				<a href="javascript:void(0)"
     					tal:condition="not:entry/current"
     					tal:attributes="onclick python:'return publish_revision(\'%s\')' % entry['id']"
     					class="publish">
     					<img border="0" src="/++resource++gscontenteditor-20080125/images/publish.png" 
-    					  title="Click to publish this revision"/>
+    						tal:attributes="title python:'Click to publish this revision (%s)' % entry['id']"
+    					  />
+    				</a>
+    				<a href="javascript:void(0)"
+    					tal:condition="not:entry/current"
+    					tal:attributes="onclick python:'return copy_revision_to_current(\'%s\')' % entry['id']"
+    					class="publish">
+    					<img border="0" src="/++resource++gscontenteditor-20080125/images/edit-copy.png" 
+    						tal:attributes="title python:'Click to copy this revision (%s) to the current revision for editing' % entry['id']"
+    						/>
     				</a>
     			</td>
     			<td class="fn">
@@ -38,11 +48,17 @@
 	</table>
 	<!-- We assume this is a component on a form - probably should be a custom widget at some stage -->
     <input type="hidden" name="published_revision" id="published_revision" class="published_revision_class"/>
+    <input type="hidden" name="copied_revision" id="copied_revision" class="copied_revision_class"/>
   </div>
   <script type="text/javascript">
 	function publish_revision(revision) { 
 		jQuery.noConflict();
 		jQuery('.published_revision_class').val(revision);
+		jQuery('.editpageclass').submit();
+	}
+	function copy_revision_to_current(revision) { 
+		jQuery.noConflict();
+		jQuery('.copied_revision_class').val(revision);
 		jQuery('.editpageclass').submit();
 	}
   </script>

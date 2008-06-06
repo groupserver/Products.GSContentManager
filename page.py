@@ -84,7 +84,7 @@ class GSContentPage(object):
         """ Creates a history entry for the context object """
         history_obj_name = '%s_%s' % (self.content_template, strftime("%Y%m%d%H%M%S", gmtime(time())))
         if not getattr(self.context.aq_explicit, history_obj_name, None):
-            content_obj = getattr(self.context.aq_explicit, self.content_template, None)
+            content_obj = self.getContentObject()
             assert content_obj
             history_obj = self.context.manage_clone(content_obj, history_obj_name)  
             
@@ -113,8 +113,18 @@ class GSContentPage(object):
             content_obj = getattr(self.context.aq_explicit, self.content_template, None)
             content_obj.write(rev_template._text)
 
+    def publish_revision (self, revision):
+        """ Publish the specified revision """
+
+        # Copy the contents of the specified revision to the current revision
+        rev_template = getattr(self.context.aq_explicit, revision, None)
+
+        if rev_template:
+            content_obj = self.getContentObject()
+            content_obj.write(rev_template._text)
+
         # Update the published revision
-        self.published_revision = self.content_template
+        self.published_revision = revision
     
     def get_last_editor (self):
         """ Get the last editor of the context object """
@@ -127,6 +137,10 @@ class GSContentPage(object):
         except:
             return ''
     
+    def getContentObject (self):
+        """ Get the current content object """
+        return getattr(self.context, self.content_template, None)
+    
     #------------------------------------------------------------------------
     # Properties
     #------------------------------------------------------------------------
@@ -134,12 +148,12 @@ class GSContentPage(object):
     # Content property
     def _setContent(self, value):
         # Save the content to the content object
-        template = getattr(self.context, self.content_template, None)
+        template = self.getContentObject()
         if template:
             template.write('<content>%s</content>' % value)
         
     def _getContent(self):
-        template = getattr(self.context, self.content_template, None)
+        template = self.getContentObject()
         if template:
             doc = etree.fromstring(template._text)
             tree = doc.xpath('//content/*')
