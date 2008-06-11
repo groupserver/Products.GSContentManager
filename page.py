@@ -9,6 +9,8 @@ from lxml import etree
 from StringIO import StringIO
 import interfaces
 
+from page_history import GSPageHistory
+
 class GSContentPage(object):
     """ Wraps a page template to implement a 'content' attribute that formlib can use transparently, 
     even though the content attribute actually maps to the page template content rather than a property
@@ -16,13 +18,15 @@ class GSContentPage(object):
     
     implements(IGSContentPage)
     
-    content_template = 'content_en'
+    CONTENT_TEMPLATE = 'content_en'
     initial_content_file = 'content.html'
     
     def __init__ (self, context, mode='edit', id=None):
         
         self.status = {'error': False}
         self.context = context
+        self.pageHistory = GSPageHistory(context)
+        
         self.interface = interface = getattr(interfaces, 'IGSContentPage')
 
         if mode == 'edit':
@@ -75,54 +79,50 @@ class GSContentPage(object):
                     self.context.manage_addProperty(field, default, t)
                     
         # Make sure a content page template exists.
-        if not getattr(self.context.aq_explicit, self.content_template, None):
+        if not getattr(self.context.aq_explicit, self.CONTENT_TEMPLATE, None):
             template_path = os.path.dirname(os.path.realpath(__file__))
             filename = os.path.join(os.path.join(template_path, 'config'), self.initial_content_file)
-            self.context.manage_addProduct['DataTemplates'].manage_addXMLTemplate(self.content_template, file(filename))
+            self.context.manage_addProduct['DataTemplates'].manage_addXMLTemplate(self.CONTENT_TEMPLATE, file(filename))
 
+    def new_version_id(self):
+        retval = '%s_%s' % (self.CONTENT_TEMPLATE, 
+          strftime("%Y%m%d%H%M%S", 
+          gmtime(time())))
+        assert type(retval) == str
+        assert retval
+        return retval
+        
     def add_to_history (self):
         """ Creates a history entry for the context object """
-        history_obj_name = '%s_%s' % (self.content_template, strftime("%Y%m%d%H%M%S", gmtime(time())))
+        history_obj_name = self.new_version_id()
         if not getattr(self.context.aq_explicit, history_obj_name, None):
-            content_obj = self.getContentObject()
+            content_obj = self.pageHistory.get_current_version()
             assert content_obj
             history_obj = self.context.manage_clone(content_obj, history_obj_name)  
             
-            # Add the last editor (as indicated by the last history entry for the page)
-            # as a property on the history entry just created.
+            # Add the last editor (as indicated by the last history entry 
+            # for the page) as a property on the history entry just 
+            # created.
             last_editor = self.get_last_editor()
             history_obj.manage_addProperty('editor', last_editor, 'string')
             
-            # If the currently published revision is the latest one, set the published revision to the
-            # newly created historical revision.
-            if getattr(self.context, 'published_revision', None) == self.content_template:
+            # If the currently published revision is the latest one, set 
+            # the published revision to the newly created historical 
+            # revision.
+            if getattr(self.context, 'published_revision', None) == content_obj.getId():
                 self.context.published_revision = history_obj_name
             
             return history_obj
     
     def copy_revision_to_current (self, revision):
         """ Copy the revision with the specified ID to the current revision """
-
-        # Move the current object to a revision.
-        self.add_to_history()
-
-        # Copy the contents of the specified revision to the current revision
-        rev_template = getattr(self.context.aq_explicit, revision, None)
-
-        if rev_template:
-            content_obj = getattr(self.context.aq_explicit, self.content_template, None)
-            content_obj.write(rev_template._text)
+        assert type(revision) in (str, unicode)
+        
+        newVersionId = self.new_version_id()
+        newVersion = self.context.manage_clone(revision, newVersionId)          
 
     def publish_revision (self, revision):
         """ Publish the specified revision """
-
-        # Copy the contents of the specified revision to the current revision
-        rev_template = getattr(self.context.aq_explicit, revision, None)
-
-        if rev_template:
-            content_obj = self.getContentObject()
-            content_obj.write(rev_template._text)
-
         # Update the published revision
         self.published_revision = revision
     
@@ -137,10 +137,6 @@ class GSContentPage(object):
         except:
             return ''
     
-    def getContentObject (self):
-        """ Get the current content object """
-        return getattr(self.context, self.content_template, None)
-    
     #------------------------------------------------------------------------
     # Properties
     #------------------------------------------------------------------------
@@ -148,12 +144,12 @@ class GSContentPage(object):
     # Content property
     def _setContent(self, value):
         # Save the content to the content object
-        template = self.getContentObject()
+        template = self.pageHistory.get_current_version()
         if template:
             template.write('<content>%s</content>' % value)
         
     def _getContent(self):
-        template = self.getContentObject()
+        template = self.pageHistory.get_current_version()
         if template:
             doc = etree.fromstring(template._text)
             tree = doc.xpath('//content/*')
