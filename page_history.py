@@ -151,4 +151,3 @@ zope.component.provideAdapter(GSContentPageHistoryContentProvider,
     provides=zope.contentprovider.interfaces.IContentProvider,
     name="groupserver.ContentPageHistory")
 
-        

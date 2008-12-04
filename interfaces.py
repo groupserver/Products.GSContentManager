@@ -39,7 +39,7 @@ class IGSContentPage(Interface):
     
     content = Text(title=u'Page content',
         description=u'The content of this page.',
-        required=True)
+        required=False)
     
 class IGSContentPageHistory(Interface):
     """Marker interface for the history of a page
@@ -68,3 +68,4 @@ class IGSContentPageHistoryContentProvider(IContentProvider):
       
     history = Dict(title=u'History entries for the page',
       description=u'The hisotory entries for this page.')
+

@@ -4,6 +4,7 @@ from time import gmtime, time, strftime
 from zope.interface import implements, alsoProvides
 from zope.component import adapts
 from Products.GSContent.interfaces import IGSContentFolder
+from Products.GSProfile.utils import enforce_schema
 from OFS.OrderedFolder import OrderedFolder
 from lxml import etree
 from StringIO import StringIO
@@ -12,16 +13,17 @@ import interfaces
 from page_history import GSPageHistory
 
 class GSContentPage(object):
-    """ Wraps a page template to implement a 'content' attribute that formlib can use transparently, 
-    even though the content attribute actually maps to the page template content rather than a property
-    on the object"""
+    """ Wraps a page template to implement a 'content' attribute 
+    that formlib can use transparently, even though the content 
+    attribute actually maps to the page template content rather than 
+    a property on the object"""
     
     implements(IGSContentPage)
     
     CONTENT_TEMPLATE = 'content_en'
     initial_content_file = 'content.html'
     
-    def __init__ (self, context, mode='edit', id=None):
+    def __init__ (self, context, mode='edit', pageId=None):
         
         self.status = {'error': False}
         self.context = context
@@ -30,59 +32,31 @@ class GSContentPage(object):
         self.interface = interface = getattr(interfaces, 'IGSContentPage')
 
         if mode == 'edit':
-            # If we're editing an existing page, just enforce the schema.
-            self.enforce_schema(IGSContentPage)
+            # If we're editing an existing page, just enforce the 
+            # schema.
+            enforce_schema(self.context, IGSContentPage)
         elif mode == 'add':
-            # If we're adding a new page, create the page then enforce the schema.
-            if id:
-                # Check that we don't have an existing page with this ID in the
-                # container.
-                if getattr(self.context, id, None):
-                    m = 'A page with id %s already exists' % id
+            # If we're adding a new page, create the page then 
+            # enforce the schema.
+            if pageId:
+                # Check that we don't have an existing page with 
+                # this ID in the container.
+                if hasattr(self.context, pageId):
+                    m = 'A page with id %s already exists' % pageId
                     self.status = {'error': True, 'msg': m}
-                    return
-                
-                # All good, so create the folder.
-                self.context.manage_addOrderedFolder(id)
-                folder = getattr(self.context, id)
-                alsoProvides(folder, IGSContentFolder)
-                
-                # Create the content page.
-                content_page = interface(folder)
-                content_page.enforce_schema(IGSContentPage)
-                self.context = folder
-    
-    def enforce_schema(self, schema):
-        """
-        SIDE EFFECTS
-          * "inputData" is stated to provide the "schema" interface
-          * "inputData" will provide all the properties defined in "schema"
-        """
-        typeMap = {
-          Text:      'ulines',
-          TextLine:  'ustring',
-          ASCII:     'lines',
-          ASCIILine: 'string',
-          URI:       'string',
-          Bool:      'boolean',
-          Float:     'float',
-          Int:       'int',
-          Datetime:  'date',
-          Date:      'date',
-        }
-        fields = [field[0] for field in getFieldsInOrder(IGSContentPage)]
-        for field in fields:
-            if field != 'content':
-                if not hasattr(self.context, field):
-                    default = schema.get(field).default or ''
-                    t = typeMap.get(type(schema.get(field)), 'ustring')
-                    self.context.manage_addProperty(field, default, t)
+                else:
+                    # All good, so create the folder.
+                    self.context.manage_addOrderedFolder(pageId)
+                    folder = getattr(self.context, pageId)
+                    alsoProvides(folder, IGSContentFolder)
                     
-        # Make sure a content page template exists.
-        if not getattr(self.context.aq_explicit, self.CONTENT_TEMPLATE, None):
-            template_path = os.path.dirname(os.path.realpath(__file__))
-            filename = os.path.join(os.path.join(template_path, 'config'), self.initial_content_file)
-            self.context.manage_addProduct['DataTemplates'].manage_addXMLTemplate(self.CONTENT_TEMPLATE, file(filename))
+                    # Create the content page.
+                    content_page = interface(folder)
+                    enforce_schema(content_page, IGSContentPage)
+                    self.context = folder
+
+                    m = 'Added page with id %s.' % pageId
+                    self.status = {'error': False, 'msg': m}
 
     def new_version_id(self):
         retval = '%s_%s' % (self.CONTENT_TEMPLATE, 
@@ -144,6 +118,7 @@ class GSContentPage(object):
     # Content property
     def _setContent(self, value):
         # Save the content to the content object
+        print 'Stuff?'
         template = self.pageHistory.get_current_version()
         if template:
             template.write('<content>%s</content>' % value)
@@ -225,3 +200,4 @@ class GSContentPage(object):
         return self.context.published_revision
 
     published_revision = property(_getPublishedRevision, _setPublishedRevision)
+

@@ -98,7 +98,8 @@ class AddPageForm(AddForm):
         
         # All good, so redirect to the edit page.        
         if changed:
-            self.request.response.redirect('%s/%s' % (folder.context.absolute_url(0), 'edit_page.html'))
+            url = '%s/edit_page.html' % folder.context.absolute_url(0)
+            self.request.response.redirect(url)
             return
         else:
             retval = u'Problem creating page'
@@ -106,3 +107,4 @@ class AddPageForm(AddForm):
         assert retval
         assert type(retval) == unicode
         self.status = retval
+
