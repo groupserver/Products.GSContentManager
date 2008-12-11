@@ -30,12 +30,8 @@ class GSContentPage(object):
         self.pageHistory = GSPageHistory(context)
         
         self.interface = interface = getattr(interfaces, 'IGSContentPage')
-
-        if mode == 'edit':
-            # If we're editing an existing page, just enforce the 
-            # schema.
-            enforce_schema(self.context, IGSContentPage)
-        elif mode == 'add':
+        enforce_schema(self.context, IGSContentPage)
+        if False: # Fix later
             # If we're adding a new page, create the page then 
             # enforce the schema.
             if pageId:
@@ -90,6 +86,7 @@ class GSContentPage(object):
     
     def copy_revision_to_current (self, revision):
         """ Copy the revision with the specified ID to the current revision """
+        assert False, "Replace the call to copy_revision_to_current"  
         assert type(revision) in (str, unicode)
         
         newVersionId = self.new_version_id()
@@ -98,6 +95,7 @@ class GSContentPage(object):
     def publish_revision (self, revision):
         """ Publish the specified revision """
         # Update the published revision
+        # --=mpj17=-- Change how publishing works.
         self.published_revision = revision
     
     def get_last_editor (self):

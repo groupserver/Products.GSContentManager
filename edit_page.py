@@ -14,7 +14,7 @@ from zope.app.apidoc.interface import getFieldsInOrder
 from zope.schema import *
 from Products.XWFCore.XWFUtils import comma_comma_and
 from interfaces import IGSContentPage
-from audit import PageEditAuditor
+from audit import PageEditAuditor, EDIT_CONTENT
 
 import logging
 log = logging.getLogger('GSContentManager')
@@ -55,107 +55,6 @@ class EditPageForm(PageForm):
         self.mode = 'edit'
         
         self.auditor = None
-
-    @form.action(label=u'Edit', failure='handle_set_action_failure')
-    def handle_set(self, action, data):
-        print 'Woot!'
-        self.auditor = PageEditAuditor(self.context)
-        userInfo = createObject('groupserver.LoggedInUser', 
-                                self.context)
-
-        m = 'handle_set: Editing page %s (%s) for %s (%s)' % \
-          (self.title, self.request.URL,
-           userInfo.name, userInfo.id)
-        log.info(m)
-        return self.set_data(data)
-        
-    def handle_set_action_failure(self, action, data, errors):
-        if len(errors) == 1:
-            self.status = u'<p>There is an error:</p>'
-        else:
-            self.status = u'<p>There are errors:</p>'
-
-    def set_data(self, data):
-        assert self.folder
-        assert self.form_fields
-        content_page = IGSContentPage(self.folder)
-        assert IGSContentPage.implementedBy(content_page),\
-          '%s does not implement IGSContentPage' % content_page
-
-        alteredFields = []
-        for datum in getFieldsInOrder(IGSContentPage):
-            if data.has_key(datum[0]):
-                if data[datum[0]] != getattr(self.context, datum[0]):
-                    alteredFields.append(datum[0])
-        print alteredFields
-        # If the page ID has changed, we need to rename the page and redirect to
-        # the new page in edit mode.
-        try:
-            new_id = data[alteredFields[alteredFields.index('id')]]
-        except:
-            new_id = None
-       
-        page_renamed = False
-        if new_id:
-            try:
-                r = self.rename_page(new_id)
-                if r:
-                    self.content_page.context = r
-                    page_renamed = True
-            except:
-                self.status = u'There was problem renaming this page'
-                return
-                                
-        copied_revision = self.request.get('copied_revision', None)
-        published_revision = self.request.get('published_revision', None)
-
-        if published_revision:
-            # Handle publishing of a selected revision.
-            self.content_page.publish_revision(published_revision)
-            self.status = u'Revision %s has been made the published revision.' % published_revision
-            return
-        elif copied_revision:
-            # Handle copying of a selected revision to current
-            self.content_page.copy_revision_to_current(copied_revision)
-            self.status = u'Revision %s has been copied to current for editing.' % copied_revision
-            return
-        else:
-            # Save the current revision in the history
-            
-            self.content_page.add_to_history()    
-        
-            # Update the content object
-            changed = form.applyChanges(self.context, self.form_fields, data)
-        
-        # If we've renamed the page, redirect to the new edit page URL.
-        if page_renamed:
-            uri = '%s/edit_page.html' % new_page.absolute_url(0)
-            self.request.response.redirect(uri)
-            return
-        
-        if changed:
-            fields = [IGSContentPage.get(name).title
-                      for name in alteredFields]
-            self.status = u'Changed %s' % comma_comma_and(fields)
-        else:
-            self.status = u"The current content has been updated."
-            
-        assert self.status
-        assert type(self.status) == unicode
-
-    def rename_page(self, newId):
-        current_id = self.content_page.id
-        folder = self.content_page.context.aq_parent
-        if hasattr(folder.aq_explicit, new_id):
-            self.status = u'<a href="%s">A page with identifier '\
-            '<code class="page">%s</code></a> already exists '\
-            u'in this folder' % (new_id, new_id)
-            retval = None
-        else:
-            folder.manage_renameObject(current_id, new_id)
-            retval = getattr(folder.aq_explicit, new_id, None)
-            self.status = 'Page renamed'
-        return retval
         
     @property
     def id(self):
@@ -172,5 +71,107 @@ class EditPageForm(PageForm):
     @property
     def content(self):
         return self.content_page.content
+
+    def action_failure(self, action, data, errors):
+        if len(errors) == 1:
+            self.status = u'<p>There is an error:</p>'
+        else:
+            self.status = u'<p>There are errors:</p>'
+
+    @form.action(label=u'Rename', failure='action_failure')
+    def handle_rename(self, action, data):
+        self.auditor = PageEditAuditor(self.context)
+        self.rename_page(data)
+        # If the page ID has changed, we need to rename the folder and
+        # redirect to the new folder (in edit mode).
+        new_id = data['id']
+        try:
+            r = self.rename_page(new_id)
+            if r:
+                self.content_page.context = r
+                page_renamed = True
+        except e:
+            self.status = u'There was problem renaming this page'
+        else:
+            uri = '%s/edit_page.html' % r.absolute_url(0)
+            self.request.response.redirect(uri)
+
+    def rename_page(self, newId):
+        current_id = self.content_page.id
+        parentFolder = self.context.aq_parent
+        oldURL = self.context.absolute_url(0)
+        if hasattr(parentFolder.aq_explicit, new_id):
+            self.status = u'<a href="%s">A page with identifier '\
+            '<code class="page">%s</code></a> already exists '\
+            u'in this folder' % (new_id, new_id)
+            retval = None
+        else:
+            folder.manage_renameObject(current_id, new_id)
+            retval = getattr(folder.aq_explicit, new_id, None)
+            newURL = retval.absolute_url(0)
+            self.auditor.log(RENAME_PAGE, oldURL, newURL)
+            self.status = 'Page renamed'
+        return retval
     
+    #@form.action(label=u'Publish', failure='action_failure')
+    def handle_publish(self, action, data):
+        # --=mpj17=-- This needs a complete rewrite, and I need to
+        #   figure out how to attach it to the form.
+        copied_revision = self.request.get('copied_revision', None)
+        published_revision = self.request.get('published_revision', None)
+
+        if published_revision:
+            # Handle publishing of a selected revision.
+            self.content_page.publish_revision(published_revision)
+            self.status = u'Revision %s has been made the published revision.' % published_revision
+        elif copied_revision:
+            # Handle copying of a selected revision to current
+            self.content_page.copy_revision_to_current(copied_revision)
+            self.status = u'Revision %s has been copied to current for editing.' % copied_revision
+    
+    @form.action(label=u'Edit', failure='action_failure')
+    def handle_set(self, action, data):
+        '''Change the data that is being 
+        '''
+        print 'Woot!'
+        self.auditor = PageEditAuditor(self.context)
+        return self.set_data(data)
+
+    def set_data(self, data):
+        assert self.folder
+        assert self.form_fields
+        content_page = IGSContentPage(self.folder)
+        assert IGSContentPage.implementedBy(content_page),\
+          '%s does not implement IGSContentPage' % content_page
+
+        fields = []
+        for datum in getFieldsInOrder(IGSContentPage):
+            if data.has_key(datum[0]):
+                if data[datum[0]] != getattr(self.context, datum[0]):
+                    fields.append(datum[0])
+        if fields:
+            # Save the new version in the history
+            # 1. Figure out the version that is being edited
+            currentVersionId = datum['edited_version'] #--=mpj17=-- Better be set
+            # 2. Copy that to a new revision
+            newVersion = self.new_version(currentVersion)
+            # 3. Apply changes
+            changed = form.applyChanges(newVersion, self.form_fields, data)
+
+            fieldNames = [IGSContentPage.get(name).title
+                      for name in alteredFields]
+            self.status = u'Changed %s' % comma_comma_and(fieldNames)
+            if 'content' in fields:
+                self.auditor.info(EDIT_CONTENT)
+            if ((len(fields) == 1) and ('content' not in fields)) or\
+                (len(fields) > 1):
+                self.auditor.info(EDIT_ATTRIBUTE)
+        else:
+            self.status = u'No changes made to this page.'
+            
+        assert self.status
+        assert type(self.status) == unicode
+
+    def new_version(self, currentVersionId):
+        pass
 

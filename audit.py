@@ -27,6 +27,8 @@ log = logging.getLogger(SUBSYSTEM) #@UndefinedVariable
 
 UNKNOWN        = '0'  # Unknown is always "0"
 EDIT_CONTENT   = '1'
+EDIT_FIELD     = '2'
+RENAME_PAGE    = '2'
 
 class EditPageAuditEventFactory(object):
     """A Factory for enrolment events
@@ -128,18 +130,17 @@ class EditContentEvent(BasicAuditEvent):
 
     def __init__(self, context, id, d, userInfo, siteInfo, 
                  instanceDatum,  supplementaryDatum):
-        """Create an enrolment event
+        """Create an edit-content event
         
         ARGUMENTS
             Most of the arguments are the same as for the factory,
             except subsystem and code are skipped.
             
             userInfo
-                The person who enrolled the instance-user (the staff
-                member).
+                The person who changed the page.
                 
             instanceDatum
-                The ID of the page
+                The URL of the page
             
             supplementaryDatum
                 The title of the page.
@@ -149,7 +150,7 @@ class EditContentEvent(BasicAuditEvent):
             about the offering.
         """
         BasicAuditEvent.__init__(self, context, id, 
-          ENROL, d, userInfo, instanceUserInfo, 
+          EDIT_CONTENT, d, userInfo, None, 
           siteInfo, None,  instanceDatum, supplementaryDatum, 
           SUBSYSTEM)
           
@@ -174,8 +175,136 @@ class EditContentEvent(BasicAuditEvent):
         trails.
         """
         cssClass = u'audit-event groupserver-page-edit-event-%s' % self.code
-        retval = u'<span class="%s">Edited <a href="%s">%s</a> (%s)</span>'%\
+        retval = u'<span class="%s">Edited content of <a href="%s">%s</a> (%s)</span>'%\
           (cssClass, self.instanceDatum, self.supplementaryDatum,
+           munge_date(self.context, self.date))
+          
+        return retval
+
+class EditAttributeEvent(BasicAuditEvent):
+    '''An audit-trail event representing an edit to the page content
+    
+    DESCRIPTION
+        A edit content event is generated when someone edits the 
+        content of a page that is managed the GroupServer Content
+        Management subsystem.
+    '''
+    implements(IAuditEvent)
+
+    def __init__(self, context, id, d, userInfo, siteInfo, 
+                 instanceDatum,  supplementaryDatum):
+        """Create an edit-atribute event
+        
+        ARGUMENTS
+            Most of the arguments are the same as for the factory,
+            except subsystem and code are skipped.
+            
+            userInfo
+                The person who changed the page.
+                
+            instanceDatum
+                The URL of the page
+            
+            supplementaryDatum
+                The title of the page.
+                
+        SIDE EFFECTS
+            Creates and enrolment query instance, so it can find out
+            about the offering.
+        """
+        BasicAuditEvent.__init__(self, context, id, 
+          EDIT_ATTRIBUTE, d, userInfo, None, 
+          siteInfo, None,  instanceDatum, supplementaryDatum, 
+          SUBSYSTEM)
+          
+        da = context.zsqlalchemy
+        self.query = EnrolmentQuery(context, da)
+        self.__offeringName = None
+            
+    def __str__(self):
+        """Display the event as a string, in such a way that it
+        will be useful for the standard Python log.
+        """
+        retval = u'%s (%s) changed the content of %s (%s) on %s (%s)' %\
+          (self.userInfo.name, self.userInfo.id, 
+           self.supplementaryDatum, self.instanceDatum,
+           self.siteInfo.name, self.siteInfo.id)
+        return retval
+    
+    @property
+    def xhtml(self):
+        """Display the event as string, with XHTML markup, in such
+        a way that it will be useful for the Web view of audit 
+        trails.
+        """
+        cssClass = u'audit-event groupserver-page-edit-event-%s' % self.code
+        retval = u'<span class="%s">Edited attributes of <a href="%s">%s</a> (%s)</span>'%\
+          (cssClass, self.instanceDatum, self.supplementaryDatum,
+           munge_date(self.context, self.date))
+          
+        return retval
+
+class RenamePageEvent(BasicAuditEvent):
+    '''An audit-trail event representing renaming a page
+    
+    DESCRIPTION
+        A rename-page event is generated when someone renames a
+        page, changing its URL
+    '''
+    implements(IAuditEvent)
+
+    def __init__(self, context, id, d, userInfo, siteInfo, 
+                 instanceDatum,  supplementaryDatum):
+        """Create an edit-atribute event
+        
+        ARGUMENTS
+            Most of the arguments are the same as for the factory,
+            except subsystem and code are skipped.
+            
+            userInfo
+                The person who changed the page.
+                
+            instanceDatum
+                The original URL
+            
+            supplementaryDatum
+                The new URL
+                
+        SIDE EFFECTS
+            Creates and enrolment query instance, so it can find out
+            about the offering.
+        """
+        BasicAuditEvent.__init__(self, context, id, 
+          RENAME_PAGE, d, userInfo, None, 
+          siteInfo, None,  instanceDatum, supplementaryDatum, 
+          SUBSYSTEM)
+          
+        da = context.zsqlalchemy
+        self.query = EnrolmentQuery(context, da)
+        self.__offeringName = None
+            
+    def __str__(self):
+        """Display the event as a string, in such a way that it
+        will be useful for the standard Python log.
+        """
+        retval = u'%s (%s) changed the URL of <%s> to <%s> on %s (%s)' %\
+          (self.userInfo.name, self.userInfo.id, 
+           self.instanceDatum, self.supplementaryDatum, 
+           self.siteInfo.name, self.siteInfo.id)
+        return retval
+    
+    @property
+    def xhtml(self):
+        """Display the event as string, with XHTML markup, in such
+        a way that it will be useful for the Web view of audit 
+        trails.
+        """
+        cssClass = u'audit-event groupserver-page-edit-event-%s' % self.code
+        retval = u'<span class="%s">Changed URL of '\
+          u'<a href="%s"><code>%s</code></a> to '\
+          u'<a href="%s"><code>%s</code></a></span>'%\
+          (cssClass, self.instanceDatum, self.instanceDatum,
+           self.supplementaryDatum, self.supplementaryDatum,
            munge_date(self.context, self.date))
           
         return retval
@@ -223,7 +352,7 @@ class PageEditAuditor(object):
       
         self.factory = EditPageAuditEventFactory()
         
-    def info(self, code):
+    def info(self, code, instanceDatum='', supplementaryDatum=''):
         """Log an info event to the audit trail.
 
         DESCRIPTION
@@ -244,8 +373,9 @@ class PageEditAuditor(object):
             None
         """
         d = datetime.now(UTC)
-        instanceDatum = page.absolute_url(0)
-        supplementaryDatum = page.title_or_id()
+        if ((not instanceDatum) and (not supplementaryDatum)):
+            instanceDatum = page.absolute_url(0)
+            supplementaryDatum = page.title_or_id()
         eventId = event_id_from_data(self.userInfo, self.userInfo,
           self.siteInfo, code, instanceDatum, supplementaryDatum)
           

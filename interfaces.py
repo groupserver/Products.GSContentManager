@@ -40,6 +40,12 @@ class IGSContentPage(Interface):
     content = Text(title=u'Page content',
         description=u'The content of this page.',
         required=False)
+
+class IGSEditContentPage(IGSContentPage):
+    edited_version = ASCIILine(title=u'Edited Revision',
+        description=u'The revision of the page that is being edited.',
+        required=False,
+        readonly=True)
     
 class IGSContentPageHistory(Interface):
     """Marker interface for the history of a page
