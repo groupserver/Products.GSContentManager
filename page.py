@@ -23,9 +23,7 @@ class GSContentPage(object):
     CONTENT_TEMPLATE = 'content_en'
     initial_content_file = 'content.html'
     
-    def __init__ (self, context, mode='edit', pageId=None):
-        
-        self.status = {'error': False}
+    def __init__ (self, context, pageId=None):
         self.context = context
         self.pageHistory = GSPageHistory(context)
         
@@ -55,9 +53,8 @@ class GSContentPage(object):
                     self.status = {'error': False, 'msg': m}
 
     def new_version_id(self):
-        retval = '%s_%s' % (self.CONTENT_TEMPLATE, 
-          strftime("%Y%m%d%H%M%S", 
-          gmtime(time())))
+        t = strftime("%Y%m%d%H%M%S", gmtime(time()))
+        retval = '%s_%s' % (self.CONTENT_TEMPLATE, t)
         assert type(retval) == str
         assert retval
         return retval
@@ -116,7 +113,6 @@ class GSContentPage(object):
     # Content property
     def _setContent(self, value):
         # Save the content to the content object
-        print 'Stuff?'
         template = self.pageHistory.get_current_version()
         if template:
             template.write('<content>%s</content>' % value)

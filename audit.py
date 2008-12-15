@@ -6,6 +6,8 @@ CONSTANTS
         factory named in the ZCML configuration.)
     UNKNOWN:          '0' (*String*)
     EDIT_CONTENT:     '1' (*String*)
+    EDIT_FIELD        '2' (*String*)
+    RENAME_PAGE       '3' (*String*)
 """
 from pytz import UTC
 from datetime import datetime
@@ -28,7 +30,7 @@ log = logging.getLogger(SUBSYSTEM) #@UndefinedVariable
 UNKNOWN        = '0'  # Unknown is always "0"
 EDIT_CONTENT   = '1'
 EDIT_FIELD     = '2'
-RENAME_PAGE    = '2'
+RENAME_PAGE    = '3'
 
 class EditPageAuditEventFactory(object):
     """A Factory for enrolment events
@@ -363,7 +365,17 @@ class PageEditAuditor(object):
         ARGUMENTS
             "code"    The code that identifies the event that is 
                       logged. Sometimes this is enough.
-        
+            "instanceDatum" The data to write as the instance datum
+                      for the event. Defaults to an empty string.
+                      (See below.)
+            "supplementaryDatum" The data to write as the 
+                    supplementary datum for the event. Defaults to 
+                    an empty string. (See below.)
+
+            If the instance datum *and* the supplementary datum are
+            set to empty strings then they are set to the page URL
+            and page title respectively.
+
         SIDE EFFECTS
             * Creates an ID for the new event,
             * Writes the instantiated event to the audit-table, and

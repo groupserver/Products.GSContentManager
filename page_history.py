@@ -8,6 +8,7 @@ from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 from OFS.OrderedFolder import OrderedFolder
 from lxml import etree
 from StringIO import StringIO
+import re
 import interfaces
 
 import logging
@@ -87,52 +88,55 @@ class GSPageHistory(object):
     
     def __init__(self, context):
         self.context = context
+        self.histRE = re.compile('content_en_[0-9]{14}')
         
     def get_published_revision (self):
         """ Get the id of the currently published revision """
-        prev = getattr(self.context, 
-                       'published_revision', 
-                       self.get_current_version().getId())
-        m = u'Published version is %s' % prev
-        log.info(m)
-        assert prev
-        return prev
-        
-    def get_versions(self):
-        """Get the versions of the document.
-        """
-        retval = [i for i in self.context.objectValues('XML Template')
-                  if i.getId()[:10] == self.HISTORY_TEMPLATE[:10]]
-        
-        if len(retval) == 0:
-            return retval
-           
-        assert type(retval) == list
-        assert len(retval) > 0
-        assert ([i.meta_type == 'XML Template' for i in retval])
-        return retval
-        
-    def get_current_version(self):
-        retval = self.get_versions()[0]
+        assert hasattr(self.context, 'published_revision'),\
+            '%s (%s) has no published_revision property' %\
+             (self.context, self.context.absolute_url(0))
+        pr = getattr(self.context, 'published_revision')
+
+        assert hasattr(self.context, pr), 'No %s in %s (%s)' %\
+             (pr, self.context, self.context.absolute_url(0))
+        retval = getattr(self.context, pr)
+
         assert retval
         assert retval.meta_type == 'XML Template' 
         return retval
         
-def bobobase_sorter(a, b):
+    def get_versions(self):
+        """Get the versions of the document.
+        """
+        templates = self.context.objectValues('XML Template')
+        retval = [t for t in templates 
+                  if self.histRE.match(t.getId())]
+        retval.sort(version_sorter)
+        assert type(retval) == list, u'Not a list'
+        assert len(retval) > 0, u'List is empty'
+        assert ([i.meta_type == 'XML Template' for i in retval]),\
+            u'Things other than XML templates returned: %s' % retval
+        return retval
+        
+    def get_current_version(self):
+        retval = self.get_versions()[-1]
+        assert retval
+        assert retval.meta_type == 'XML Template' 
+        return retval
+
+def version_sorter(a, b):
     assert a
-    assert a.bobobase_modification_time
+    assert a.meta_type == 'XML Template'
     assert b
-    assert b.bobobase_modification_time
+    assert b.meta_type == 'XML Template'
     
-    ta = a.bobobase_modification_time()
-    tb = b.bobobase_modification_time()
-    
-    retval = 0
-    if a > b:
+    aDt = a.getId().split('_')[2]
+    bDt = b.getId().split('_')[2]
+    retval = 1
+    if aDt < bDt:
         retval = -1
-    elif a < b:
-        retval = 1
-            
+    elif aDt == bDt:
+        retval = 0
     assert retval in (-1, 0, 1)
     return retval
 
