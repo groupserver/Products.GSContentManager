@@ -89,9 +89,21 @@ class GSPageHistory(object):
     def __init__(self, context):
         self.context = context
         self.histRE = re.compile('content_en_[0-9]{14}')
+        self.__keys = None
         
     def get_published_revision (self):
-        """ Get the id of the currently published revision """
+        """ Get the currently published revision of the content
+        
+        ARGUMENTS
+            None
+            
+        RETURNS
+            An XML Template, representing the published revision of
+            the content.
+            
+        SIDE EFFECTS
+            None
+        """
         assert hasattr(self.context, 'published_revision'),\
             '%s (%s) has no published_revision property' %\
              (self.context, self.context.absolute_url(0))
@@ -104,9 +116,23 @@ class GSPageHistory(object):
         assert retval
         assert retval.meta_type == 'XML Template' 
         return retval
+
+    @property
+    def published(self):
+        return self.get_published_revision()
         
     def get_versions(self):
         """Get the versions of the document.
+        
+        ARGUMENTS
+            None
+            
+        RETURNS
+            A list of XML templates, ordered by creation date (newest
+            last). Each template represents a version of the content.
+            
+        SIDE EFFECTS
+            None
         """
         templates = self.context.objectValues('XML Template')
         retval = [t for t in templates 
@@ -119,11 +145,106 @@ class GSPageHistory(object):
         return retval
         
     def get_current_version(self):
+        """Get most recently created version of the document content
+        
+        The current version is the version that was mostly recently
+        created, rather than the one that is currently published. The
+        latter is returned by "get_published_revision".
+        
+        ARGUMENTS
+            None
+            
+        RETURNS
+            An XML templates that represents the most recent version
+            of the content.
+            
+        SIDE EFFECTS
+            None
+        """
         retval = self.get_versions()[-1]
         assert retval
         assert retval.meta_type == 'XML Template' 
         return retval
+        
+    @property
+    def current(self):
+        return self.get_current_revision()
+    
+    # Mapping Methods below
+    def keys(self):
+        vers = self.get_versions()
+        if ((self.__keys == None) or (len(self.__keys) != len(vers))):
+            self.__keys = [v.getId() for v in vers]
+        retval = self.__keys
+        assert type(retval) == list
+        return retval
+        
+    def values(self):
+        return self.get_versions()
+        
+    def items(self):
+        retval = [(v.getId(), v) for v in self.values]
+        assert type(retval) == list
+        return retval
+        
+    def has_key(self, key):
+        return key in self.keys
+    
+    def get(self, key, default=None):
+        if self.has_key(key):
+            retval = [v for v in self.values if v.getId() == key][0]
+        else:
+            retval = default
+        return retval
+    
+    def clear(self):
+        raise NotImplementedError
+    
+    def iterkeys(self):
+        return iter(self.keys())
 
+    def itervalues(self):
+        return iter(self.values)
+        
+    def iteritems(self):
+        return iter(self.items())
+    
+    def pop(self):
+        raise NotImplementedError
+        
+    def popitem(self):
+        raise NotImplementedError
+
+    def copy(self):
+        raise NotImplementedError
+    
+    def update(self):
+        raise NotImplementedError
+        
+    def __len__(self):
+        return len(self.keys())
+        
+    def __getitem__(self, key):
+        if self.has_key(key):
+            retval = self.get(key)
+        else:
+            raise KeyError(key)
+        assert retval != None
+        assert retval.meta_type == 'XML Template'
+        return retval
+        
+    def __setitem__(self, key, value):
+        raise NotImplementedError
+    
+    def __delitem__(self, key):
+        raise NotImplementedError
+
+    def __iter__(self):
+        return self.iterkeys()
+        
+    def __contains__(self, item):
+        return self.kas_key(item)
+        
 def version_sorter(a, b):
     assert a
     assert a.meta_type == 'XML Template'
