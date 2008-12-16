@@ -32,41 +32,31 @@ class EditPageForm(PageForm):
     template = ZopeTwoPageTemplateFile(pageTemplateFileName)
 
     def __init__(self, context, request):
-        # Adapt the context object to a content page object
-        # Hmmm? self.context = self.content_page = content_page = interface(context)
-        self.context = self.folder = context
-        self.request = request
-
-        self.content_page = content_page = GSContentPage(context)
-        self.hist = hist = GSPageHistory(context)
-
         PageForm.__init__(self, context, request)
-
+        # Adapt the context object to a content page object
+        self.folder = context
+        self.hist = hist = GSPageHistory(context)
         self.siteInfo = createObject('groupserver.SiteInfo', context)
+
+        self.ev = ev = request.form.get('form.edited_version', 
+            hist.current.getId())
+        assert ev in hist, u'%s not in %s' % (ev, hist.keys())
+        print 'Editing %s:\n%s' % (ev, hist[ev]())
+        request.form['form.content'] = hist[ev]()
 
         self.form_fields = form.Fields(IGSEditContentPage, 
             render_context=True, omit_readonly=True)
-
-        self.ev = ev = request.form.get('edited_version', 
-            hist.current.getId())
-        assert ev in hist, u'%s not in %s' % (ev, hist.keys())
-        print 'Editing %s:\n%s' % (hist.current.getId(), hist.current())
-            
-        request.form['content'] = hist[ev]()
         self.form_fields['content'].custom_widget = wym_editor_widget
-
-        currUrl = context.absolute_url(0)
-        self.add_url = '%s/add_page.html' % currUrl
         
         self.auditor = None
         
     @property
     def id(self):
-        return self.content_page.id
+        return self.folder.getId()
 
     @property
     def title(self):
-        return self.hist.current.title_or_id()
+        return self.hist[self.ev].title_or_id()
     
     @property
     def description(self):
@@ -75,8 +65,7 @@ class EditPageForm(PageForm):
 
     @property
     def content(self):
-        c = self.current()
-        print c
+        c = self.hist[self.ev]()
         return c
 
     def action_failure(self, action, data, errors):
@@ -98,14 +87,13 @@ class EditPageForm(PageForm):
         except e:
             self.status = u'There was problem renaming this page'
         else:
-            self.content_page.context = r
-            # --=mpj17=-- parent?
-            uri = '%s/edit_page.html' % r.absolute_url(0)
+            # --=mpj17=-- ok?
+            uri = '%s/edit_page.html' % self.folder.absolute_url(0)
             self.auditor.log(RENAME_PAGE, oldUri, uri)
             self.request.response.redirect(uri)
 
     def rename_page(self, newId):
-        current_id = self.content_page.id
+        current_id = self.id
         parentFolder = self.context.aq_parent
         if hasattr(parentFolder.aq_explicit, new_id):
             self.status = u'<a href="%s">A page with identifier '\
@@ -129,12 +117,14 @@ class EditPageForm(PageForm):
 
         if published_revision:
             # Handle publishing of a selected revision.
-            self.content_page.publish_revision(published_revision)
+            # --=mpj17=-- replace
+            # self.content_page.publish_revision(published_revision)
             self.status = u'Revision %s has been made the '\
               u'published revision.' % published_revision
         elif copied_revision:
             # Handle copying of a selected revision to current
-            self.content_page.copy_revision_to_current(copied_revision)
+            # --=mpj17=-- replace
+            # self.content_page.copy_revision_to_current(copied_revision)
             self.status = u'Revision %s has been copied to current '\
               u'for editing.' % copied_revision
     
@@ -149,9 +139,9 @@ class EditPageForm(PageForm):
     def set_data(self, data):
         assert self.folder
         assert self.form_fields
-        content_page = IGSContentPage(self.folder)
-        assert IGSContentPage.implementedBy(content_page),\
-          '%s does not implement IGSContentPage' % content_page
+        #content_page = IGSContentPage(self.folder)
+        #assert IGSContentPage.implementedBy(content_page),\
+        #  '%s does not implement IGSContentPage' % content_page
 
         fields = []
         for datum in getFieldsInOrder(IGSContentPage):

@@ -50,7 +50,7 @@
         
         <h1 tal:content="view/label">Edit Page</h1>
 
-        <p><a href="#" tal:attributes="href view/add_url">Add a page</a></p>
+        <!--p><a href="#" tal:attributes="href view/add_url">Add a page</a></p-->
         
         <!-- Page History -->
         <div
