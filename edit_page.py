@@ -15,7 +15,7 @@ from zope.schema import *
 from Products.XWFCore.XWFUtils import comma_comma_and
 from interfaces import IGSContentPage, IGSEditContentPage
 from page import GSContentPage
-from audit import PageEditAuditor, EDIT_CONTENT, RENAME_PAGE
+from audit import PageEditAuditor, EDIT_CONTENT
 from page_history import GSPageHistory
 
 import logging
@@ -74,39 +74,6 @@ class EditPageForm(PageForm):
         else:
             self.status = u'<p>There are errors:</p>'
 
-    # @form.action(label=u'Rename', failure='action_failure')
-    def handle_rename(self, action, data):
-        self.auditor = PageEditAuditor(self.context)
-        self.rename_page(data)
-        # If the page ID has changed, we need to rename the folder
-        # and redirect to the new folder (in edit mode).
-        new_id = data['id']
-        oldUri = self.context.absolute_url(0)
-        try:
-            r = self.rename_page(new_id)
-        except e:
-            self.status = u'There was problem renaming this page'
-        else:
-            # --=mpj17=-- ok?
-            uri = '%s/edit_page.html' % self.folder.absolute_url(0)
-            self.auditor.log(RENAME_PAGE, oldUri, uri)
-            self.request.response.redirect(uri)
-
-    def rename_page(self, newId):
-        current_id = self.id
-        parentFolder = self.context.aq_parent
-        if hasattr(parentFolder.aq_explicit, new_id):
-            self.status = u'<a href="%s">A page with identifier '\
-            '<code class="page">%s</code></a> already exists '\
-            u'in this folder' % (new_id, new_id)
-            retval = None
-        else:
-            folder.manage_renameObject(current_id, new_id)
-            retval = getattr(folder.aq_explicit, new_id, None)
-            newURL = retval.absolute_url(0)
-            self.status = 'Page renamed'
-        return retval
-    
     #@form.action(label=u'Publish', failure='action_failure')
     def handle_publish(self, action, data):
         # --=mpj17=-- This needs a complete rewrite, and I need to
@@ -173,4 +140,5 @@ class EditPageForm(PageForm):
 
     def new_version(self, currentVersionId):
         pass
+
 
