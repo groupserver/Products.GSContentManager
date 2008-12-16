@@ -36,29 +36,23 @@ class EditPageForm(PageForm):
         # Hmmm? self.context = self.content_page = content_page = interface(context)
         self.context = self.folder = context
         self.request = request
-        #self.content_page = content_page = IGSContentPage(context)
+
         self.content_page = content_page = GSContentPage(context)
         self.hist = hist = GSPageHistory(context)
-        print hist.get_published_revision()
-        print hist.get_versions()
-        print hist.get_current_version()
 
-        # PageForm.__init__(self, content_page.context, request)
         PageForm.__init__(self, context, request)
 
         self.siteInfo = createObject('groupserver.SiteInfo', context)
-        site_root = context.site_root()
 
-        assert hasattr(site_root, 'GlobalConfiguration')
-        config = site_root.GlobalConfiguration
         self.form_fields = form.Fields(IGSEditContentPage, 
             render_context=True, omit_readonly=True)
 
-        if not(request.form.has_key('edited_version')):
-             # --=mpj17=-- I need to update this when an edit occurs
-            request.form['edited_version'] = \
-                content_page.published_revision
-
+        self.ev = ev = request.form.get('edited_version', 
+            hist.current.getId())
+        assert ev in hist, u'%s not in %s' % (ev, hist.keys())
+        print 'Editing %s:\n%s' % (hist.current.getId(), hist.current())
+            
+        request.form['content'] = hist[ev]()
         self.form_fields['content'].custom_widget = wym_editor_widget
 
         currUrl = context.absolute_url(0)
@@ -72,15 +66,18 @@ class EditPageForm(PageForm):
 
     @property
     def title(self):
-        return self.content_page.title
+        return self.hist.current.title_or_id()
     
     @property
     def description(self):
-        return self.content_page.description
+        return ''
+        # self.content_page.description
 
     @property
     def content(self):
-        return self.content_page.content
+        c = self.current()
+        print c
+        return c
 
     def action_failure(self, action, data, errors):
         if len(errors) == 1:
@@ -145,7 +142,9 @@ class EditPageForm(PageForm):
     def handle_set(self, action, data):
         '''Change the data that is being 
         '''
-        return self.set_data(data)
+        #return self.set_data(data)
+        print self.content
+        self.satus = u'Foo'
 
     def set_data(self, data):
         assert self.folder

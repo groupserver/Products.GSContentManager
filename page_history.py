@@ -168,7 +168,7 @@ class GSPageHistory(object):
         
     @property
     def current(self):
-        return self.get_current_revision()
+        return self.get_current_version()
     
     # Mapping Methods below
     def keys(self):
@@ -188,11 +188,11 @@ class GSPageHistory(object):
         return retval
         
     def has_key(self, key):
-        return key in self.keys
+        return key in self.keys()
     
     def get(self, key, default=None):
         if self.has_key(key):
-            retval = [v for v in self.values if v.getId() == key][0]
+            retval = [v for v in self.values() if v.getId() == key][0]
         else:
             retval = default
         return retval
@@ -243,7 +243,7 @@ class GSPageHistory(object):
         return self.iterkeys()
         
     def __contains__(self, item):
-        return self.kas_key(item)
+        return self.has_key(item)
         
 def version_sorter(a, b):
     assert a
