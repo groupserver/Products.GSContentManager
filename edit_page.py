@@ -1,6 +1,7 @@
 # coding=utf-8
 '''Implementation of the Edit Page form.
 '''
+from time import strftime, gmtime, time
 from Products.Five.formlib.formbase import PageForm
 from zope.component import createObject, adapts
 from zope.interface import implements, providedBy, implementedBy,\
@@ -21,6 +22,8 @@ from page_history import GSPageHistory
 import logging
 log = logging.getLogger('GSContentManager')
 
+CONTENT_TEMPLATE = 'content_en'
+
 def wym_editor_widget(field, request):
     retval = TextAreaWidget(field, request)
     retval.cssClass = 'wymeditor'
@@ -37,6 +40,7 @@ class EditPageForm(PageForm):
         self.folder = context
         self.hist = hist = GSPageHistory(context)
         self.siteInfo = createObject('groupserver.SiteInfo', context)
+        self.interface = IGSEditContentPage
 
         self.ev = ev = request.form.get('form.edited_version', 
             hist.current.getId())
@@ -44,7 +48,7 @@ class EditPageForm(PageForm):
         print 'Editing %s:\n%s' % (ev, hist[ev]())
         request.form['form.content'] = hist[ev]()
 
-        self.form_fields = form.Fields(IGSEditContentPage, 
+        self.form_fields = form.Fields(self.interface, 
             render_context=True, omit_readonly=True)
         self.form_fields['content'].custom_widget = wym_editor_widget
         
@@ -95,50 +99,67 @@ class EditPageForm(PageForm):
             self.status = u'Revision %s has been copied to current '\
               u'for editing.' % copied_revision
     
-    @form.action(label=u'Edit', failure='action_failure')
+    @form.action(label=u'Change', failure='action_failure')
     def handle_set(self, action, data):
         '''Change the data that is being 
         '''
-        #return self.set_data(data)
-        print self.content
-        self.satus = u'Foo'
+        self.auditor = PageEditAuditor(self.context)
+        return self.set_data(data)
 
     def set_data(self, data):
         assert self.folder
         assert self.form_fields
-        #content_page = IGSContentPage(self.folder)
-        #assert IGSContentPage.implementedBy(content_page),\
-        #  '%s does not implement IGSContentPage' % content_page
-
-        fields = []
-        for datum in getFieldsInOrder(IGSContentPage):
-            if data.has_key(datum[0]):
-                if data[datum[0]] != getattr(self.context, datum[0]):
-                    fields.append(datum[0])
-        if fields:
-            # Save the new version in the history
-            # 1. Figure out the version that is being edited
-            currentVersionId = datum['edited_version'] #--=mpj17=-- Better be set
-            # 2. Copy that to a new revision
-            newVersion = self.new_version(currentVersion)
-            # 3. Apply changes
-            changed = form.applyChanges(newVersion, self.form_fields, data)
-
-            fieldNames = [IGSContentPage.get(name).title
-                      for name in alteredFields]
-            self.status = u'Changed %s' % comma_comma_and(fieldNames)
-            if 'content' in fields:
-                self.auditor.info(EDIT_CONTENT)
-            if ((len(fields) == 1) and ('content' not in fields)) or\
-                (len(fields) > 1):
-                self.auditor.info(EDIT_ATTRIBUTE)
-        else:
-            self.status = u'No changes made to this page.'
-            
+        # Save the new version in the history
+        # 1. Figure out the version that is being edited
+        currentVersionId = self.ev
+        # 2. Copy that to a new revision
+        newVersion = self.new_version()
+        # 3. Apply changes
+        newVersion.write(data['content'])
+        fields = self.form_fields.omit(['content'])
+        #changed = form.applyChanges(newVersion, fields, data)
+        #print changed
+        
+        #fieldNames = [self.interface.get(name).title
+        #              for name in fields]
+        #self.status = u'Changed %s' % comma_comma_and(fieldNames)
+        #if 'content' in fields:
+        #    self.auditor.info(EDIT_CONTENT)
+        #if ((len(fields) == 1) and ('content' not in fields)) or\
+        #    (len(fields) > 1):
+        #    self.auditor.info(EDIT_ATTRIBUTE)
+        self.status = u'foo'
         assert self.status
         assert type(self.status) == unicode
 
-    def new_version(self, currentVersionId):
-        pass
+    def new_version(self):
+        '''Create a new (blank) version of the document'''
+        newId = self.new_version_id()
+        manageAdd = self.folder.manage_addProduct['DataTemplates']
+        manageAdd.manage_addXMLTemplate(newId, None)
+        retval = getattr(self.folder, newId)
+        assert retval
+        assert retval.meta_type == 'XML Template'
+        return retval
 
+    def new_version_id(self):
+        t = strftime("%Y%m%d%H%M%S", gmtime(time()))
+        retval = '%s_%s' % (CONTENT_TEMPLATE, t)
+        assert type(retval) == str
+        assert retval
+        return retval
+
+    def get_changed(self, oldContent, newContent, skip = []):
+        fields = [field for field in getFieldsInOrder(self.interface)
+                  if not field[1].readonly]
+        alteredFields = []
+        for field in fields:
+            fieldId = field[0]
+            if fieldId not in skip:
+                new = getattr(newContent, fieldId, '')
+                old = getattr(oldContent, fieldId, '')
+                if (old != new):
+                    alteredFields.append(fieldId)
+        assert type(alteredFields) == list
+        return alteredFields
 

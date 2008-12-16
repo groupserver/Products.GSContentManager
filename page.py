@@ -52,16 +52,10 @@ class GSContentPage(object):
                     m = 'Added page with id %s.' % pageId
                     self.status = {'error': False, 'msg': m}
 
-    def new_version_id(self):
-        t = strftime("%Y%m%d%H%M%S", gmtime(time()))
-        retval = '%s_%s' % (self.CONTENT_TEMPLATE, t)
-        assert type(retval) == str
-        assert retval
-        return retval
         
     def add_to_history (self):
         """ Creates a history entry for the context object """
-        history_obj_name = self.new_version_id()
+        history_obj_name = ''# --=mpj17=-- Fix self.new_version_id()
         if not getattr(self.context.aq_explicit, history_obj_name, None):
             content_obj = self.pageHistory.get_current_version()
             assert content_obj
