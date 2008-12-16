@@ -29,6 +29,10 @@ class IGSContentPage(Interface):
     content = Text(title=u'Page content',
         description=u'The content of this page.',
         required=False)
+        
+    editor = Text(title=u'Editor ID',
+        description=u'The Identifier of the last editor of this Page',
+        readonly=True)
 
 class IGSEditContentPage(IGSContentPage):
     edited_version = ASCIILine(title=u'Edited Revision',

@@ -33,12 +33,12 @@ EDIT_FIELD     = '2'
 RENAME_PAGE    = '3'
 
 class EditPageAuditEventFactory(object):
-    """A Factory for enrolment events
+    """A Factory for edit page events
     """
     implements(IFactory)
 
     title=u'ABEL YAPA Enrol Audit Event Factory'
-    description=u'Creates a GroupServer audit event enrolment'
+    description=u'Creates a GroupServer audit event'
 
     def __call__(self, context, event_id,  code, date,
         userInfo, instanceUserInfo,  siteInfo,  groupInfo = None,
@@ -69,16 +69,13 @@ class EditPageAuditEventFactory(object):
                 The date the event occurred.
                 
             userInfo
-                The user who caused the event. Always set for 
-                enrolment events.
+                The user who caused the event. Always set.
                 
             instanceUserInfo
-                The user who had an event occurred to them. Always
-                set for enrolment events.
+                The user who had an event occurred to them. 
                 
             siteInfo
-                The site where the event occurred. Always set for
-                enrolment events.
+                The site where the event occurred. Always set.
                 
             groupInfo
                 The group where the event occurred. Can be None.
@@ -148,16 +145,12 @@ class EditContentEvent(BasicAuditEvent):
                 The title of the page.
                 
         SIDE EFFECTS
-            Creates and enrolment query instance, so it can find out
-            about the offering.
+            None
         """
         BasicAuditEvent.__init__(self, context, id, 
           EDIT_CONTENT, d, userInfo, None, 
           siteInfo, None,  instanceDatum, supplementaryDatum, 
           SUBSYSTEM)
-          
-        da = context.zsqlalchemy
-        self.query = EnrolmentQuery(context, da)
         self.__offeringName = None
             
     def __str__(self):
@@ -386,12 +379,12 @@ class PageEditAuditor(object):
         """
         d = datetime.now(UTC)
         if ((not instanceDatum) and (not supplementaryDatum)):
-            instanceDatum = page.absolute_url(0)
-            supplementaryDatum = page.title_or_id()
+            instanceDatum = self.page.absolute_url(0)
+            supplementaryDatum = self.page.title_or_id()
         eventId = event_id_from_data(self.userInfo, self.userInfo,
           self.siteInfo, code, instanceDatum, supplementaryDatum)
           
-        e =  self.factory(self.user, eventId,  code, d,
+        e =  self.factory(self.page, eventId,  code, d,
           self.userInfo, None, self.siteInfo, None,
           instanceDatum, supplementaryDatum, SUBSYSTEM)
           

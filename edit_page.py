@@ -18,6 +18,7 @@ from interfaces import IGSContentPage, IGSEditContentPage
 from page import GSContentPage
 from audit import PageEditAuditor, EDIT_CONTENT
 from page_history import GSPageHistory
+from Products.GSProfile.utils import enforce_schema
 
 import logging
 log = logging.getLogger('GSContentManager')
@@ -45,7 +46,6 @@ class EditPageForm(PageForm):
         self.ev = ev = request.form.get('form.edited_version', 
             hist.current.getId())
         assert ev in hist, u'%s not in %s' % (ev, hist.keys())
-        print 'Editing %s:\n%s' % (ev, hist[ev]())
         request.form['form.content'] = hist[ev]()
 
         self.form_fields = form.Fields(self.interface, 
@@ -109,26 +109,15 @@ class EditPageForm(PageForm):
     def set_data(self, data):
         assert self.folder
         assert self.form_fields
-        # Save the new version in the history
-        # 1. Figure out the version that is being edited
-        currentVersionId = self.ev
-        # 2. Copy that to a new revision
-        newVersion = self.new_version()
-        # 3. Apply changes
-        newVersion.write(data['content'])
-        fields = self.form_fields.omit(['content'])
-        #changed = form.applyChanges(newVersion, fields, data)
-        #print changed
+        userInfo = createObject('groupserver.LoggedInUser',self.context)
         
-        #fieldNames = [self.interface.get(name).title
-        #              for name in fields]
-        #self.status = u'Changed %s' % comma_comma_and(fieldNames)
-        #if 'content' in fields:
-        #    self.auditor.info(EDIT_CONTENT)
-        #if ((len(fields) == 1) and ('content' not in fields)) or\
-        #    (len(fields) > 1):
-        #    self.auditor.info(EDIT_ATTRIBUTE)
-        self.status = u'foo'
+        # Save the new version in the history
+        newVersion = self.new_version()
+        newVersion.write(data['content'])
+        newVersion.title = data['title']
+        newVersion.manage_addProperty('editor', userInfo.id, 'ustring')
+        self.auditor.info(EDIT_CONTENT)
+        self.status = u'Changed %s' % data['title']
         assert self.status
         assert type(self.status) == unicode
 
