@@ -2,6 +2,9 @@
 '''Implementation of the Edit Page form.
 '''
 from time import strftime, gmtime, time
+import difflib
+from datetime import datetime
+from base64 import b64encode
 from Products.Five.formlib.formbase import PageForm
 from zope.component import createObject, adapts
 from zope.interface import implements, providedBy, implementedBy,\
@@ -13,12 +16,13 @@ from zope.app.form.browser import MultiCheckBoxWidget, SelectWidget,\
 from zope.security.interfaces import Forbidden
 from zope.app.apidoc.interface import getFieldsInOrder
 from zope.schema import *
-from Products.XWFCore.XWFUtils import comma_comma_and
+from Products.XWFCore.XWFUtils import comma_comma_and, munge_date
 from interfaces import IGSContentPage, IGSEditContentPage
 from page import GSContentPage
 from audit import PageEditAuditor, EDIT_CONTENT
 from page_history import GSPageHistory
 from Products.GSProfile.utils import enforce_schema
+from Products.CustomUserFolder.userinfo import userInfo_to_anchor
 
 import logging
 log = logging.getLogger('GSContentManager')
@@ -151,4 +155,64 @@ class EditPageForm(PageForm):
                     alteredFields.append(fieldId)
         assert type(alteredFields) == list
         return alteredFields
+
+    def get_auditDatums(self, oldVer, newVer):
+        url = self.folder.absolute_url(0)
+        title = oldVer.title_or_id()
+        instanceDatum = u','.join((b64encode(url), b64encode(title),
+            oldVer.getId(), newVer.getId()))
+
+        textDiff = self.get_text_diff(oldVer, newVer)
+        htmlDiff = self.get_html_diff(oldVer, newVer)
+        supplementaryDatum = u','.join((b64encode(textDiff),
+                                        b64encode(htmlDiff)))
+        retval = (instanceDatum, supplementartDatum)
+        assert len(retval) == 2
+        assert type(retval[0]) == unicode
+        assert type(retval[1]) == unicode
+        return retval
+
+    def get_text_diff(self, oldVer, newVer):
+        assert oldVer 
+        assert oldVer.meta_type == 'XML Template'
+        assert newVer 
+        assert newVer.meta_type == 'XML Template'
+        
+        ovt = oldVer().split('\n')
+        ovDesc = oldVer.getId()
+        nvt = newVer().split('\n')
+        nvDesc = newVer.getId()
+        d = difflib.unified_diff(ovt, nvt, ovDesc, nvDesc)
+        retval = u'\n'.join(d)
+        assert type(retval) == unicode
+        assert retval
+        return retval
+
+    def get_html_diff(self, oldVer, newVer):
+        assert oldVer 
+        assert oldVer.meta_type == 'XML Template'
+        assert newVer 
+        assert newVer.meta_type == 'XML Template'
+        
+        ovt = oldVer().split('\n')
+        ovDesc = self.get_version_description(oldVer)
+        nvt = newVer().split('\n')
+        nvDesc = self.get_version_description(newVer)
+
+        htmlDiffer = difflib.HtmlDiff(tabsize=2)
+        retval = htmlDiffer.make_table(ovt, nvt, ovDesc, nvDesc)
+        
+        assert retval
+        return retval
+
+    def get_version_description(self, ver):
+        vTimeStamp = float(ver.getId().split('_')[-1])
+        vDate = datetime.fromtimestamp(vTimeStamp)
+        vUI = createObject('groupserver.UserFromId', 
+                            self.folder, ver.editor)
+        retval = u'%s (%s)' % (userInfo_to_anchor(vUI),
+                               munge_date(vDate,'%Y %b %d %H:%M:%S'))
+        assert retval
+        assert type(retval) == unicode
+        return retval 
 
