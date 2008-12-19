@@ -55,6 +55,9 @@
                 permission="zope2.Public"
                 factory=".page.GSContentPage"
                 /> 
-
+  <utility 
+    factory=".audit.EditPageAuditEventFactory"
+    name="groupserver.PageEditor"
+    permission="zope.Public" />
 </configure>
-
+  

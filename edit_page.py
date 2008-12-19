@@ -2,7 +2,7 @@
 '''Implementation of the Edit Page form.
 '''
 from time import strftime, gmtime, time
-import difflib
+import difflib, pytz
 from datetime import datetime
 from base64 import b64encode
 from Products.Five.formlib.formbase import PageForm
@@ -50,10 +50,10 @@ class EditPageForm(PageForm):
         self.ev = ev = request.form.get('form.edited_version', 
             hist.current.getId())
         assert ev in hist, u'%s not in %s' % (ev, hist.keys())
-        request.form['form.content'] = hist[ev]()
+        #request.form['form.content'] = hist[ev]()
 
         self.form_fields = form.Fields(self.interface, 
-            render_context=True, omit_readonly=True)
+            render_context=False, omit_readonly=True)
         self.form_fields['content'].custom_widget = wym_editor_widget
         
         self.auditor = None
@@ -117,10 +117,12 @@ class EditPageForm(PageForm):
         
         # Save the new version in the history
         newVersion = self.new_version()
+
         newVersion.write(data['content'])
         newVersion.title = data['title']
         newVersion.manage_addProperty('editor', userInfo.id, 'ustring')
-        self.auditor.info(EDIT_CONTENT)
+        i, s = self.get_auditDatums(self.hist[self.ev], newVersion)
+        self.auditor.info(EDIT_CONTENT, i, s)
         self.status = u'Changed %s' % data['title']
         assert self.status
         assert type(self.status) == unicode
@@ -132,41 +134,30 @@ class EditPageForm(PageForm):
         manageAdd.manage_addXMLTemplate(newId, None)
         retval = getattr(self.folder, newId)
         assert retval
+        assert retval.getId() == newId
         assert retval.meta_type == 'XML Template'
         return retval
 
     def new_version_id(self):
-        t = strftime("%Y%m%d%H%M%S", gmtime(time()))
+        now = datetime.utcnow().replace(tzinfo=pytz.utc)
+        t = now.strftime("%Y%m%d%H%M%S")
         retval = '%s_%s' % (CONTENT_TEMPLATE, t)
         assert type(retval) == str
+        assert not(hasattr(self.folder, retval))
         assert retval
         return retval
-
-    def get_changed(self, oldContent, newContent, skip = []):
-        fields = [field for field in getFieldsInOrder(self.interface)
-                  if not field[1].readonly]
-        alteredFields = []
-        for field in fields:
-            fieldId = field[0]
-            if fieldId not in skip:
-                new = getattr(newContent, fieldId, '')
-                old = getattr(oldContent, fieldId, '')
-                if (old != new):
-                    alteredFields.append(fieldId)
-        assert type(alteredFields) == list
-        return alteredFields
 
     def get_auditDatums(self, oldVer, newVer):
         url = self.folder.absolute_url(0)
         title = oldVer.title_or_id()
         instanceDatum = u','.join((b64encode(url), b64encode(title),
-            oldVer.getId(), newVer.getId()))
+            b64encode(oldVer.getId()), b64encode(newVer.getId())))
 
         textDiff = self.get_text_diff(oldVer, newVer)
         htmlDiff = self.get_html_diff(oldVer, newVer)
         supplementaryDatum = u','.join((b64encode(textDiff),
                                         b64encode(htmlDiff)))
-        retval = (instanceDatum, supplementartDatum)
+        retval = (instanceDatum, supplementaryDatum)
         assert len(retval) == 2
         assert type(retval[0]) == unicode
         assert type(retval[1]) == unicode
@@ -185,7 +176,6 @@ class EditPageForm(PageForm):
         d = difflib.unified_diff(ovt, nvt, ovDesc, nvDesc)
         retval = u'\n'.join(d)
         assert type(retval) == unicode
-        assert retval
         return retval
 
     def get_html_diff(self, oldVer, newVer):
@@ -206,12 +196,15 @@ class EditPageForm(PageForm):
         return retval
 
     def get_version_description(self, ver):
-        vTimeStamp = float(ver.getId().split('_')[-1])
-        vDate = datetime.fromtimestamp(vTimeStamp)
+        dt = ver.getId().split('_')[-1]
+        y, m, d, h, mi, s = [int(s) for s in 
+                            (dt[0:4],  dt[4:6],  dt[6:8], 
+                             dt[8:10], dt[10:12], dt[12:])]
+        vDate = datetime(y,m,d,h,mi,s).replace(tzinfo=pytz.utc)
         vUI = createObject('groupserver.UserFromId', 
                             self.folder, ver.editor)
         retval = u'%s (%s)' % (userInfo_to_anchor(vUI),
-                               munge_date(vDate,'%Y %b %d %H:%M:%S'))
+                               munge_date(self.folder, vDate,'%Y %b %d %H:%M:%S'))
         assert retval
         assert type(retval) == unicode
         return retval 

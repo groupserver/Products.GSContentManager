@@ -94,6 +94,7 @@ class EditPageAuditEventFactory(object):
         SIDE EFFECTS
             None
         """
+        print 'Here1'
         assert subsystem == SUBSYSTEM, 'Subsystems do not match'
         
         # The process of picking the class used to create an event
@@ -137,12 +138,19 @@ class EditContentEvent(BasicAuditEvent):
             
             userInfo
                 The person who changed the page.
+
+            siteInfo
+                The site that contains the page.
                 
             instanceDatum
-                The URL of the page
+                The url, title, old version identifier, and new 
+                version identifier. All base-64 encoded and separated
+                by commas.
             
             supplementaryDatum
-                The title of the page.
+                A comparison of the two versions, in a unified-diff
+                format and HTML table. Each comparison is base-64
+                encoded and separated by commas.
                 
         SIDE EFFECTS
             None
@@ -151,16 +159,21 @@ class EditContentEvent(BasicAuditEvent):
           EDIT_CONTENT, d, userInfo, None, 
           siteInfo, None,  instanceDatum, supplementaryDatum, 
           SUBSYSTEM)
-        self.__offeringName = None
             
     def __str__(self):
         """Display the event as a string, in such a way that it
         will be useful for the standard Python log.
         """
-        retval = u'%s (%s) changed the content of %s (%s) on %s (%s)' %\
-          (self.userInfo.name, self.userInfo.id, 
-           self.supplementaryDatum, self.instanceDatum,
-           self.siteInfo.name, self.siteInfo.id)
+        url, title, oVid, nVid = [b64decode(d) 
+                                  for d in self.instanceDatum.split(',')]
+        uDiff, htmlDiff = [b64decode(d) 
+                           for d in self.supplementaryDatum.split(',')]
+        
+        retval = u'%s (%s) changed the content of %s (%s) on '\
+          u'%s (%s)\n%s' %\
+          (self.userInfo.name, self.userInfo.id, title, url,
+           self.siteInfo.name, self.siteInfo.id, uDiff)
+        print retval
         return retval
     
     @property
@@ -169,9 +182,16 @@ class EditContentEvent(BasicAuditEvent):
         a way that it will be useful for the Web view of audit 
         trails.
         """
-        cssClass = u'audit-event groupserver-page-edit-event-%s' % self.code
-        retval = u'<span class="%s">Edited content of <a href="%s">%s</a> (%s)</span>'%\
-          (cssClass, self.instanceDatum, self.supplementaryDatum,
+        cssClass = u'audit-event groupserver-page-edit-event-%s' %\
+          self.code
+        url, title, oVid, nVid = [b64decode(d) 
+                                  for d in self.instanceDatum.split(',')]
+        uDiff, htmlDiff = [b64decode(d) 
+                           for d in self.supplementaryDatum.split(',')]
+
+        retval = u'<div class="%s"><p>Edited content of '\
+          u'<a href="%s">%s</a></p> %s <p>(%s)</p></span>'%\
+          (cssClass, url, title, htmlDiff,
            munge_date(self.context, self.date))
           
         return retval
@@ -301,7 +321,8 @@ class RenamePageEvent(BasicAuditEvent):
           (cssClass, self.instanceDatum, self.instanceDatum,
            self.supplementaryDatum, self.supplementaryDatum,
            munge_date(self.context, self.date))
-          
+        print 'Here'
+        assert retval
         return retval
 
 class PageEditAuditor(object):
@@ -343,6 +364,7 @@ class PageEditAuditor(object):
         self.siteInfo = createObject('groupserver.SiteInfo', page)
 
         da = page.zsqlalchemy
+        assert da, 'ZSQLAlchemy data adaptor not found'
         self.queries = AuditQuery(da)
       
         self.factory = EditPageAuditEventFactory()
@@ -387,7 +409,6 @@ class PageEditAuditor(object):
         e =  self.factory(self.page, eventId,  code, d,
           self.userInfo, None, self.siteInfo, None,
           instanceDatum, supplementaryDatum, SUBSYSTEM)
-          
         self.queries.store(e)
         log.info(e)
 
