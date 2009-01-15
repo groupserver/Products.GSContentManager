@@ -49,12 +49,10 @@
         tal:attributes="action request/URL" id="editpage" class="editpageclass">
         
         <h1 tal:content="view/label">Edit Page</h1>
-
-        <!--p><a href="#" tal:attributes="href view/add_url">Add a page</a></p-->
         
-        <!-- Page History
-        <div
-          tal:replace="structure provider:groupserver.ContentPageHistory"/-->
+        <!-- Page History -->
+        <tal:block
+          replace="structure provider:groupserver.ContentPageHistory"/>
         
         <!-- Widgets -->
         <tal:block 

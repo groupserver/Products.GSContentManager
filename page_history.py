@@ -1,6 +1,7 @@
 import os, zope
 from interfaces import *
 from zope.interface import implements
+from zope.size.interfaces import ISized
 from zope.component import adapts, createObject
 from Products.GSContent.interfaces import IGSContentFolder
 from Products.XWFCore.XWFUtils import munge_date
@@ -58,24 +59,21 @@ class GSContentPageHistoryContentProvider(object):
         acl_users = self.context.site_root().acl_users
         prev = self.pageHistory.get_published_revision()
         
-        for item in self.pageHistory.get_versions():
-        
-            uid = getattr(item, 'editor', '')
+        for iid, item in self.pageHistory.items():
             authorInfo = createObject('groupserver.UserFromId', 
-              self.context, uid)
+              self.context, item.editor)
             editor = {
               'name' : authorInfo.name,
               'id':    authorInfo.id,
               'url':   authorInfo.url
             }
 
-            dt = munge_date(self.context, item.bobobase_modification_time())
-            size = pretty_size(item.get_size())
+            #dt = munge_date(self.context, item.bobobase_modification_time())
             entry = {'editor': editor,
-                      'size': size,
-                      'modified': dt,
-                      'id': item.id,
-                      'current': item.id == prev
+                      'size': ISized(item).sizeForDisplay(),
+                      'modified': '',
+                      'id': iid,
+                      'current': iid == prev
                       }
             objects.append(entry)
             
@@ -177,7 +175,7 @@ class GSPageHistory(object):
         return self.get_versions()
         
     def items(self):
-        retval = [(v.id, v) for v in self.values]
+        retval = [(v.id, v) for v in self.values()]
         assert type(retval) == list
         return retval
         
@@ -251,17 +249,6 @@ def version_sorter(a, b):
     elif aDt == bDt:
         retval = 0
     assert retval in (-1, 0, 1)
-    return retval
-
-def pretty_size(size):
-    if size < 5000:
-        retval = u'tiny'
-    elif size < 1000000:
-        retval = u'%sKB' % (size/1024)
-    else:
-        retval = u'%sMB' % (size/(1024*1024))
-
-    assert type(retval) == unicode
     return retval
     
 zope.component.provideAdapter(GSContentPageHistoryContentProvider,

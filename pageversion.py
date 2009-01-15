@@ -4,6 +4,7 @@
 from interfaces import IGSContentPageVersion
 from zope.interface import implements
 from zope.schema.fieldproperty import FieldProperty
+from zope.size.interfaces import ISized
 
 class GSPageVersion(object):
     implements(IGSContentPageVersion)
@@ -94,4 +95,28 @@ class GSPageVersion(object):
               data, 'string')
     parentVersion = property(get_parentVersion, set_parentVersion,
       doc=__parentVersion_doc)
+
+class GSPageVersionSize(object):
+    implements(ISized)
+    
+    def __init__(self, version):
+        self.context = self.version = version
+        
+    def sizeForSorting(self):
+        l = len(self.version.content)
+        retval = ('byte', l)
+        assert len(retval) == 2
+        return retval
+
+    def sizeForDisplay(self):
+        size = self.sizeForSorting()[1]
+        if size < 5000:
+            retval = u'tiny'
+        elif size < 1000000:
+            retval = u'%sKB' % (size/1024)
+        else:
+            retval = u'%sMB' % (size/(1024*1024))
+
+        assert type(retval) == unicode
+        return retval
 
