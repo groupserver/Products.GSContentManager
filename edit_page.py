@@ -44,19 +44,20 @@ class EditPageForm(PageForm):
     implements(IGSContentPageVersion)
     
     def __init__(self, folder, request):
+        print 'Here 1'
         PageForm.__init__(self, folder, request)
         self.form_fields['content'].custom_widget = wym_editor_widget
+        print 'Here 2'
         
         self.folder = folder
         self.siteInfo = createObject('groupserver.SiteInfo', folder)
+        print 'Here 3'
         
-        # Get the version of the page for editing
-        self.hist = GSPageHistory(folder)
-        ev = request.form.get('form.edited_version', 
-            self.hist.current.getId()) #--=mpj17=-- Check manual
-        assert ev in self.hist, \
-          u'%s not in %s' % (ev, self.hist.keys())
-        self.versionForChange = IGSContentPageVersion(self.hist[ev])
+        # Get the version of the page for editing; default to HEAD
+        hist = GSPageHistory(folder)
+        ev = request.form.get('form.edited_version', hist.current.id)
+        assert ev in hist, u'%s not in %s' % (ev, hist.keys())
+        self.versionForChange = hist[ev]
         
         self.auditor = None
     

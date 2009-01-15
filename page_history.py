@@ -71,12 +71,11 @@ class GSContentPageHistoryContentProvider(object):
 
             dt = munge_date(self.context, item.bobobase_modification_time())
             size = pretty_size(item.get_size())
-            iid = item.getId()
             entry = {'editor': editor,
                       'size': size,
                       'modified': dt,
-                      'id': iid,
-                      'current': iid == prev
+                      'id': item.id,
+                      'current': item.id == prev
                       }
             objects.append(entry)
             
@@ -135,13 +134,11 @@ class GSPageHistory(object):
             None
         """
         templates = self.context.objectValues('XML Template')
-        retval = [t for t in templates 
+        retval = [IGSContentPageVersion(t) for t in templates 
                   if self.histRE.match(t.getId())]
         retval.sort(version_sorter)
         assert type(retval) == list, u'Not a list'
         assert len(retval) > 0, u'List is empty'
-        assert ([i.meta_type == 'XML Template' for i in retval]),\
-            u'Things other than XML templates returned: %s' % retval
         return retval
         
     def get_current_version(self):
@@ -163,7 +160,7 @@ class GSPageHistory(object):
         """
         retval = self.get_versions()[-1]
         assert retval
-        assert retval.meta_type == 'XML Template' 
+        assert hasattr(retval, 'id')
         return retval
         
     @property
@@ -172,10 +169,7 @@ class GSPageHistory(object):
     
     # Mapping Methods below
     def keys(self):
-        vers = self.get_versions()
-        if ((self.__keys == None) or (len(self.__keys) != len(vers))):
-            self.__keys = [v.getId() for v in vers]
-        retval = self.__keys
+        retval = [v.id for v in self.get_versions()  ]
         assert type(retval) == list
         return retval
         
@@ -183,7 +177,7 @@ class GSPageHistory(object):
         return self.get_versions()
         
     def items(self):
-        retval = [(v.getId(), v) for v in self.values]
+        retval = [(v.id, v) for v in self.values]
         assert type(retval) == list
         return retval
         
@@ -192,7 +186,7 @@ class GSPageHistory(object):
     
     def get(self, key, default=None):
         if self.has_key(key):
-            retval = [v for v in self.values() if v.getId() == key][0]
+            retval = [v for v in self.values() if v.id == key][0]
         else:
             retval = default
         return retval
@@ -230,7 +224,6 @@ class GSPageHistory(object):
         else:
             raise KeyError(key)
         assert retval != None
-        assert retval.meta_type == 'XML Template'
         return retval
         
     def __setitem__(self, key, value):
@@ -247,12 +240,11 @@ class GSPageHistory(object):
         
 def version_sorter(a, b):
     assert a
-    assert a.meta_type == 'XML Template'
+    assert hasattr(a, 'id')
     assert b
-    assert b.meta_type == 'XML Template'
-    
-    aDt = a.getId().split('_')[2]
-    bDt = b.getId().split('_')[2]
+    assert hasattr(b, 'id')
+    aDt = a.id.split('_')[2]
+    bDt = b.id.split('_')[2]
     retval = 1
     if aDt < bDt:
         retval = -1
