@@ -7,43 +7,50 @@ from zope.schema.vocabulary import SimpleVocabulary
 from zope.contentprovider.interfaces import IContentProvider
 
 class IGSContentPage(Interface):
+    pass
+    
+class IGSDataTemplate(Interface):
+    pass
+
+class IGSContentManagerFolderMarker(Interface):
+    pass
+
+class IGSContentPageVersion(Interface):
     """ Schema for a content page """
 
-    title = ASCIILine(title=u'Page title',
-        description=u'The title of this page, which will appear in the '
-          u'META title tag on the page.',
+    id = ASCIILine(title=u'Identifier',
+        description=u'The identifier of the version.',
         required=True)
 
-    hidden = Bool(title=u'Hidden',
-        description=u'Whether the page is hidden from anonymous users '
-          u'or not.',
-        required=True,
-        default=True)
+    title = ASCIILine(title=u'Title',
+        description=u'The title of the page, which will appear in '
+          u'the title bar of the browser.',
+        required=True)
     
-    published_revision = ASCIILine(title=u'Published Revision',
-        description=u'The published revision of the page.',
-        required=False,
-        default='content_en',
-        readonly=True)
-    
-    content = Text(title=u'Page content',
+    content = Text(title=u'Content',
         description=u'The content of this page.',
         required=False)
+
+    published = Bool(title=u'Publish',
+        description=u'If you publish the change it will be shown '
+          u'to people by default.',
+        required=True,
+        default=True)
         
     editor = Text(title=u'Editor ID',
-        description=u'The Identifier of the last editor of this Page',
-        readonly=True)
-
-class IGSEditContentPage(IGSContentPage):
-    edited_version = ASCIILine(title=u'Edited Revision',
-        description=u'The revision of the page that is being edited.',
+        description=u'The identifier of the user who last edited '
+          u'this Page')
+        
+    parentVersion = ASCIILine(title=u'Parent Version ID',
+        description=u'The identifier of the page version that this '
+          u'version was based on.',
         required=False,
-        readonly=True)
-    
+        default='')
+
 class IGSContentPageHistory(Interface):
     """Marker interface for the history of a page
     """
-    
+
 class IGSContentManagerContextMenuContentProvider(IContentProvider):
     """The content provider for the context menu"""
     

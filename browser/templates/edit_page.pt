@@ -4,12 +4,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
   xmlns:tal="http://xml.zope.org/namespaces/tal"
   xmlns:metal="http://xml.zope.org/namespaces/metal"
-  metal:use-macro="context/@@groupserver_layout/page">
+  metal:use-macro="context/@@groupserver_site_home_layout/page">
   <head>
     <title metal:fill-slot="title">
-      <span tal:replace="string:${view/label}: ${view/siteInfo/get_name}">
-        Edit Page
-      </span>
+      Edit
+      <span tal:replace="string:${view/title}"/>:
+      <span tal:replace="string:${view/siteInfo/name}"/>
     </title>
     <tal:block metal:fill-slot="style">
      <link rel="stylesheet" 
@@ -52,45 +52,25 @@
 
         <!--p><a href="#" tal:attributes="href view/add_url">Add a page</a></p-->
         
-        <!-- Page History -->
+        <!-- Page History
         <div
-          tal:replace="structure provider:groupserver.ContentPageHistory"/>
+          tal:replace="structure provider:groupserver.ContentPageHistory"/-->
         
         <!-- Widgets -->
-        <tal:block repeat="widget view/widgets">
-          <div class="form-widget" id="widget-abc123" 
-            tal:define="req widget/required;
-              style python:req and 'required' or 'not-required'"
-            tal:attributes="id string:widget-${widget/name};
-              class string:form-widget ${style}">
-            <label for="abc123" title="The hint for the widget"
-              tal:condition="python:widget.type != 'checkbox'"
-              tal:attributes="for widget/name; title widget/hint"
-              tal:content="widget/label">
-              A label
-            </label>
-                        
-            <p class="error" tal:condition="widget/error"
-              tal:content="structure widget/error">
-              Error message
-            </p>
-            
-            <span id="abc123" 
-              tal:replace="structure widget">Widget</span>
-              
-            <label for="abc123" title="The hint for the widget"
-              class="checkboxLabel"
-              tal:condition="python:widget.type == 'checkbox'"
-              tal:attributes="for widget/name; title widget/hint"
-              tal:content="widget/label">
-              A label
-            </label>
-          </div><!--form-widget-->
+        <tal:block 
+          define="allWidgets python:[w for w in view.widgets]">
+          <span tal:define="w python:allWidgets[0]"
+            tal:replace="structure w/hidden">Widget</span>
+          <tal:block define="widgets python:allWidgets[1:4]">
+            <tal:block 
+              replace="structure provider:groupserver.FormWidgets"/>
+          </tal:block>
+          <tal:block 
+            repeat="widget python:allWidgets[4:]">
+            <span tal:replace="structure widget/hidden">Widget</span>
+          </tal:block>
         </tal:block>
 
-	<!-- We're overrinding the display of the form action because we need to be able to
-	trigger a different action client-side and using javascript to fire button click events
-	is a right royal pita -->
         <div class="buttons" tal:condition="view/availableActions">
           <tal:block repeat="action view/actions">
             <div class="formelementbutton">

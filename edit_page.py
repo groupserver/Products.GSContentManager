@@ -17,7 +17,7 @@ from zope.security.interfaces import Forbidden
 from zope.app.apidoc.interface import getFieldsInOrder
 from zope.schema import *
 from Products.XWFCore.XWFUtils import comma_comma_and, munge_date
-from interfaces import IGSContentPage, IGSEditContentPage
+from interfaces import *
 from page import GSContentPage
 from audit import PageEditAuditor, EDIT_CONTENT
 from page_history import GSPageHistory
@@ -38,43 +38,47 @@ class EditPageForm(PageForm):
     label = u'Edit Page'
     pageTemplateFileName = 'browser/templates/edit_page.pt'
     template = ZopeTwoPageTemplateFile(pageTemplateFileName)
+    form_fields = form.Fields(IGSContentPageVersion,
+        render_context=True, omit_readonly=False)
 
-    def __init__(self, context, request):
-        PageForm.__init__(self, context, request)
-        # Adapt the context object to a content page object
-        self.folder = context
-        self.hist = hist = GSPageHistory(context)
-        self.siteInfo = createObject('groupserver.SiteInfo', context)
-        self.interface = IGSEditContentPage
-
-        self.ev = ev = request.form.get('form.edited_version', 
-            hist.current.getId())
-        assert ev in hist, u'%s not in %s' % (ev, hist.keys())
-        #request.form['form.content'] = hist[ev]()
-
-        self.form_fields = form.Fields(self.interface, 
-            render_context=False, omit_readonly=True)
+    implements(IGSContentPageVersion)
+    
+    def __init__(self, folder, request):
+        PageForm.__init__(self, folder, request)
         self.form_fields['content'].custom_widget = wym_editor_widget
         
-        self.auditor = None
+        self.folder = folder
+        self.siteInfo = createObject('groupserver.SiteInfo', folder)
         
+        # Get the version of the page for editing
+        self.hist = GSPageHistory(folder)
+        ev = request.form.get('form.edited_version', 
+            self.hist.current.getId()) #--=mpj17=-- Check manual
+        assert ev in self.hist, \
+          u'%s not in %s' % (ev, self.hist.keys())
+        self.versionForChange = IGSContentPageVersion(self.hist[ev])
+        
+        self.auditor = None
+    
+    def setUpWidgets(self, ignore_request=False):
+        # There is a litle voodoo here. A PageForm normally wraps 
+        #   the instance that holds the data. In this case we want
+        #   the data to come from the version that is being 
+        #   edited. To do this we pass "versionForChange" to the
+        #   widgets.
+        self.adapters = {}
+        self.widgets = form.setUpWidgets(
+            self.form_fields, self.prefix, self.versionForChange,
+            self.request, form=self, adapters=self.adapters,
+            ignore_request=ignore_request)
+    
     @property
     def id(self):
         return self.folder.getId()
 
     @property
     def title(self):
-        return self.hist[self.ev].title_or_id()
-    
-    @property
-    def description(self):
-        return ''
-        # self.content_page.description
-
-    @property
-    def content(self):
-        c = self.hist[self.ev]()
-        return c
+        return self.versionForChange.title
 
     def action_failure(self, action, data, errors):
         if len(errors) == 1:
@@ -121,7 +125,7 @@ class EditPageForm(PageForm):
         newVersion.write(data['content'])
         newVersion.title = data['title']
         newVersion.manage_addProperty('editor', userInfo.id, 'ustring')
-        i, s = self.get_auditDatums(self.hist[self.ev], newVersion)
+        i, s = self.get_auditDatums(self.versionForChange, newVersion)
         self.auditor.info(EDIT_CONTENT, i, s)
         self.status = u'Changed %s' % data['title']
         assert self.status
@@ -132,7 +136,8 @@ class EditPageForm(PageForm):
         newId = self.new_version_id()
         manageAdd = self.folder.manage_addProduct['DataTemplates']
         manageAdd.manage_addXMLTemplate(newId, None)
-        retval = getattr(self.folder, newId)
+        xmlDataTemplate = getattr(self.folder, newId)
+        retval = IGSContentPageVersion(xmlDataTemplate)
         assert retval
         assert retval.getId() == newId
         assert retval.meta_type == 'XML Template'
