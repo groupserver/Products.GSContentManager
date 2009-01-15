@@ -37,9 +37,11 @@ class IGSContentPageVersion(Interface):
         required=True,
         default=True)
         
-    editor = Text(title=u'Editor ID',
+    editor = ASCIILine(title=u'Editor ID',
         description=u'The identifier of the user who last edited '
-          u'this Page')
+          u'this Page',
+        required=False,
+        default='')
         
     parentVersion = ASCIILine(title=u'Parent Version ID',
         description=u'The identifier of the page version that this '

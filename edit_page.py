@@ -85,27 +85,6 @@ class EditPageForm(PageForm):
             self.status = u'<p>There is an error:</p>'
         else:
             self.status = u'<p>There are errors:</p>'
-
-    #@form.action(label=u'Publish', failure='action_failure')
-    def handle_publish(self, action, data):
-        # --=mpj17=-- This needs a complete rewrite, and I need to
-        #   figure out how to attach it to the form.
-        copied_revision = False and self.request.get('copied_revision', None)
-        published_revision = False and    self.request.get('published_revision', 
-          None)
-
-        if published_revision:
-            # Handle publishing of a selected revision.
-            # --=mpj17=-- replace
-            # self.content_page.publish_revision(published_revision)
-            self.status = u'Revision %s has been made the '\
-              u'published revision.' % published_revision
-        elif copied_revision:
-            # Handle copying of a selected revision to current
-            # --=mpj17=-- replace
-            # self.content_page.copy_revision_to_current(copied_revision)
-            self.status = u'Revision %s has been copied to current '\
-              u'for editing.' % copied_revision
     
     @form.action(label=u'Change', failure='action_failure')
     def handle_set(self, action, data):
@@ -117,17 +96,29 @@ class EditPageForm(PageForm):
     def set_data(self, data):
         assert self.folder
         assert self.form_fields
-        userInfo = createObject('groupserver.LoggedInUser',self.context)
-        
-        # Save the new version in the history
-        newVersion = self.new_version()
+        assert self.versionForChange
+        assert self.auditor
+        assert data
 
-        newVersion.write(data['content'])
-        newVersion.title = data['title']
-        newVersion.manage_addProperty('editor', userInfo.id, 'ustring')
-        i, s = self.get_auditDatums(self.versionForChange, newVersion)
+        newVersion = self.new_version()
+        fields = self.form_fields.omit('id', 'parentVersion', 
+          'editor')
+        form.applyChanges(newVersion, fields, data)
+        newVersion.parentVersion = self.versionForChange.id
+        userInfo = createObject('groupserver.LoggedInUser', 
+          self.folder)
+        newVersion.editor = userInfo.id
+        
+        i, s = self.get_auditDatums(self.versionForChange, 
+          newVersion)
         self.auditor.info(EDIT_CONTENT, i, s)
-        self.status = u'Changed %s' % data['title']
+            
+            # Handle publishing here
+        if data['published']:
+            self.folder.published_version = newVersion.id
+        self.status = u'%s %s' % \
+          (data['published'] and 'Published' or 'Changed', 
+           data['title'])
         assert self.status
         assert type(self.status) == unicode
 
@@ -137,10 +128,10 @@ class EditPageForm(PageForm):
         manageAdd = self.folder.manage_addProduct['DataTemplates']
         manageAdd.manage_addXMLTemplate(newId, None)
         xmlDataTemplate = getattr(self.folder, newId)
+        assert xmlDataTemplate.getId() == newId
+        assert xmlDataTemplate.meta_type == 'XML Template'
         retval = IGSContentPageVersion(xmlDataTemplate)
         assert retval
-        assert retval.getId() == newId
-        assert retval.meta_type == 'XML Template'
         return retval
 
     def new_version_id(self):
@@ -154,9 +145,9 @@ class EditPageForm(PageForm):
 
     def get_auditDatums(self, oldVer, newVer):
         url = self.folder.absolute_url(0)
-        title = oldVer.title_or_id()
-        instanceDatum = u','.join((b64encode(url), b64encode(title),
-            b64encode(oldVer.getId()), b64encode(newVer.getId())))
+        instanceDatum = u','.join((b64encode(url), 
+            b64encode(oldVer.title), b64encode(oldVer.id), 
+            b64encode(newVer.title), b64encode(newVer.id)))
 
         textDiff = self.get_text_diff(oldVer, newVer)
         htmlDiff = self.get_html_diff(oldVer, newVer)
@@ -170,28 +161,22 @@ class EditPageForm(PageForm):
 
     def get_text_diff(self, oldVer, newVer):
         assert oldVer 
-        assert oldVer.meta_type == 'XML Template'
         assert newVer 
-        assert newVer.meta_type == 'XML Template'
         
-        ovt = oldVer().split('\n')
-        ovDesc = oldVer.getId()
-        nvt = newVer().split('\n')
-        nvDesc = newVer.getId()
-        d = difflib.unified_diff(ovt, nvt, ovDesc, nvDesc)
+        ovt = oldVer.content.split('\n')
+        nvt = newVer.content.split('\n')
+        d = difflib.unified_diff(ovt, nvt, oldVer.id, newVer.id)
         retval = u'\n'.join(d)
         assert type(retval) == unicode
         return retval
 
     def get_html_diff(self, oldVer, newVer):
         assert oldVer 
-        assert oldVer.meta_type == 'XML Template'
         assert newVer 
-        assert newVer.meta_type == 'XML Template'
         
-        ovt = oldVer().split('\n')
+        ovt = oldVer.content.split('\n')
         ovDesc = self.get_version_description(oldVer)
-        nvt = newVer().split('\n')
+        nvt = newVer.content.split('\n')
         nvDesc = self.get_version_description(newVer)
 
         htmlDiffer = difflib.HtmlDiff(tabsize=2)
@@ -201,7 +186,7 @@ class EditPageForm(PageForm):
         return retval
 
     def get_version_description(self, ver):
-        dt = ver.getId().split('_')[-1]
+        dt = ver.id.split('_')[-1]
         y, m, d, h, mi, s = [int(s) for s in 
                             (dt[0:4],  dt[4:6],  dt[6:8], 
                              dt[8:10], dt[10:12], dt[12:])]

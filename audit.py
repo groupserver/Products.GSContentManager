@@ -94,7 +94,6 @@ class EditPageAuditEventFactory(object):
         SIDE EFFECTS
             None
         """
-        print 'Here1'
         assert subsystem == SUBSYSTEM, 'Subsystems do not match'
         
         # The process of picking the class used to create an event
