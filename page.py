@@ -29,8 +29,7 @@ class GSContentPage(BrowserView):
         BrowserView.__init__(self, context, request)
         self.siteInfo = createObject('groupserver.SiteInfo',
           self.context)
-        self.pageHistory = hist = GSPageHistory(context)
-        self.interface = interface = getattr(interfaces, 'IGSContentPage')
+        self.pageHistory = GSPageHistory(context)
         self.__userInfo = None
     
     @property
@@ -53,13 +52,12 @@ class GSContentPage(BrowserView):
         If the user cannot view the page history then the user will
         be shown only the published version of the page.
         '''
-        pId = self.pageHistory.published.getId()
+        retval = self.pageHistory.published
         uo = self.userInfo.user
         canViewOld = uo.has_permission('View History', self.context)
         if canViewOld:
-            retval = self.request.form.get('form.version',  pId)
-        else:
-            retval = pId    
+            vid = self.request.form.get('form.version',  retval.id)
+            retval = self.pageHistory[vid]
         assert retval
         return retval
         
@@ -67,7 +65,7 @@ class GSContentPage(BrowserView):
     def content(self):
         '''Gets the content from the requested version of the page.
         '''
-        retval = self.pageHistory[self.version]()
+        retval = self.version.content
         assert type(retval) in (str, unicode)
         return retval
 
@@ -81,7 +79,7 @@ class GSContentPage(BrowserView):
     def title(self):
         '''Gets the title from the requested version of the page.
         '''
-        retval = self.pageHistory[self.version].title_or_id()
+        retval = self.version.title
         assert type(retval) in (str, unicode)
         return retval
 
@@ -98,8 +96,7 @@ class GSContentPage(BrowserView):
     def editor(self):
         '''Returns the name of the last editor.
         '''
-        assert hasattr(self.pageHistory[self.version], 'editor')
-        retval = self.pageHistory[self.version].editor
+        retval = self.version.editor
         assert type(retval) in (str, unicode)
         return retval
 

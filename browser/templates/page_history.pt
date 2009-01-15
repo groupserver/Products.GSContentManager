@@ -1,65 +1,35 @@
-<tal:block tal:define="view options/view; history view/history; published_revision view/published_revision" tal:condition="history">
-  <div id="history" class="history">
-    <p class="label">Page History</p>
-    <table class="history" tal:condition="history">
-      <thead>
-      	<tr>
-      		<th>&#160;</th>
-      		<th>Edited By</th>
-      		<th>Size</th>
-      		<th>Changed</th>
-    		</tr>
-  		</thead>
-  		<tbody>
-    		<tr tal:repeat="entry history"
-    		  tal:attributes="id entry/id">
-    			<td>
-    				<img border="0" 
-    				  tal:condition="entry/current"
-    					src="/++resource++gscontenteditor-20080125/images/published.png"
-    					title="This is the currently published revision"
-    					tal:attributes="title python:'This is the currently published revision (%s)' % entry['id']"/>
-    				<a href="javascript:void(0)"
-    					tal:condition="not:entry/current"
-    					tal:attributes="onclick python:'return publish_revision(\'%s\')' % entry['id']"
-    					class="publish">
-    					<img border="0" src="/++resource++gscontenteditor-20080125/images/publish.png" 
-    						tal:attributes="title python:'Click to publish this revision (%s)' % entry['id']"
-    					  />
-    				</a>
-    				<a href="javascript:void(0)"
-    					tal:condition="not:entry/current"
-    					tal:attributes="onclick python:'return copy_revision_to_current(\'%s\')' % entry['id']"
-    					class="publish">
-    					<img border="0" src="/++resource++gscontenteditor-20080125/images/edit-copy.png" 
-    						tal:attributes="title python:'Click to copy this revision (%s) to the current revision for editing' % entry['id']"
-    						/>
-    				</a>
-    			</td>
-    			<td class="fn">
-    			  <a href="#" tal:omit-tag="not:entry/editor/id"
-    			    tal:content="entry/editor/name"
-    			    tal:attributes="href entry/editor/url"/>
-    			</td>
-    			<td tal:content="entry/size"/>
-    			<td tal:content="entry/modified"/>
-  		</tr>
-		</tbody>
-	</table>
-	<!-- We assume this is a component on a form - probably should be a custom widget at some stage -->
-    <input type="hidden" name="published_revision" id="published_revision" class="published_revision_class"/>
-    <input type="hidden" name="copied_revision" id="copied_revision" class="copied_revision_class"/>
-  </div>
-  <script type="text/javascript">
-	function publish_revision(revision) { 
-		jQuery.noConflict();
-		jQuery('.published_revision_class').val(revision);
-		jQuery('.editpageclass').submit();
-	}
-	function copy_revision_to_current(revision) { 
-		jQuery.noConflict();
-		jQuery('.copied_revision_class').val(revision);
-		jQuery('.editpageclass').submit();
-	}
-  </script>
-</tal:block>
+<div tal:define="view options/view; 
+  history view/history; 
+  published_revision view/published_revision" 
+  tal:condition="history" class="history">
+  <p class="label">History</p>
+  <ul tal:condition="history">
+		<tal:block repeat="entry history">
+		  <li tal:define="p python:entry['published'] and 'published' or 'created';
+		    c python:entry['changing'] and 'changing' or 'not-changing';"
+  		  tal:attributes="id entry/id; class string:${p} ${c};">
+  		  <span tal:condition="entry/published">Published</span>
+  		  <span tal:condition="not:entry/published">Created</span>
+  		  by
+  		  <a href="#" class="fn"
+  		    tal:omit-tag="not:entry/editor/id"
+  		    tal:content="entry/editor/name"
+  		    tal:attributes="href entry/editor/url">Someone</a>
+  	    on
+  			<span class="date"
+  			  tal:content="entry/date">Today, Tomorrow, Timaru</span>
+  			(<span class="size" tal:content="entry/size">Way Big</span>)
+  			
+  			<span tal:condition="entry/changing">Changing</span>
+  			<a tal:condition="not:entry/changing" 
+  			  href="#"
+  			  tal:attributes="href string:edit_page.html?form.edited_version=${entry/id}">Change</a>
+  			
+  			<a href="#"
+  			  tal:attributes="href string:?form.version=${entry/id}">View&#8230;</a>
+  			
+      </li>
+    </tal:block>
+	</ul>
+</div>
+

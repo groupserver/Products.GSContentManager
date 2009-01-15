@@ -6,9 +6,11 @@
   xmlns:metal="http://xml.zope.org/namespaces/metal"
   metal:use-macro="context/@@groupserver_site_home_layout/page">
   <head>
-    <title metal:fill-slot="title">
-      Edit
-      <span tal:replace="string:${view/title}"/>:
+    <title metal:fill-slot="title"
+      tal:define="munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date;">
+      Change
+      <span tal:replace="string:${view/title}"/> 
+      (<span tal:replace="python:munge_date(view.context, view.versionForChange.creationDate)"/>):
       <span tal:replace="string:${view/siteInfo/name}"/>
     </title>
     <tal:block metal:fill-slot="style">
@@ -44,14 +46,19 @@
         Context Menu
       </span>
     </tal:block>
-    <tal:block metal:fill-slot="body">
+    <tal:block metal:fill-slot="body"
+      tal:define="munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date;">
       <form enctype="multipart/form-data"  method="post" action="."
         tal:attributes="action request/URL" id="editpage" class="editpageclass">
         
-        <h1 tal:content="view/label">Edit Page</h1>
+        <h1>Change
+          <cite tal:content="view/versionForChange/title">Page</cite>
+          (<span class="date" 
+            tal:content="python:munge_date(view.context, view.versionForChange.creationDate)"/>)</h1>
         
         <!-- Page History -->
         <tal:block
+          define="changedVersion view/versionForChange/id"
           replace="structure provider:groupserver.ContentPageHistory"/>
         
         <!-- Widgets -->

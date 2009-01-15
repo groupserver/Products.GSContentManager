@@ -1,6 +1,8 @@
 # coding=utf-8
 '''Implementation of the Edit Page form.
 '''
+from datetime import datetime
+import pytz
 from interfaces import IGSContentPageVersion
 from zope.interface import implements
 from zope.schema.fieldproperty import FieldProperty
@@ -95,6 +97,20 @@ class GSPageVersion(object):
               data, 'string')
     parentVersion = property(get_parentVersion, set_parentVersion,
       doc=__parentVersion_doc)
+
+    # Creation Date
+    __creationDate_doc = u'Creation Date'
+    def get_creationDate(self):
+        dt = self.id.split('_')[-1]
+        y, m, d, h, mi, s = [int(s) for s in 
+                            (dt[0:4],  dt[4:6],  dt[6:8], 
+                             dt[8:10], dt[10:12], dt[12:])]
+        retval = datetime(y,m,d,h,mi,s).replace(tzinfo=pytz.utc)
+        return retval
+    def set_creationDate(self, data):
+        raise NotImplementedError
+    creationDate = property(get_creationDate, set_creationDate, 
+      doc=__creationDate_doc)
 
 class GSPageVersionSize(object):
     implements(ISized)

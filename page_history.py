@@ -57,9 +57,9 @@ class GSContentPageHistoryContentProvider(object):
         """ Gets all history entries of the page """
         objects = []
         acl_users = self.context.site_root().acl_users
-        prev = self.pageHistory.get_published_revision()
-        
-        for iid, item in self.pageHistory.items():
+        items = self.pageHistory.get_versions()
+        items.reverse()
+        for item in items:
             authorInfo = createObject('groupserver.UserFromId', 
               self.context, item.editor)
             editor = {
@@ -67,13 +67,13 @@ class GSContentPageHistoryContentProvider(object):
               'id':    authorInfo.id,
               'url':   authorInfo.url
             }
-
-            #dt = munge_date(self.context, item.bobobase_modification_time())
             entry = {'editor': editor,
                       'size': ISized(item).sizeForDisplay(),
                       'modified': '',
-                      'id': iid,
-                      'current': iid == prev
+                      'id': item.id,
+                      'date': munge_date(self.context, item.creationDate),
+                      'published': item.published,
+                      'changing': self.changedVersion == item.id
                       }
             objects.append(entry)
             
@@ -238,15 +238,13 @@ class GSPageHistory(object):
         
 def version_sorter(a, b):
     assert a
-    assert hasattr(a, 'id')
+    assert hasattr(a, 'creationDate')
     assert b
-    assert hasattr(b, 'id')
-    aDt = a.id.split('_')[2]
-    bDt = b.id.split('_')[2]
+    assert hasattr(b, 'creationDate')
     retval = 1
-    if aDt < bDt:
+    if a.creationDate < b.creationDate:
         retval = -1
-    elif aDt == bDt:
+    elif a.creationDate == b.creationDate:
         retval = 0
     assert retval in (-1, 0, 1)
     return retval

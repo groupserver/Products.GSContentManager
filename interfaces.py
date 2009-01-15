@@ -48,6 +48,10 @@ class IGSContentPageVersion(Interface):
           u'version was based on.',
         required=False,
         default='')
+        
+    creationDate = Datetime(title=u'Creation Date',
+        description=u'The date that the version was created',
+        required=False)
 
 class IGSContentPageHistory(Interface):
     """Marker interface for the history of a page
@@ -62,9 +66,6 @@ class IGSContentManagerContextMenuContentProvider(IContentProvider):
       required=False,
       default=u"browser/templates/profileContextMenu.pt")
       
-    pages = Dict(title=u'Pages in the Profile',
-      description=u'The pages that are in the context of the profile.')
-
 class IGSContentPageHistoryContentProvider(IContentProvider):
     """The content provider for the page history """
     
@@ -73,6 +74,11 @@ class IGSContentPageHistoryContentProvider(IContentProvider):
         u'history',
       required=False,
       default=u"browser/templates/page_history.pt")
+
+    changedVersion = Text(title=u'Changed Version',
+      description=u'The identifier of the version that is being '\
+        u'changed',
+      required=True)
       
     history = Dict(title=u'History entries for the page',
       description=u'The hisotory entries for this page.')

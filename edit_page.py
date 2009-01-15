@@ -100,7 +100,7 @@ class EditPageForm(PageForm):
 
         newVersion = self.new_version()
         fields = self.form_fields.omit('id', 'parentVersion', 
-          'editor')
+          'editor', 'creationDate')
         form.applyChanges(newVersion, fields, data)
         newVersion.parentVersion = self.versionForChange.id
         userInfo = createObject('groupserver.LoggedInUser', 
@@ -111,9 +111,9 @@ class EditPageForm(PageForm):
           newVersion)
         self.auditor.info(EDIT_CONTENT, i, s)
             
-            # Handle publishing here
+        # Handle publishing here
         if data['published']:
-            self.folder.published_version = newVersion.id
+            self.folder.published_revision = newVersion.id
         self.status = u'%s %s' % \
           (data['published'] and 'Published' or 'Changed', 
            data['title'])
@@ -184,15 +184,11 @@ class EditPageForm(PageForm):
         return retval
 
     def get_version_description(self, ver):
-        dt = ver.id.split('_')[-1]
-        y, m, d, h, mi, s = [int(s) for s in 
-                            (dt[0:4],  dt[4:6],  dt[6:8], 
-                             dt[8:10], dt[10:12], dt[12:])]
-        vDate = datetime(y,m,d,h,mi,s).replace(tzinfo=pytz.utc)
         vUI = createObject('groupserver.UserFromId', 
                             self.folder, ver.editor)
-        retval = u'%s (%s)' % (userInfo_to_anchor(vUI),
-                               munge_date(self.folder, vDate,'%Y %b %d %H:%M:%S'))
+        dt = munge_date(self.folder, 
+          ver.creationDate, '%Y %b %d %H:%M:%S')
+        retval = u'%s (%s)' % (userInfo_to_anchor(vUI),dt)
         assert retval
         assert type(retval) == unicode
         return retval 
