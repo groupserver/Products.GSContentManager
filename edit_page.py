@@ -51,10 +51,12 @@ class EditPageForm(PageForm):
         self.siteInfo = createObject('groupserver.SiteInfo', folder)
         
         # Get the version of the page for editing; default to HEAD
-        hist = GSPageHistory(folder)
-        ev = request.form.get('form.edited_version', hist.current.id)
-        assert ev in hist, u'%s not in %s' % (ev, hist.keys())
-        self.versionForChange = hist[ev]
+        self.hist = GSPageHistory(folder)
+        ev = request.form.get('form.edited_version', 
+          self.hist.current.id)
+        assert ev in self.hist, \
+          u'%s not in %s' % (ev, self.hist.keys())
+        self.versionForChange = self.hist[ev]
         
         self.auditor = None
     
@@ -89,7 +91,9 @@ class EditPageForm(PageForm):
         '''Change the data that is being 
         '''
         self.auditor = PageEditAuditor(self.context)
-        return self.set_data(data)
+        retval = self.set_data(data)
+        self.versionForChange = self.hist[self.hist.current.id]
+        return retval
 
     def set_data(self, data):
         assert self.folder
@@ -160,22 +164,37 @@ class EditPageForm(PageForm):
     def get_text_diff(self, oldVer, newVer):
         assert oldVer 
         assert newVer 
-        
-        ovt = oldVer.content.split('\n')
-        nvt = newVer.content.split('\n')
+        # Note we have to convert the text to Unicode, from UTF-8
+        ovt = oldVer.content.decode('utf-8').split('\n')
+        nvt = newVer.content.decode('utf-8').split('\n')
         d = difflib.unified_diff(ovt, nvt, oldVer.id, newVer.id)
-        retval = u'\n'.join(d)
-        assert type(retval) == unicode
+        retval = u'\n'.join(d).encode('utf-8')
+        # And convert it back to utf-8, so we can Base64 encode it.
+        assert type(retval) == str
         return retval
 
     def get_html_diff(self, oldVer, newVer):
+        # --=mpj17=--
+        # The sequence of characters from the browser is in UTF-8.
+        #   (If it is not I will leap from this hell-hole of
+        #   electronics and punch you on the nose.) This has to be
+        #   decoded from UTF-8 (a sequence of bytes) into a Unicode 
+        #   string (a great and wondrous thing). This string must
+        #   then be encoded into ASCII (a sequence of bytes), but
+        #   this time replacing the weird characters with XML 
+        #   character entities.
         assert oldVer 
         assert newVer 
-        
-        ovt = oldVer.content.split('\n')
-        ovDesc = self.get_version_description(oldVer)
-        nvt = newVer.content.split('\n')
-        nvDesc = self.get_version_description(newVer)
+
+        ovt = [t.encode('ascii', 'xmlcharrefreplace') 
+               for t in oldVer.content.decode('utf-8').split('\n')]
+        d = self.get_version_description(oldVer)
+        ovDesc = d.encode('ascii', 'xmlcharrefreplace') 
+               
+        nvt = [t.encode('ascii', 'xmlcharrefreplace')
+               for t in newVer.content.decode('utf-8').split('\n')]
+        d = self.get_version_description(newVer)
+        nvDesc = d.encode('ascii', 'xmlcharrefreplace')
 
         htmlDiffer = difflib.HtmlDiff(tabsize=2)
         retval = htmlDiffer.make_table(ovt, nvt, ovDesc, nvDesc)

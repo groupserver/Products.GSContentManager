@@ -46,7 +46,13 @@ class GSPageVersion(object):
     # Content       
     __content_doc = u'The contents of the page'
     def get_content(self):
-        retval = self.xmlDataTemplate()
+        # Zope Five cannot handle Unicode everywhere yet. So we 
+        #   ensure that we hand back ASCII, with XML character
+        #   references replacing the Unicode characters.
+        utext = self.xmlDataTemplate().decode('utf-8')
+        assert type(utext) == unicode
+        retval = utext.encode('ascii', 'xmlcharrefreplace')
+        assert type(retval) == str
         return retval
     def set_content(self, data):
         IGSContentPageVersion['content'].bind(self).validate(data)
@@ -127,11 +133,11 @@ class GSPageVersionSize(object):
     def sizeForDisplay(self):
         size = self.sizeForSorting()[1]
         if size < 5000:
-            retval = u'tiny'
+            retval = u'%.2fKB' % (size/1024.0)
         elif size < 1000000:
-            retval = u'%sKB' % (size/1024)
+            retval = u'%.1fKB' % (size/1024.0)
         else:
-            retval = u'%sMB' % (size/(1024*1024))
+            retval = u'%.2fMB' % (size/(1024*1024.0))
 
         assert type(retval) == unicode
         return retval
