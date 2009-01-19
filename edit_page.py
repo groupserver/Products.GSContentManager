@@ -70,20 +70,24 @@ class EditPageForm(PageForm):
         data = {
           'id': self.versionForChange.id,
           'title': self.versionForChange.title,
-          'published': False, #--=mpj17=--
+          'published': self.defaultPublishedOption, #--=mpj17=--
           'editor': self.versionForChange.editor,
           'creationDate': self.versionForChange.creationDate,
         }
         self.widgets = form.setUpWidgets(
             self.form_fields, self.prefix, self.versionForChange,
             self.request, form=self, data=data,
-            #adapters=self.adapters,
             ignore_request=ignore_request)
-    
     @property
-    def showPublishOption(self):
-        retval = not(self.hist.published.id == \
-          self.versionForChange.id)
+    def defaultPublishedOption(self):
+        # The published option should be
+        #  * OFF if the currently version is off
+        #  * OFF if the edited version is not the published version
+        #  * ON if the edited version is ON
+        retval = ((self.hist.current.published and   
+            (self.hist.current.id == self.versionForChange.id))
+            or
+            (self.hist.published.id == self.versionForChange.id))
         assert type(retval) == bool
         return retval
     

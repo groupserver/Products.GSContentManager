@@ -66,18 +66,8 @@
           define="allWidgets python:[w for w in view.widgets]">
           <span tal:define="w python:allWidgets[0]"
             tal:replace="structure w/hidden">Widget</span>
-          <tal:block define="widgets python:allWidgets[1:3]">
+          <tal:block define="widgets python:allWidgets[1:4]">
             <tal:block 
-              replace="structure provider:groupserver.FormWidgets"/>
-          </tal:block>
-          <tal:block define="w python:allWidgets[3]">
-            <tal:block condition="not:view/showPublishOption">
-              <span tal:replace="structure w/hidden">Widget</span>
-              <label class="checkboxLabel">This is the currently 
-                published version</label>
-            </tal:block>
-            <tal:block tal:condition="view/showPublishOption"
-              define="widgets python:[w]"
               replace="structure provider:groupserver.FormWidgets"/>
           </tal:block>
           <tal:block 
