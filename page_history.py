@@ -63,9 +63,10 @@ class GSContentPageHistoryContentProvider(object):
             authorInfo = createObject('groupserver.UserFromId', 
               self.context, item.editor)
             editor = {
-              'name' : authorInfo.name,
-              'id':    authorInfo.id,
-              'url':   authorInfo.url
+              'name' :      authorInfo.name,
+              'id':         authorInfo.id,
+              'url':        authorInfo.url,
+              'anonymous':  authorInfo.anonymous
             }
             entry = {'editor': editor,
                       'size': ISized(item).sizeForDisplay(),

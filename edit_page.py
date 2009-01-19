@@ -226,7 +226,10 @@ class EditPageForm(PageForm):
                             self.folder, ver.editor)
         dt = munge_date(self.folder, 
           ver.creationDate, '%Y %b %d %H:%M:%S')
-        retval = u'%s (%s)' % (userInfo_to_anchor(vUI),dt)
+        if vUI.anonymous:
+          retval = u'an %s (%s)' % (vUI.name.lower(), dt)
+        else:
+          retval = u'%s (%s)' % (userInfo_to_anchor(vUI), dt)
         assert retval
         assert type(retval) == unicode
         return retval 
