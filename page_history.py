@@ -108,10 +108,9 @@ class GSPageHistory(object):
 
         assert hasattr(self.context, pr), 'No %s in %s (%s)' %\
              (pr, self.context, self.context.absolute_url(0))
-        retval = getattr(self.context, pr)
+        retval = IGSContentPageVersion(getattr(self.context, pr))
 
         assert retval
-        assert retval.meta_type == 'XML Template' 
         return retval
 
     @property

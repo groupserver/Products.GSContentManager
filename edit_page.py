@@ -67,10 +67,25 @@ class EditPageForm(PageForm):
         #   edited. To do this we pass "versionForChange" to the
         #   widgets.
         self.adapters = {}
+        data = {
+          'id': self.versionForChange.id,
+          'title': self.versionForChange.title,
+          'published': False, #--=mpj17=--
+          'editor': self.versionForChange.editor,
+          'creationDate': self.versionForChange.creationDate,
+        }
         self.widgets = form.setUpWidgets(
             self.form_fields, self.prefix, self.versionForChange,
-            self.request, form=self, adapters=self.adapters,
+            self.request, form=self, data=data,
+            #adapters=self.adapters,
             ignore_request=ignore_request)
+    
+    @property
+    def showPublishOption(self):
+        retval = not(self.hist.published.id == \
+          self.versionForChange.id)
+        assert type(retval) == bool
+        return retval
     
     @property
     def id(self):
