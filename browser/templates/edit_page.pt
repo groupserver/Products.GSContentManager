@@ -21,6 +21,9 @@
         .history td, .history th {
           padding: 0.69em 1.39em;
         }
+        .wym_skin_default .wym_iframe iframe {
+          height: 60em;
+        }
     </style>
     </tal:block>
   </head>
