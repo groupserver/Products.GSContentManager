@@ -1,8 +1,7 @@
 <div tal:define="view options/view; 
-  history view/history; 
-  published_revision view/published_revision" 
+  history view/history;
+  showChange view/showChange"
   tal:condition="history" class="history">
-  <p class="label">History</p>
   <ul tal:condition="history">
 		<tal:block repeat="entry history">
 		  <li tal:define="p python:entry['published'] and 'published' or 'created';
@@ -23,15 +22,14 @@
   			<span class="date"
   			  tal:content="entry/date">Today, Tomorrow, Timaru</span>
   			(<span class="size" tal:content="entry/size">Way Big</span>)
-  			
-  			<span tal:condition="entry/changing">Changing</span>
-  			<a tal:condition="not:entry/changing" 
-  			  href="#"
-  			  tal:attributes="href string:edit_page.html?form.edited_version=${entry/id}">Change</a>
-  			
+  			<tal:block condition="showChange">
+    			<span tal:condition="entry/changing">Changing</span>
+    			<a tal:condition="not:entry/changing" 
+    			  href="#"
+    			  tal:attributes="href string:edit_page.html?form.edited_version=${entry/id}">Change</a>
+  			</tal:block>
   			<a href="#"
   			  tal:attributes="href string:?form.version=${entry/id}">View&#8230;</a>
-  			
       </li>
     </tal:block>
 	</ul>

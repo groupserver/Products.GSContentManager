@@ -78,8 +78,13 @@ class IGSContentPageHistoryContentProvider(IContentProvider):
     changedVersion = Text(title=u'Changed Version',
       description=u'The identifier of the version that is being '\
         u'changed',
-      required=True)
+      required=False)
       
     history = Dict(title=u'History entries for the page',
       description=u'The hisotory entries for this page.')
+
+    showChange = Bool(title=u'Show Changed',
+        description=u'True if the "change" links are shown in the '\
+          u'history.',
+         default=False)
 

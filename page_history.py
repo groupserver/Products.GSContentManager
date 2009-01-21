@@ -41,18 +41,14 @@ class GSContentPageHistoryContentProvider(object):
 
         pageTemplate = PageTemplateFile(self.pageTemplateFileName)
         return pageTemplate(view=self)
+    #########################################
+    # Non standard methods below this point #
+    #########################################
 
     @property
     def history(self):
         return self.get_history()
         
-    @property
-    def published_revision(self):
-        return self.pageHistory.get_published_revision()
-        
-    #########################################
-    # Non standard methods below this point #
-    #########################################
     def get_history (self):
         """ Gets all history entries of the page """
         objects = []

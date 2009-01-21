@@ -60,8 +60,10 @@
             tal:content="python:munge_date(view.context, view.versionForChange.creationDate)"/>)</h1>
         
         <!-- Page History -->
+        <p class="label">History</p>
         <tal:block
-          define="changedVersion view/versionForChange/id"
+          define="changedVersion view/versionForChange/id;
+            showChange python:True;"
           replace="structure provider:groupserver.ContentPageHistory"/>
         
         <!-- Widgets -->

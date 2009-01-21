@@ -68,6 +68,14 @@
     name="edit_page.html"
     class=".edit_page.EditPageForm"
     permission="zope2.ManageProperties" />
+    
+   <browser:page 
+    for=".interfaces.IGSContentManagerFolderMarker"
+    name="history.html"
+    class=".historyview.GSPHistoryView"
+    template="browser/templates/historyview.pt"
+    permission="zope2.ViewHistory" />
+
 
   <!--browser:page 
     for="Products.GSContent.interfaces.IGSContentFolder"
@@ -92,4 +100,4 @@
     name="groupserver.PageEditor"
     permission="zope.Public" />
 </configure>
-  
+
