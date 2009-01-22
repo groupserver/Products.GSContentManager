@@ -79,14 +79,23 @@ class IGSContentPageHistoryContentProvider(IContentProvider):
       description=u'The identifier of the version that is being '\
         u'changed',
       required=False)
-      
-    history = Dict(title=u'History entries for the page',
-      description=u'The hisotory entries for this page.')
 
     showChange = Bool(title=u'Show Changed',
         description=u'True if the "change" links are shown in the '\
           u'history.',
          default=False)
+
+    startId = ASCIILine(title=u'Start Identifier',
+      description=u'The identifier for the page at the start of '\
+        u'the history range.',
+        required=False,
+        default=None)
+        
+    endId = ASCIILine(title=u'End Identifier',
+      description=u'The identifier for the page at the end of '\
+        u'the history range.',
+        required=False,
+        default=None)
 
 class IGSContentManagerTabMenuContentProvider(IContentProvider):
     """The content provider for the tab menu"""

@@ -60,7 +60,7 @@
         </tal:block>
     
         <h1>Change
-          <cite tal:content="view/versionForChange/title">Page</cite>
+          <cite tal:content="view/title">Page</cite>
           (<span class="date" 
             tal:content="python:munge_date(view.context, view.versionForChange.creationDate)"/>)</h1>
         
@@ -68,8 +68,16 @@
         <p class="label">History</p>
         <tal:block
           define="changedVersion view/versionForChange/id;
-            showChange python:True;"
+            showChange python:True;
+            startId view/earliestVersionInHistory;"
           replace="structure provider:groupserver.ContentPageHistory"/>
+        <p tal:define="l python:len(view.hist)">
+          <span class="val" tal:content="l">1</span>
+          version<tal:block condition="python:l&gt;1">s</tal:block>
+          in total.
+          <a tal:attributes="title string:Historty of ${view/title}"
+            href="history.html">View more&#8230;</a>
+        </p>
         
         <!-- Widgets -->
         <tal:block 

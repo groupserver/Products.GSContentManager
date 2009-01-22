@@ -78,6 +78,7 @@ class EditPageForm(PageForm):
             self.form_fields, self.prefix, self.versionForChange,
             self.request, form=self, data=data,
             ignore_request=ignore_request)
+            
     @property
     def defaultPublishedOption(self):
         # The published option should be
@@ -89,6 +90,19 @@ class EditPageForm(PageForm):
             or
             (self.hist.published.id == self.versionForChange.id))
         assert type(retval) == bool
+        return retval
+    
+    @property
+    def earliestVersionInHistory(self):
+        vfcCd = self.versionForChange.creationDate
+        pCd = self.hist.published.creationDate
+        if vfcCd < pCd:
+            retval = self.versionForChange.id
+        else:
+            retval = self.hist.published.id
+            
+        assert retval
+        assert retval in self.hist
         return retval
     
     @property

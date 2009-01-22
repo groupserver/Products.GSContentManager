@@ -29,12 +29,13 @@ class GSContentPageHistoryContentProvider(object):
 
         self.context = context
         self.request = request
-        
-        self.pageHistory = GSPageHistory(context)
+        self.pageHistory = None
         
     def update(self):
         self.__updated = True
-
+        self.pageHistory = GSPageHistory(self.context,
+          self.startId, self.endId)
+        
     def render(self):
         if not self.__updated:
             raise interfaces.UpdateNotCalled
@@ -78,12 +79,14 @@ class GSContentPageHistoryContentProvider(object):
 
 class GSPageHistory(object):
     
-    HISTORY_TEMPLATE = 'content_en_%s'
+    histRE = re.compile('content_en_[0-9]{14}')
     
-    def __init__(self, context):
+    def __init__(self, context, startId=None, endId=None):
         self.context = context
-        self.histRE = re.compile('content_en_[0-9]{14}')
+        
         self.__keys = None
+        self.__startId = startId
+        self.__endId = endId
         
     def get_published_revision (self):
         """ Get the currently published revision of the content
@@ -131,6 +134,13 @@ class GSPageHistory(object):
         retval = [IGSContentPageVersion(t) for t in templates 
                   if self.histRE.match(t.getId())]
         retval.sort(version_sorter)
+        ids = [v.id for v in retval]
+        
+        if ((self.__startId != None) and (self.__startId in ids)):
+            retval = retval[ids.index(self.__startId):]
+        if ((self.__endId != None) and (self.__endId in ids)):
+            retval = retval[:ids.index(self.__endId)+1]
+         
         assert type(retval) == list, u'Not a list'
         assert len(retval) > 0, u'List is empty'
         return retval
