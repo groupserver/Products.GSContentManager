@@ -16,6 +16,15 @@
       tal:content="view/title">Page o' Stuff</h1>
     <tal:block metal:fill-slot="body">
       <div tal:replace="structure view/content">Stuff</div>
+
+    </tal:block>
+    <tal:block metal:fill-slot="javascript">
+      <tal:block
+        define="jsFile string:javascript.xml"
+        condition="python:hasattr(context.aq_parent.aq_explicit, jsFile)"
+        replace="structure python:getattr(context.aq_parent, jsFile)(method='html')">
+        JavaScript
+      </tal:block>
     </tal:block>
   </body>
 </html>
