@@ -1,0 +1,19 @@
+<tal:block tal:define="view options/view;">
+  <div id="tabmenu" 
+    tal:condition="view/show">
+    <ul style="line-height:2.08em;margin: 0px;padding: 0px;">
+      <!--tal:block repeat="page view/pages"-->
+      <tal:block repeat="page view/pages">
+        <li style="display: block; float: left; line-height: 2.08em; list-style-type: none;">
+          <a href="#" tal:attributes="href page/action; 
+              class python:view.page_class(page);
+              title page/description"
+              style="padding: 0.3em 1.39em;"
+            tal:content="page/title">Page Name</a>
+        </li>
+      </tal:block>
+    </ul>
+  </div><!--tabmenu-->
+  <div style="clear:left;"/>
+</tal:block>
+

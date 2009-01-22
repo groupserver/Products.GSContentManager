@@ -53,7 +53,12 @@
       tal:define="munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date;">
       <form enctype="multipart/form-data"  method="post" action="."
         tal:attributes="action request/URL" id="editpage" class="editpageclass">
-        
+
+        <tal:block 
+          replace="structure provider:groupserver.ContentManagerTabMenu">
+          Tab Menu
+        </tal:block>
+    
         <h1>Change
           <cite tal:content="view/versionForChange/title">Page</cite>
           (<span class="date" 

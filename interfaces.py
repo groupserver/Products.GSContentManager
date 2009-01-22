@@ -88,3 +88,15 @@ class IGSContentPageHistoryContentProvider(IContentProvider):
           u'history.',
          default=False)
 
+class IGSContentManagerTabMenuContentProvider(IContentProvider):
+    """The content provider for the tab menu"""
+    
+    pageTemplateFileName = Text(title=u"Page Template File Name",
+      description=u'The name of the ZPT file that is used to render '\
+        u'the menu.',
+      required=False,
+      default=u"browser/templates/tabmenu.pt")
+      
+    pages = Dict(title=u'Pages in the Profile',
+      description=u'The pages that are in the context of the profile.')
+
