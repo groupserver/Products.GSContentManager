@@ -1,0 +1,24 @@
+<p tal:define="view options/view; 
+  privacy view/privacy;
+  vR privacy/viewRoles;
+  hR privacy/historyRoles">
+
+  <strong tal:condition="python:('Anonymous' in vR)">Anyone</strong> 
+  <span tal:condition="python:not('Anonymous' in vR)">Only 
+    <span 
+      tal:replace="python:view.rolesToDescriptions(vR)">the 
+      massive</span>
+  </span>
+  can see the <em>published changes</em> you make  to the 
+  page<span 
+    tal:condition="python:('Anonymous' in hR)">, and 
+    they</span><span
+    tal:condition="python:not('Anonymous' in hR)">. Only
+    <span 
+      tal:replace="python:view.rolesToDescriptions(hR)">the 
+      massive</span>
+  </span>
+  can see <em>past versions</em> of the page and 
+  <em>unpublished changes.</em>
+</p>
+

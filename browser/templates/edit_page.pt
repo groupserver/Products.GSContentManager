@@ -94,6 +94,12 @@
           </tal:block>
         </tal:block>
 
+        <span 
+          tal:replace="structure provider:groupserver.ContentPagePrivacy">
+          Privacy Statement
+        </span>
+
+
         <div class="buttons" tal:condition="view/availableActions">
           <tal:block repeat="action view/actions">
             <div class="formelementbutton">

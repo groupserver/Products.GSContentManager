@@ -53,6 +53,10 @@
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
 
   <interface 
+    interface=".interfaces.IGSContentPagePrivacyContentProvider"
+    type="zope.contentprovider.interfaces.ITALNamespaceData"/>
+
+  <interface 
     interface=".interfaces.IGSContentManagerFolderMarker"
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
 
@@ -100,14 +104,19 @@
     name="groupserver.PageEditor"
     permission="zope.Public" />
     
+  <adapter
+    factory=".tabmenu.GSContentManagerTabMenuContentProvider"
+    provides="zope.contentprovider.interfaces.IContentProvider"
+    name="groupserver.ContentManagerTabMenu"/>
+
   <!-- Tab Menu -->
    <interface 
     interface=".interfaces.IGSContentManagerTabMenuContentProvider"
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
   <adapter
-    factory=".tabmenu.GSContentManagerTabMenuContentProvider"
-    provides="zope.contentprovider.interfaces.IContentProvider"
-    name="groupserver.ContentManagerTabMenu"/>
+    factory=".privacy.GSContentPagePrivacyContentProvider"
+    provides=".interfaces.IGSContentPagePrivacyContentProvider"
+    name="groupserver.ContentPagePrivacy"/>
   <browser:menu 
     id="page_change_menu"
     title="Page Change" />

@@ -1,3 +1,4 @@
+# coding=utf-8
 import os, zope
 from interfaces import *
 from zope.interface import implements
