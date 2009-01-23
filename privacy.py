@@ -70,14 +70,14 @@ class GSPagePrivacy(object):
     @property
     def changeRoles(self):
         retval = rolesForPermissionOn('Manage properties', self.context)
-        assert type(retval) == tuple\
+        assert type(retval) == tuple,\
           'retval is a %s, not a tuple: %s' % (type(retval), retval) 
         return retval
         
     @property
     def historyRoles(self):
         retval = rolesForPermissionOn('View History', self.context)
-        assert type(retval) == tuple\
+        assert type(retval) == tuple,\
           'retval is a %s, not a tuple: %s' % (type(retval), retval) 
         return retval
         
