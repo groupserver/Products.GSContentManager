@@ -63,22 +63,22 @@ class GSPagePrivacy(object):
     @property
     def viewRoles(self):
         retval = rolesForPermissionOn('View', self.context)
-        assert type(retval) == tuple,\
-          'retval is a %s, not a tuple: %s' % (type(retval), retval) 
+        assert type(retval) in (tuple, list),\
+          'retval is a %s, not a tuple or list: %s' % (type(retval), retval) 
         return retval
 
     @property
     def changeRoles(self):
         retval = rolesForPermissionOn('Manage properties', self.context)
-        assert type(retval) == tuple,\
-          'retval is a %s, not a tuple: %s' % (type(retval), retval) 
+        assert type(retval) in (tuple, list),\
+          'retval is a %s, not a tuple or list: %s' % (type(retval), retval) 
         return retval
         
     @property
     def historyRoles(self):
         retval = rolesForPermissionOn('View History', self.context)
-        assert type(retval) == tuple,\
-          'retval is a %s, not a tuple: %s' % (type(retval), retval) 
+        assert type(retval) in (tuple, list),\
+          'retval is a %s, not a tuple or list: %s' % (type(retval), retval) 
         return retval
         
 zope.component.provideAdapter(GSContentPagePrivacyContentProvider,
