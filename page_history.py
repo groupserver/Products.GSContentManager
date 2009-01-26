@@ -55,6 +55,7 @@ class GSContentPageHistoryContentProvider(object):
         """ Gets all history entries of the page """
         objects = []
         acl_users = self.context.site_root().acl_users
+        publishedItem = None
         items = self.pageHistory.get_versions()
         items.reverse()
         for item in items:
@@ -66,15 +67,21 @@ class GSContentPageHistoryContentProvider(object):
               'url':        authorInfo.url,
               'anonymous':  authorInfo.anonymous
             }
+            d = munge_date(self.context, item.creationDate)
             entry = {'editor': editor,
                       'size': ISized(item).sizeForDisplay(),
                       'modified': '',
                       'id': item.id,
-                      'date': munge_date(self.context, item.creationDate),
+                      'date': d,
                       'published': item.published,
-                      'changing': self.changedVersion == item.id
+                      'changing': self.changedVersion == item.id,
+                      'children': [],
                       }
-            objects.append(entry)
+            if ((not item.published) and (publishedItem != None)):
+                publishedItem['children'].append(entry)
+            else:
+                objects.append(entry)
+                publishedItem = entry
             
         return objects
 
