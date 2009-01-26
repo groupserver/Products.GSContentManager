@@ -124,7 +124,7 @@
     menu="page_change_menu"
     for=".interfaces.IGSContentManagerFolderMarker">
     <browser:menuItem 
-      action=""
+      action="index.html"
       title="View"
       description="View the page"
       order="1"

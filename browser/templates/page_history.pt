@@ -11,8 +11,8 @@
 	    i python:ci and 'disclosureWidget' or ''"
 		  tal:attributes="id entry/id; 
 		    class string:${i} ${p} ${c};">
-	    <p style="display:inline;">
-  	    <a class="disclosureButton" style="display:inline;"
+	    <p>
+  	    <a class="disclosureButton" 
   	      tal:omit-tag="not:entry/children">
     		  <span tal:condition="entry/published">Published</span>
     		  <span tal:condition="not:entry/published">Created</span>
@@ -48,8 +48,7 @@
     		      title string:Profile of ${entry/editor/name}">Profile</a>
         </span><!--links-->
       </p>
-		  <ul tal:condition="entry/children" 
-		    class="disclosureShowHide" style="display:none;">
+		  <ul tal:condition="entry/children" class="disclosureShowHide">
 		    <tal:block repeat="child entry/children">
     		  <li tal:define="ch child/changing;
       		    c python:ch and 'changing' or 'not-changing';"

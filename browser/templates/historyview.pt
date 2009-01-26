@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
   xmlns:tal="http://xml.zope.org/namespaces/tal"
   xmlns:metal="http://xml.zope.org/namespaces/metal"
-  metal:use-macro="context/@@groupserver_site_home_layout/page">
+  metal:use-macro="context/@@groupserver_layout/page">
   <head>
     
     <!--Todo: add the division name.-->
@@ -23,6 +23,15 @@
       </tal:block>
       <h1>History of 
         <span tal:content="view/title">Stuff</span></h1>
+      <p>
+        <a href="javascript:GSDisclosureButton.hide_all()"
+          title="Show only the published versions">Hide 
+          unpublished</a>
+        |
+        <a href="javascript:GSDisclosureButton.show_all()"
+          title="Show all unpublished versions">Show 
+          unpublished</a>
+      </p>
       <div tal:define="history view/hist; showChange view/showChange"
         tal:replace="structure provider:groupserver.ContentPageHistory"/>
     </tal:block>
