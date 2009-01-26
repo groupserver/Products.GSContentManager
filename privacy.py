@@ -47,7 +47,7 @@ class GSContentPagePrivacyContentProvider(object):
           'admins':  'administrators',
         }
         k = roleMap.keys()
-        rs = [r for r in roles if (r in k)]
+        rs = [r.strip() for r in roles if (r.strip() in k)]
         if (('GroupAdmin' in roles) or ('DivisionAdmin' in roles)):
             rs.append('admins')
 
