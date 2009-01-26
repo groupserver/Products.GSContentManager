@@ -21,14 +21,6 @@
         replace="structure provider:groupserver.ContentManagerTabMenu">
         Tab Menu
       </tal:block>
-                <div class="disclosureWidget">
-            <p>
-              <a class="disclosureButton">Foo</a>
-            </p>
-            <div class="disclosureShowHide" style="display: none;">
-              Foo bar wibble blarg&#8230;
-            </div>
-          </div>
       <h1>History of 
         <span tal:content="view/title">Stuff</span></h1>
       <div tal:define="history view/hist; showChange view/showChange"

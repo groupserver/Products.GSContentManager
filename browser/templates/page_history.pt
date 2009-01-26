@@ -12,7 +12,7 @@
 		  tal:attributes="id entry/id; 
 		    class string:${i} ${p} ${c};">
 	    <p style="display:inline;">
-  	    <a class="disclosureButton"
+  	    <a class="disclosureButton" style="display:inline;"
   	      tal:omit-tag="not:entry/children">
     		  <span tal:condition="entry/published">Published</span>
     		  <span tal:condition="not:entry/published">Created</span>
