@@ -46,7 +46,7 @@
         </span><!--links-->
       </p>
 		  <ul tal:condition="entry/children" 
-		    class="disclosureShowHide" style="display:block;">
+		    class="disclosureShowHide" style="display:none;">
 		    <tal:block repeat="child entry/children">
     		  <li tal:define="ch child/changing;
       		    c python:ch and 'changing' or 'not-changing';"
