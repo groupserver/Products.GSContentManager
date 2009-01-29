@@ -31,6 +31,10 @@
     for=".interfaces.IGSDataTemplate"
     provides=".interfaces.IGSContentPageVersion" />
   <adapter 
+    factory=".pageversion.GSPageVersion"
+    for="zope.pagetemplate.interfaces.IPageTemplate"
+    provides=".interfaces.IGSContentPageVersion" />
+  <adapter 
     factory=".pageversion.GSPageVersionSize"
     for=".interfaces.IGSContentPageVersion"
     provides="zope.size.interfaces.ISized" />

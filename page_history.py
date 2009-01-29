@@ -138,7 +138,8 @@ class GSPageHistory(object):
         SIDE EFFECTS
             None
         """
-        templates = self.context.objectValues('XML Template')
+        objectValueTypes = ('XML Template', 'Page Template')
+        templates = self.context.objectValues(objectValueTypes)
         retval = [IGSContentPageVersion(t) for t in templates 
                   if self.histRE.match(t.getId())]
         retval.sort(version_sorter)

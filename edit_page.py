@@ -160,12 +160,17 @@ class EditPageForm(PageForm):
     def new_version(self):
         '''Create a new (blank) version of the document'''
         newId = self.new_version_id()
-        manageAdd = self.folder.manage_addProduct['DataTemplates']
-        manageAdd.manage_addXMLTemplate(newId, None)
-        xmlDataTemplate = getattr(self.folder, newId)
-        assert xmlDataTemplate.getId() == newId
-        assert xmlDataTemplate.meta_type == 'XML Template'
-        retval = IGSContentPageVersion(xmlDataTemplate)
+        manageAdd = self.folder.manage_addProduct['PageTemplates']
+        # --=mpj17=-- If the text is not set, the page template will
+        #   try and acquire the text from its parent when the form
+        #   tries to set the text. (I know, do not get me started.)
+        #   By setting the text here we stop the madness.
+        manageAdd.manage_addPageTemplate(newId, title='', 
+          text='GSNotSet', REQUEST=None)
+        template = getattr(self.folder, newId)
+        assert template.getId() == newId
+        assert template.meta_type == 'Page Template'
+        retval = IGSContentPageVersion(template)
         assert retval
         return retval
 
