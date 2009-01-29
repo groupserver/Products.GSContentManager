@@ -43,12 +43,6 @@
         </tal:block>
       </dl>
     </div>
-    <tal:block metal:fill-slot="contextnavigation">
-      <span 
-        tal:replace="structure provider:groupserver.ContentManagerContextMenu">
-        Context Menu
-      </span>
-    </tal:block>
     <tal:block metal:fill-slot="body"
       tal:define="munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date;">
       <form enctype="multipart/form-data"  method="post" action="."
