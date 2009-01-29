@@ -28,7 +28,7 @@ class GSContentPage(BrowserView):
         assert request
         BrowserView.__init__(self, context, request)
         self.siteInfo = createObject('groupserver.SiteInfo',
-          self.context)
+          context)
         self.pageHistory = GSPageHistory(context)
         self.__userInfo = None
     
