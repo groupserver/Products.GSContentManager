@@ -145,24 +145,5 @@
       order="3"
       permission="zope2.ViewHistory"/>
   </browser:menuItems>
-
-  <five:implements
-    class="zope.copypastemove.ContainerItemRenamer"
-    interface="zope.copypastemove.interfaces.IContainerItemRenamer"/>
-  <adapter 
-    provides="zope.copypastemove.interfaces.IContainerItemRenamer"
-    for="zope.app.container.interfaces.IContainer"
-    permission="zope2.Public"
-    factory="zope.copypastemove.ContainerItemRenamer"/>
-
-  <five:implements 
-    class="zope.copypastemove.OrderedContainerItemRenamer"
-    interface="zope.copypastemove.interfaces.IContainerItemRenamer"/>
-  <adapter 
-    provides="zope.copypastemove.interfaces.IContainerItemRenamer"
-    for="zope.app.container.interfaces.IOrderedContainer"
-    permission="zope2.Public"
-    factory="zope.copypastemove.OrderedContainerItemRenamer"/>
-
 </configure>
 

@@ -53,31 +53,23 @@ class ManagePagesForm(PageForm):
 
     @form.action(label=u'Rename', failure='action_failure')
     def handle_rename(self, action, data):
-
-        f = IContainer(self.context)
-        parent = f.aq_inner.aq_parent
-        renamer = IContainerItemRenamer(parent)
+        # <rant author="mpj17">
+        #   I should be using IContainerItemRenamer here, but some 
+        #   web-footed drool factory did not implement the "get"
+        #   method, even though the Drool Factory did state that
+        #   the folder implements IContainer.
+        #</rant>
         oldName = self.folder.getId()
+        parent = self.folder.aq_inner.aq_parent
+        assert hasattr(parent, oldName)
         newName = data.get('renamedPageId', '')
-        if newName:
-            try:
-                # --=mpj17=-- I *do* know how to use try-except 
-                #    blocks; I preferr forward error-detection :P
-                renamer.renameItem(oldName, newName)
-            except ItemNotFoundError, e:
-                self.status = u'Could not find <code>%s</code>.' %\
-                  oldName
-            except DuplicationError, e:
-                self.status = u'There is already a page with the ' \
-                  u'identifier <code>%s</code> in <code>%s</code>.' %\
-                  (oldName, newName)
-            else:
-                self.status = u'Should rename!'
-        else:
-            self.status = u'Name not specified'
+        assert not(hasattr(parent, newName))
+        parent.manage_renameObject(oldName, newName, None)
+        assert hasattr(parent, newName)
+        self.status = u'Renamed <code>%s</code> to <code>%s</code>'%\
+          (oldName, newName)
         assert type(self.status) == unicode
         assert self.status
-        return retval
 
     @form.action(label=u'Move', failure='action_failure')
     def handle_move(self, action, data):
