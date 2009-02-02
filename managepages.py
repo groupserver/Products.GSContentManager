@@ -1,29 +1,23 @@
 # coding=utf-8
 '''Implementation of the Edit Page form.
 '''
-from time import strftime, gmtime, time
-import difflib, pytz
-from datetime import datetime
-from base64 import b64encode
 from Products.Five.formlib.formbase import PageForm
 from zope.component import createObject, adapts
+from zope.component.interfaces import IFactory
 from zope.interface import implements, providedBy, implementedBy,\
   directlyProvidedBy, alsoProvides
 from zope.formlib import form
 from zope.copypastemove.interfaces import *
+from zope.copypastemove import ItemNotFoundError
+from zope.exceptions import DuplicationError
+from zope.app.container.interfaces import IContainer, IOrderedContainer
 from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
 from zope.app.form.browser import MultiCheckBoxWidget, SelectWidget,\
   TextAreaWidget
-from zope.security.interfaces import Forbidden
 from zope.app.apidoc.interface import getFieldsInOrder
 from zope.schema import *
 from Products.XWFCore.XWFUtils import comma_comma_and, munge_date
 from interfaces import *
-from page import GSContentPage
-from audit import PageEditAuditor, EDIT_CONTENT
-from page_history import GSPageHistory
-from Products.GSProfile.utils import enforce_schema
-from Products.CustomUserFolder.userinfo import userInfo_to_anchor
 
 class ManagePagesForm(PageForm):
     label = u'Manage Pages'
@@ -59,9 +53,28 @@ class ManagePagesForm(PageForm):
 
     @form.action(label=u'Rename', failure='action_failure')
     def handle_rename(self, action, data):
-        parent = self.folder.aq_parent
+
+        f = IContainer(self.context)
+        parent = f.aq_inner.aq_parent
         renamer = IContainerItemRenamer(parent)
-        self.status = u'Should rename!'
+        oldName = self.folder.getId()
+        newName = data.get('renamedPageId', '')
+        if newName:
+            try:
+                # --=mpj17=-- I *do* know how to use try-except 
+                #    blocks; I preferr forward error-detection :P
+                renamer.renameItem(oldName, newName)
+            except ItemNotFoundError, e:
+                self.status = u'Could not find <code>%s</code>.' %\
+                  oldName
+            except DuplicationError, e:
+                self.status = u'There is already a page with the ' \
+                  u'identifier <code>%s</code> in <code>%s</code>.' %\
+                  (oldName, newName)
+            else:
+                self.status = u'Should rename!'
+        else:
+            self.status = u'Name not specified'
         assert type(self.status) == unicode
         assert self.status
         return retval

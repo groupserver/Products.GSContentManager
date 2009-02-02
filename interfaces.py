@@ -60,25 +60,31 @@ class IGSContentPageHistory(Interface):
 class IGSMangePages(Interface):
     pageId = ASCIILine(title=u'Page Identifier',
       description=u'The identifier for the new page. No spaces '\
-        u'are allowed.')
+        u'are allowed.',
+      required=False)
     
     title = TextLine(title=u'Title',
       description=u'The title of the page. This will appear at'\
-        u'the top of the page and in the title bar of the browser.')
-    
+        u'the top of the page and in the title bar of the browser.',
+      required=False)
+      
     newPageId = ASCIILine(title=u'New Page Identifier',
       description=u'The identifier the page should have after it '\
-        u'has been copied. No spaces are allowed.')
+        u'has been copied. No spaces are allowed.',
+      required=False)
 
     copyDestination = ASCIILine(title=u'Destination',
-      description=u'Where the page should be copied to.')
+      description=u'Where the page should be copied to.',
+      required=False)
 
     renamedPageId = ASCIILine(title=u'New Page Identifier',
       description=u'The new identifier for the page. No spaces '\
-        u'are allowed.')
+        u'are allowed.',
+      required=False)
 
     moveDestination = ASCIILine(title=u'Destination',
-      description=u'Where the page should be moved to.')
+      description=u'Where the page should be moved to.',
+      required=False)
 
 class IGSContentManagerContextMenuContentProvider(IContentProvider):
     """The content provider for the context menu"""
