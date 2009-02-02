@@ -10,6 +10,7 @@ from zope.component import createObject, adapts
 from zope.interface import implements, providedBy, implementedBy,\
   directlyProvidedBy, alsoProvides
 from zope.formlib import form
+from zope.copypastemove.interfaces import *
 from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
 from zope.app.form.browser import MultiCheckBoxWidget, SelectWidget,\
   TextAreaWidget
@@ -42,30 +43,36 @@ class ManagePagesForm(PageForm):
     
     @form.action(label=u'Add', failure='action_failure')
     def handle_add(self, action, data):
-        '''Change the data that is being 
-        '''
-        pass
+        self.status = u'Should add'
+        assert type(self.status) == unicode
+        assert self.status
         return retval
 
     @form.action(label=u'Copy', failure='action_failure')
     def handle_copy(self, action, data):
-        '''Change the data that is being 
-        '''
-        pass
+        copier = IObjectCopier(self.folder)
+        assert copier.copyable()
+        self.status = u'Should copy!'
+        assert type(self.status) == unicode
+        assert self.status
         return retval
 
     @form.action(label=u'Rename', failure='action_failure')
     def handle_rename(self, action, data):
-        '''Change the data that is being 
-        '''
-        pass
+        parent = self.folder.aq_parent
+        renamer = IContainerItemRenamer(parent)
+        self.status = u'Should rename!'
+        assert type(self.status) == unicode
+        assert self.status
         return retval
 
     @form.action(label=u'Move', failure='action_failure')
     def handle_move(self, action, data):
-        '''Change the data that is being 
-        '''
-        pass
+        mover = IObjectMover(self.folder)
+        assert mover.movable()
+        self.status = u'Should move!'
+        assert type(self.status) == unicode
+        assert self.status
         return retval
 
     def action_failure(self, action, data, errors):
