@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:tal="http://xml.zope.org/namespaces/tal"
+  xmlns:metal="http://xml.zope.org/namespaces/metal"
+  metal:use-macro="context/@@groupserver_layout/page">
+  <head>
+    <title metal:fill-slot="title" >
+      <span tal:replace="view/siteInfo/name"/>
+    </title>
+  </head>
+  <body>
+    <h1 metal:fill-slot="pagetitle">Page o' Stuff</h1>
+    <tal:block metal:fill-slot="body">
+      <div id="pageHierarchy">
+      </div><!--pageHierarchy-->
+      <div id="actions">
+        <ul id="primaryActions">
+          <li id="add-button">
+            <a title="Add a page beneath the selected page"
+              href="#add">Add</a>
+          </li>
+          <li id="copy-button">
+            <a title="Copy the selected page"
+              href="#copy">Copy</a>
+          </li>
+          <li id="rename-button">
+            <a title="Rename the selected page"
+              href="#rename">Rename</a>
+          </li>
+          <li id="move-button">
+            <a title="Move the selected page"
+              href="#move">Move</a>
+          </li>
+        </ul><!--primaryActions-->
+        <ul id="secondaryActions">
+          <li>
+            <a title="View the selected page" 
+              href="#">View&#8230;</a>
+          </li>
+        </ul><!--secondaryActions-->
+      </div><!--actions-->
+      <div id="options">
+        <form enctype="multipart/form-data"  method="post" action="."
+          tal:attributes="action request/URL" id="managepage"
+          class="managepageclass"
+          tal:define="allWidgets python:[w for w in view.widgets];
+            allActions python:[a for a in view.actions]">
+          <fieldset id="add">
+            <label>Add</label>
+            <tal:block define="widgets python:allWidgets[:2]">
+              <tal:block 
+                replace="structure provider:groupserver.FormWidgets"/>
+            </tal:block>
+            <div class="buttons">
+              <div class="formelementbutton">
+                <tal:block
+                  replace="structure python:allActions[0].render()">
+                  Button
+                </tal:block>
+              </div>
+            </div><!--buttons-->
+          </fieldset><!--add-->
+          <fieldset id="copy">
+            <label>Copy</label>
+            <tal:block define="widgets python:allWidgets[2:4]">
+              <tal:block 
+                replace="structure provider:groupserver.FormWidgets"/>
+            </tal:block>
+            <div class="buttons">
+              <div class="formelementbutton">
+                <tal:block
+                  replace="structure python:allActions[1].render()">
+                  Button
+                </tal:block>
+              </div>
+            </div><!--buttons-->
+          </fieldset><!--copy-->
+          <fieldset id="rename">
+            <label>Reame</label>
+            <tal:block define="widgets python:[allWidgets[4]]">
+              <tal:block 
+                replace="structure provider:groupserver.FormWidgets"/>
+            </tal:block>
+            <div class="buttons">
+              <div class="formelementbutton">
+                <tal:block
+                  replace="structure python:allActions[2].render()">
+                  Button
+                </tal:block>
+              </div>
+            </div><!--buttons-->
+          </fieldset><!--rename-->
+          <fieldset id="move">
+            <label>Move</label>
+            <tal:block define="widgets python:[allWidgets[5]]">
+              <tal:block 
+                replace="structure provider:groupserver.FormWidgets"/>
+            </tal:block>
+            <div class="buttons">
+              <div class="formelementbutton">
+                <tal:block
+                  replace="structure python:allActions[3].render()">
+                  Button
+                </tal:block>
+              </div>
+            </div><!--buttons-->
+          </fieldset><!--move-->
+        </form>
+      </div><!--options-->
+      <script type="text/javascript" 
+        src="/++resource++jquery-1.2.1.min.js">&#160;</script>
+      <script type="text/javascript">
+        var showOption = function () {
+            var o = '';
+            o = jQuery(this).attr('href');
+            jQuery("#options fieldset").css('display', 'none');
+            jQuery(o).show('slow');
+        }
+        
+        jQuery(document).ready( function () {
+          jQuery("#options fieldset")
+            .css('display', 'none');
+          jQuery("#actions a").each(function () {
+              var o = jQuery(this).attr('href');
+              jQuery(this)
+                .css("cursor","pointer")
+                .removeAttr('href');
+              jQuery(this).click(function(){
+                  jQuery("#options fieldset").css('display', 'none');
+                  jQuery(o).show();
+              });
+          });
+        });
+      </script>
+    </tal:block>
+  </body>
+</html>
+

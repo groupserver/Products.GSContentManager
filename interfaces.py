@@ -57,6 +57,29 @@ class IGSContentPageHistory(Interface):
     """Marker interface for the history of a page
     """
 
+class IGSMangePages(Interface):
+    pageId = ASCIILine(title=u'Page Identifier',
+      description=u'The identifier for the new page. No spaces '\
+        u'are allowed.')
+    
+    title = TextLine(title=u'Title',
+      description=u'The title of the page. This will appear at'\
+        u'the top of the page and in the title bar of the browser.')
+    
+    newPageId = ASCIILine(title=u'New Page Identifier',
+      description=u'The identifier the page should have after it '\
+        u'has been copied. No spaces are allowed.')
+
+    copyDestination = ASCIILine(title=u'Destination',
+      description=u'Where the page should be copied to.')
+
+    renamedPageId = ASCIILine(title=u'New Page Identifier',
+      description=u'The new identifier for the page. No spaces '\
+        u'are allowed.')
+
+    moveDestination = ASCIILine(title=u'Destination',
+      description=u'Where the page should be moved to.')
+
 class IGSContentManagerContextMenuContentProvider(IContentProvider):
     """The content provider for the context menu"""
     

@@ -46,7 +46,8 @@
     <tal:block metal:fill-slot="body"
       tal:define="munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date;">
       <form enctype="multipart/form-data"  method="post" action="."
-        tal:attributes="action request/URL" id="editpage" class="editpageclass">
+        tal:attributes="action request/URL" id="editpage"
+        class="editpageclass">
 
         <tal:block 
           replace="structure provider:groupserver.ContentManagerTabMenu">

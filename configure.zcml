@@ -76,6 +76,12 @@
     name="edit_page.html"
     class=".edit_page.EditPageForm"
     permission="zope2.ManageProperties" />
+
+  <browser:page 
+    for=".interfaces.IGSContentManagerFolderMarker"
+    name="manage.html"
+    class=".managepages.ManagePagesForm"
+    permission="zope2.ManageProperties" />
     
    <browser:page 
     for=".interfaces.IGSContentManagerFolderMarker"
@@ -83,13 +89,6 @@
     class=".historyview.GSPHistoryView"
     template="browser/templates/historyview.pt"
     permission="zope2.ViewHistory" />
-
-
-  <!--browser:page 
-    for="Products.GSContent.interfaces.IGSContentFolder"
-    name="add_page.html"
-    class=".add_page.AddPageForm"
-    permission="zope2.ManageProperties" /-->
 
   <browser:page 
     for=".interfaces.IGSContentManagerFolderMarker"
