@@ -16,8 +16,10 @@ from zope.app.form.browser import MultiCheckBoxWidget, SelectWidget,\
   TextAreaWidget
 from zope.app.apidoc.interface import getFieldsInOrder
 from zope.schema import *
-from Products.XWFCore.XWFUtils import comma_comma_and, munge_date
+from Products.XWFCore.XWFUtils import comma_comma_and, \
+  add_marker_interfaces
 from interfaces import *
+from utils import *
 
 class ManagePagesForm(PageForm):
     label = u'Manage Pages'
@@ -37,10 +39,30 @@ class ManagePagesForm(PageForm):
     
     @form.action(label=u'Add', failure='action_failure')
     def handle_add(self, action, data):
-        self.status = u'Should add'
+        newPage = data.get('pageId', '')
+        assert newPage
+        assert not(hasattr(self.folder, newPage)), \
+          '%s already in %s' % (newPage, self.folder.getId())
+        self.folder.manage_addFolder(newPage)
+
+        newFolder = getattr(self.folder, newPage)
+        assert newFolder, '%s not in %s' %\
+          (newPage, self.folder.getId())
+        add_marker_interfaces(newFolder, 
+          ('Products.GSContentManager.interfaces.IGSContentManagerFolderMarker',))
+
+        nvId = new_version_id()
+        newVersion = new_version(newFolder, nvId)
+        newVersion.content = \
+          u'<p> </p>'
+        newVersion.title = data.get('title', '').encode('utf-8')
+        newFolder.manage_addProperty('published_revision', nvId, 
+          'string')
+        
+        self.status = u'Added <a href="%s">%s</a>.' %\
+          (newPage, data.get('title', ''))
         assert type(self.status) == unicode
         assert self.status
-        return retval
 
     @form.action(label=u'Copy', failure='action_failure')
     def handle_copy(self, action, data):
@@ -61,12 +83,16 @@ class ManagePagesForm(PageForm):
         #</rant>
         oldName = self.folder.getId()
         parent = self.folder.aq_inner.aq_parent
-        assert hasattr(parent, oldName)
+        assert hasattr(parent, oldName), '%s not in %s' %\
+          (oldName, parent.getId())
         newName = data.get('renamedPageId', '')
-        assert not(hasattr(parent, newName))
+        assert not(hasattr(parent, newName)), '%s already in %s' %\
+          (newName, parent.getId())
         parent.manage_renameObject(oldName, newName, None)
-        assert hasattr(parent, newName)
-        self.status = u'Renamed <code>%s</code> to <code>%s</code>'%\
+        assert hasattr(parent, newName), \
+          '%s not renamed to %s in %s' % \
+          (oldName, newName, parent.getId())
+        self.status = u'Renamed <code>%s</code> to <code>%s</code>.'%\
           (oldName, newName)
         assert type(self.status) == unicode
         assert self.status

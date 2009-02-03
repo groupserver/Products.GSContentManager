@@ -12,10 +12,26 @@
   </head>
   <body>
     <h1 metal:fill-slot="pagetitle">Page o' Stuff</h1>
+    <div metal:fill-slot="messages" tal:condition="view/status" 
+      class="message-error"
+      tal:define="e view/errors"
+      tal:attributes="class python:e and 'message-error' or 'message-result'">
+      <p class="form-status" tal:content="structure view/status"/>
+      <dl tal:condition="view/errors">
+        <tal:block repeat="widget view/widgets">
+          <tal:block tal:condition="widget/error">
+            <dt tal:content="widget/label">Widget Name</dt>
+            <dd class="error" 
+              tal:content="structure widget/error">Error message</dd>
+          </tal:block>
+        </tal:block>
+      </dl>
+    </div>
     <tal:block metal:fill-slot="body">
       <div id="pageHierarchy">
       </div><!--pageHierarchy-->
       <div id="actions">
+        <!--Turn into a menu-->
         <ul id="primaryActions">
           <li id="add-button">
             <a title="Add a page beneath the selected page"

@@ -23,11 +23,10 @@ from audit import PageEditAuditor, EDIT_CONTENT
 from page_history import GSPageHistory
 from Products.GSProfile.utils import enforce_schema
 from Products.CustomUserFolder.userinfo import userInfo_to_anchor
+from utils import *
 
 import logging
 log = logging.getLogger('GSContentManager')
-
-CONTENT_TEMPLATE = 'content_en'
 
 def wym_editor_widget(field, request):
     retval = TextAreaWidget(field, request)
@@ -135,7 +134,10 @@ class EditPageForm(PageForm):
         assert self.auditor
         assert data
 
-        newVersion = self.new_version()
+        nvId = new_version_id()
+        while nvId in self.folder.objectIds():
+            nvId = new_version_id()
+        newVersion = new_version(self.folder, nvId)
         fields = self.form_fields.omit('id', 'parentVersion', 
           'editor', 'creationDate')
         form.applyChanges(newVersion, fields, data)
@@ -156,32 +158,6 @@ class EditPageForm(PageForm):
            data['title'])
         assert self.status
         assert type(self.status) == unicode
-
-    def new_version(self):
-        '''Create a new (blank) version of the document'''
-        newId = self.new_version_id()
-        manageAdd = self.folder.manage_addProduct['PageTemplates']
-        # --=mpj17=-- If the text is not set, the page template will
-        #   try and acquire the text from its parent when the form
-        #   tries to set the text. (I know, do not get me started.)
-        #   By setting the text here we stop the madness.
-        manageAdd.manage_addPageTemplate(newId, title='', 
-          text='GSNotSet', REQUEST=None)
-        template = getattr(self.folder, newId)
-        assert template.getId() == newId
-        assert template.meta_type == 'Page Template'
-        retval = IGSContentPageVersion(template)
-        assert retval
-        return retval
-
-    def new_version_id(self):
-        now = datetime.utcnow().replace(tzinfo=pytz.utc)
-        t = now.strftime("%Y%m%d%H%M%S")
-        retval = '%s_%s' % (CONTENT_TEMPLATE, t)
-        assert type(retval) == str
-        assert not(hasattr(self.folder, retval))
-        assert retval
-        return retval
 
     def get_auditDatums(self, oldVer, newVer):
         url = self.folder.absolute_url(0)
