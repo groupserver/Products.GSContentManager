@@ -94,6 +94,9 @@ class IGSContentManagerContextMenuContentProvider(IContentProvider):
         u'menu.',
       required=False,
       default=u"browser/templates/profileContextMenu.pt")
+
+class IGSPageTreeContentProvider(IContentProvider):
+    """The content provider for the context menu"""
       
 class IGSContentPageHistoryContentProvider(IContentProvider):
     """The content provider for the page history """

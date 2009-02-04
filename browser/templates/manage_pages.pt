@@ -28,8 +28,8 @@
       </dl>
     </div>
     <tal:block metal:fill-slot="body">
-      <div id="pageHierarchy">
-      </div><!--pageHierarchy-->
+      <p tal:replace="structure provider:groupserver.PageTree">Page
+        hierarchy</p>
       <div id="actions">
         <!--Turn into a menu-->
         <ul id="primaryActions">

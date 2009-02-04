@@ -43,6 +43,7 @@ class GSContentPageHistoryContentProvider(object):
 
         pageTemplate = PageTemplateFile(self.pageTemplateFileName)
         return pageTemplate(view=self)
+        
     #########################################
     # Non standard methods below this point #
     #########################################

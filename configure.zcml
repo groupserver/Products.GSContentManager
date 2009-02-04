@@ -64,6 +64,10 @@
     interface=".interfaces.IGSContentManagerFolderMarker"
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
 
+  <interface 
+    interface=".interfaces.IGSPageTreeContentProvider"
+    type="zope.contentprovider.interfaces.ITALNamespaceData"/>
+
   <!--Edit Page-->
   <class 
     class=".edit_page.EditPageForm">

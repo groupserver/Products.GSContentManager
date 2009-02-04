@@ -14,7 +14,6 @@ from Products.Five import BrowserView
 
 from page_history import GSPageHistory
 
-
 class GSContentPage(BrowserView):
     """The view of a version-controlled content page."""
     
@@ -99,4 +98,63 @@ class GSContentPage(BrowserView):
         retval = self.version.editor
         assert type(retval) in (str, unicode)
         return retval
+
+class Page(object):
+
+    def __init__(self, folder):
+        self.context = self.folder = folder
+        self.pageHistory = GSPageHistory(folder)
+        
+    @property
+    def version(self):
+        retval = self.pageHistory.published
+        assert retval
+        return retval
+        
+    @property
+    def content(self):
+        '''Gets the content from the requested version of the page.
+        '''
+        retval = self.version.content
+        assert type(retval) in (str, unicode)
+        return retval
+
+    @property
+    def id(self):
+        '''The ID of the page is the ID of the folder that contains
+        the page.
+        '''
+        return self.folder.id
+    
+    @property
+    def name(self):
+        retval = self.version.title
+        assert type(retval) in (str, unicode)
+        return retval
+
+    @property
+    def hidden(self):
+        '''Returns the hidden value of the *entire* folder, not the
+        version.
+        '''
+        retval = self.folder.hidden
+        assert type(retval) == bool
+        return retval
+                
+    @property
+    def editor(self):
+        '''Returns the name of the last editor.
+        '''
+        uid = self.version.editor
+        retval = createObject('groupserver.UserFromId', self.context, uid)
+        return retval
+
+    @property
+    def date(self):
+        retval = self.version.creationDate
+        return retval
+        
+    @property
+    def url(self):
+        return self.folder.absolute_url()
 
