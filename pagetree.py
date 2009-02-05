@@ -47,12 +47,24 @@ class GSPageTreeContentProvider(object):
         return retval
         
     def node_to_li(self, node):
+        '''Convert a node into an HTML li
+        
+        ARGUMENTS
+          node  The node to convert.
+        
+        RETURNS
+          A Unicode string that contains the li.
+          
+        SIDE EFFECTS
+          None.
+        '''
+        
         page = Page(node[0])
         t = '%(name)s, last edited by %(fn)s on %(date)s' % \
           {'name': page.name,
            'date': munge_date(self.context, page.date), 
            'fn':   page.editor.name}
-        retval = u'<li>\n\t<a title="%(title)s" href="%(url)s">'\
+        retval = u'<li>\n\t<a title="%(title)s" href="#">'\
           u'<cite>%(name)s</cite> <code>(%(id)s)</code></a>' % {
             'title': t,
             'url': page.url,

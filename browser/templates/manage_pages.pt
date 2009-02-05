@@ -28,8 +28,11 @@
       </dl>
     </div>
     <tal:block metal:fill-slot="body">
-      <p tal:replace="structure provider:groupserver.PageTree">Page
-        hierarchy</p>
+      <div id="sourceTree">
+        <p tal:replace="structure provider:groupserver.PageTree">
+          Page hierarchy for the source.
+        </p>
+      </div><!--sourceTree-->
       <div id="actions">
         <!--Turn into a menu-->
         <ul id="primaryActions">
@@ -125,8 +128,8 @@
           </fieldset><!--move-->
         </form>
       </div><!--options-->
-      <script type="text/javascript" 
-        src="/++resource++jquery-1.2.1.min.js">&#160;</script>
+    </tal:block>
+    <tal:block metal:fill-slot="javascript">
       <script type="text/javascript">
         var showOption = function () {
             var o = '';
@@ -148,6 +151,57 @@
                   jQuery(o).show();
               });
           });
+        });
+      </script>
+
+      <link rel="stylesheet" 
+        href="/++resource++jsTree-20090204/tree_component.css" 
+        type="text/css">&#160;</link>
+
+      <script 
+        src="/++resource++jsTree-20090204/lib/jquery.js"
+        type="text/javascript">&#160;</script><!--=mpj17= girr-->
+      <script 
+        src="/++resource++jsTree-20090204/lib/jquery.listen.js"
+        type="text/javascript">&#160;</script>
+      <script 
+        src="/++resource++jsTree-20090204/lib/css.js"
+        type="text/javascript">&#160;</script>
+      <script 
+        src="/++resource++jsTree-20090204/tree_component.js"
+        type="text/javascript">&#160;</script>
+      <script 
+        src="/++resource++jsTree-20090204/lib/sarissa.js"
+        type="text/javascript">&#160;</script>
+      <script 
+        src="/++resource++jsTree-20090204/lib/sarissa_ieemu_xpath.js"
+        type="text/javascript">&#160;</script>
+      <script 
+        src="/++resource++jsTree-20090204/lib/jquery.xslt.js"
+        type="text/javascript">&#160;</script>
+      <!-- required for metadata rule definitions -->
+      <script 
+        src="/++resource++jsTree-20090204/lib/jquery.metadata.js"
+        type="text/javascript">&#160;</script>
+      <!-- required for cookie functionality -->
+      <script
+        src="/++resource++jsTree-20090204/lib/jquery.cookie.js"
+        type="text/javascript" >&#160;</script>
+      <script type="text/javascript">
+        jQuery(document).ready( function () {
+          var tree = new tree_component();
+          var node = jQuery("#sourceTree");
+          var options = {
+            ui: {
+              theme_path: "/++resource++jsTree-20090204/themes/",
+              animation:  500,
+              theme_name: "classic",
+              rtl:        false
+            }
+          };
+          tree.init(node, options);
+          tree.toggleDots(node);
+          tree.open_all(node);
         });
       </script>
     </tal:block>
