@@ -69,12 +69,34 @@ class ManagePagesForm(PageForm):
 
     @form.action(label=u'Copy', failure='action_failure')
     def handle_copy(self, action, data):
-        copier = IObjectCopier(self.folder)
-        assert copier.copyable()
-        self.status = u'Should copy!'
+        source = self.folder.absolute_url()
+
+        # Copy the source
+        sourceFolder = \
+          self.get_folder_from_id(url_to_nodeId('foo-', source))
+        srcParent = sourceFolder.aq_parent
+        copy = srcParent.manage_copyObjects([sourceFolder.getId()], 
+            None)
+
+        # Paste into the destination
+        destination = self.nodeId_to_url(data['copyDestination'])
+        destinationFolder = \
+          self.get_folder_from_id(data['copyDestination'])
+        pasteResult = destinationFolder.manage_pasteObjects(copy, None)
+        
+        # Rename
+        copyId = pasteResult[0]['new_id']
+        newId = data['newPageId']
+        destinationFolder.manage_renameObject(copyId, newId, None)
+        copied = getattr(destinationFolder, newId).absolute_url()
+        
+        self.status = u'Copied '\
+          u'(<code><a href="%(src)s">%(src)s</a></code>) '\
+          u'to '\
+          u'(<code><a href="%(dest)s">%(dest)s</a></code>).' %\
+          {'src': source, 'dest': copied}
         assert type(self.status) == unicode
         assert self.status
-        return retval
 
     @form.action(label=u'Rename', failure='action_failure')
     def handle_rename(self, action, data):
