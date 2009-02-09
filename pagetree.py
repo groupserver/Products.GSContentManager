@@ -45,7 +45,7 @@ class GSPageTreeContentProvider(object):
         retval = u'<ul class="pageTree">\n%s\n</ul>' % \
           self.node_to_li(self.pageTree)
         return retval
-        
+
     def node_to_li(self, node):
         '''Convert a node into an HTML li
         
@@ -64,12 +64,14 @@ class GSPageTreeContentProvider(object):
           {'name': page.name,
            'date': munge_date(self.context, page.date), 
            'fn':   page.editor.name}
-        retval = u'<li>\n\t<a title="%(title)s" href="#">'\
-          u'<cite>%(name)s</cite> <code>(%(id)s)</code></a>' % {
+        retval = u'<li id="%(nodeId)s">\n\t<a title="%(title)s" '\
+          u'href="#"><cite>%(name)s</cite> '\
+          u'<code>(%(id)s)</code></a>' % {
             'title': t,
             'url': page.url,
             'name': page.name,
-            'id': page.id
+            'id': page.id,
+            'nodeId': url_to_nodeId(self.treeIdPrefix, page.url)
         }
         if node[1]:
             cLi = u'\n'.join(self.node_to_li(c) for c in node[1])
@@ -80,7 +82,6 @@ class GSPageTreeContentProvider(object):
         assert type(retval) == unicode
         return retval
         
-
 class PageTree(object):
     '''A representation of a tree of pages as a list of lists.
     
@@ -100,18 +101,21 @@ class PageTree(object):
         '''
         assert IGSContentManagerFolderMarker in providedBy(folder)
         self.context = self.folder = folder
+        self.__tree = None
 
     @property
     def tree(self):        
         '''Get the tree as a 2-tuple: (node, children). Each child is
            represented as a 2-tuple of (node, children).
         '''
-        retval = self.get_tree(self.get_root(self.folder))
+        if self.__tree == None:
+            self.__tree = self.get_tree(self.get_root(self.folder))
+        retval = self.__tree
         assert retval
         assert len(retval) == 2
         assert IGSContentManagerFolderMarker in providedBy(retval[0])
         return retval
-                
+
     def get_root(self, node):
         '''Get the root of the page-tree
 
@@ -163,6 +167,14 @@ class PageTree(object):
         assert retval[0] == node
         assert IGSContentManagerFolderMarker in providedBy(retval[0])
         return retval
+
+        
+def url_to_nodeId(treeIdPrefix, url):
+    retval = url.lstrip('http\:\/\/')
+    retval = retval.replace('-', '--')
+    retval = retval.replace('/', '-')
+    retval = '%s%s' % (treeIdPrefix, retval)
+    return retval
         
 provideAdapter(GSPageTreeContentProvider,
     provides=IContentProvider,

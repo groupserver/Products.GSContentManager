@@ -87,6 +87,12 @@
               <tal:block 
                 replace="structure provider:groupserver.FormWidgets"/>
             </tal:block>
+            <div id="copyDestinationTree" 
+              tal:define="treeIdPrefix string:copy-">
+              <p tal:replace="structure provider:groupserver.PageTree">
+                Page hierarchy for the source.
+              </p>
+            </div><!--copyDestinationTree-->
             <div class="buttons">
               <div class="formelementbutton">
                 <tal:block
@@ -117,6 +123,12 @@
               <tal:block 
                 replace="structure provider:groupserver.FormWidgets"/>
             </tal:block>
+            <div id="moveDestinationTree"
+              tal:define="treeIdPrefix string:move-">
+              <p tal:replace="structure provider:groupserver.PageTree">
+                Page hierarchy for the source.
+              </p>
+            </div><!--moveDestinationTree-->
             <div class="buttons">
               <div class="formelementbutton">
                 <tal:block
@@ -153,11 +165,10 @@
           });
         });
       </script>
-
+      <!--Tree-->
       <link rel="stylesheet" 
         href="/++resource++jsTree-20090204/tree_component.css" 
         type="text/css">&#160;</link>
-
       <script 
         src="/++resource++jsTree-20090204/lib/jquery.js"
         type="text/javascript">&#160;</script><!--=mpj17= girr-->
@@ -188,19 +199,46 @@
         src="/++resource++jsTree-20090204/lib/jquery.cookie.js"
         type="text/javascript" >&#160;</script>
       <script type="text/javascript">
+        var setDestination = function(node, tree) {
+            var e = null;
+            var selected = null;
+            var v = null;
+            
+            selected = jQuery(tree.selected).attr('id');
+            v = selected.slice(0, selected.indexOf('-'));
+            if (v == "move") {
+                e = jQuery('#form\\.moveDestination');
+                e.attr('value', selected);
+            } else if (v == "copy") {
+                e = jQuery('#form\\.copyDestination');
+                e.attr('value', selected);
+            }
+            return true;
+        }
+
         jQuery(document).ready( function () {
           var tree = new tree_component();
-          var node = jQuery("#sourceTree");
           var options = {
             ui: {
               theme_path: "/++resource++jsTree-20090204/themes/",
               animation:  500,
               theme_name: "classic",
-              rtl:        false
+              rtl:        false,
+            },
+            callback: {
+              onchange: setDestination
             }
           };
+          var node = jQuery("#sourceTree");
           tree.init(node, options);
-          tree.toggleDots(node);
+          tree.open_all(node);
+
+          var node = jQuery("#copyDestinationTree");
+          tree.init(node, options);
+          tree.open_all(node);
+
+          var node = jQuery("#moveDestinationTree");
+          tree.init(node, options);
           tree.open_all(node);
         });
       </script>

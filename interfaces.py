@@ -97,7 +97,13 @@ class IGSContentManagerContextMenuContentProvider(IContentProvider):
 
 class IGSPageTreeContentProvider(IContentProvider):
     """The content provider for the context menu"""
-      
+    
+    treeIdPrefix = ASCIILine(title=u'Tree Identifier Prefix',
+      description=u'The text that is appended to the start of all '\
+        u'tree-node identifiers.',
+      default='tree-'
+    )
+    
 class IGSContentPageHistoryContentProvider(IContentProvider):
     """The content provider for the page history """
     
