@@ -56,8 +56,11 @@ class GSContentPage(BrowserView):
         canViewOld = uo.has_permission('View History', self.context)
         if canViewOld:
             vid = self.request.form.get('form.version',  retval.id)
-            retval = self.pageHistory[vid]
-        assert retval
+            try:
+                retval = self.pageHistory[vid]
+            except KeyError, e:
+                pass # --=mpj17=-- Because we have already set retval
+        assert retval, 'Return value not set'
         return retval
         
     @property
