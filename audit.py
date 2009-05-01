@@ -8,6 +8,7 @@ CONSTANTS
     EDIT_CONTENT:     '1' (*String*)
     EDIT_FIELD        '2' (*String*)
     RENAME_PAGE       '3' (*String*)
+    CHANGE_PRIVACY    '4' (*String*)
 """
 from pytz import UTC
 from datetime import datetime
@@ -31,6 +32,7 @@ UNKNOWN        = '0'  # Unknown is always "0"
 EDIT_CONTENT   = '1'
 EDIT_FIELD     = '2'
 RENAME_PAGE    = '3'
+CHANGE_PRIVACY = '4'
 
 class EditPageAuditEventFactory(object):
     """A Factory for edit page events
@@ -103,6 +105,9 @@ class EditPageAuditEventFactory(object):
         #   the code or subsystem, for example.
         if (code == EDIT_CONTENT):
             event = EditContentEvent(context, event_id, date, 
+              userInfo, siteInfo, instanceDatum, supplementaryDatum)
+        if (code == CHANGE_PRIVACY):
+            event = ChangePrivacyEvent(context, event_id, date,
               userInfo, siteInfo, instanceDatum, supplementaryDatum)
         else:
             # If we get something odd, create a basic event with all
@@ -322,6 +327,27 @@ class RenamePageEvent(BasicAuditEvent):
            munge_date(self.context, self.date))
         print 'Here'
         assert retval
+        return retval
+
+class ChangePrivacyEvent(BasicAuditEvent):
+    '''An audit-trail event representing a change to the page privacy    '''
+    implements(IAuditEvent)
+
+    def __init__(self, context, id, d, userInfo, siteInfo, 
+                 instanceDatum,  supplementaryDatum):
+        BasicAuditEvent.__init__(self, context, id, 
+          CHANGE_PRIVACY, d, userInfo, None, 
+          siteInfo, None,  instanceDatum, supplementaryDatum, 
+          SUBSYSTEM)
+            
+    def __str__(self):        
+        retval = u'stuff'
+        return retval
+    
+    @property
+    def xhtml(self):
+        retval = u'<p>stuff</p>'
+          
         return retval
 
 class PageEditAuditor(object):

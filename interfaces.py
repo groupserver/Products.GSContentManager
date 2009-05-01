@@ -3,7 +3,7 @@
 import re, pytz
 from zope.interface.interface import Interface, Invalid, invariant
 from zope.schema import *
-from zope.schema.vocabulary import SimpleVocabulary
+from zope.schema.vocabulary import SimpleVocabulary, SimpleTerm
 from zope.contentprovider.interfaces import IContentProvider
 
 class IGSContentPage(Interface):
@@ -85,6 +85,30 @@ class IGSMangePages(Interface):
     moveDestination = ASCIILine(title=u'Destination',
       description=u'Where the page should be moved to.',
       required=False)
+
+anyone = SimpleTerm(
+  'anyone', 'anyone',
+  u'Anyone: Anyone, including those that are not logged in.')
+members = SimpleTerm(
+  'members', 'members',
+  u'Members: Only logged in members.')
+administrators  = SimpleTerm(
+  'administrators', 'administrators',
+  u'Administrators: Only administrators.'
+)
+viewLevels   = SimpleVocabulary([anyone, members, administrators])
+changeLevels = SimpleVocabulary(        [members, administrators])
+
+class IGSChangePagePrivacy(Interface):
+    view = Choice(title=u'View',
+      description=u'Who can view the page.',
+      required=True,
+      vocabulary=viewLevels)
+      
+    change = Choice(title=u'Change',
+      description=u'Who can change the page.',
+      required=True,
+      vocabulary=changeLevels)
 
 class IGSContentManagerContextMenuContentProvider(IContentProvider):
     """The content provider for the context menu"""

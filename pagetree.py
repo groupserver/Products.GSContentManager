@@ -64,8 +64,9 @@ class GSPageTreeContentProvider(object):
           {'name': page.name,
            'date': munge_date(self.context, page.date), 
            'fn':   page.editor.name}
+        print page.url
         retval = u'<li id="%(nodeId)s">\n\t<a title="%(title)s" '\
-          u'href="#"><cite>%(name)s</cite> '\
+          u'href="%(url)s"><cite>%(name)s</cite> '\
           u'<code>(%(id)s)</code></a>' % {
             'title': t,
             'url': page.url,
