@@ -102,28 +102,30 @@
       </form>
     </tal:block>
     <tal:block metal:fill-slot="javascript">
-      <script type="text/javascript" 
-        src="/++resource++jquery-1.2.1.min.js">&#160;</script>
-      <script type="text/javascript" 
-        src="/++resource++wymeditor-20080123/jquery.wymeditor.pack.js">&#160;</script>
-      <script type="text/javascript" 
-        src="/++resource++wymeditor-20080123/init.js">&#160;</script>
       <script type="text/javascript"
         src="/++resource++check_required-20071214.js">&#160;</script>
       <script type="text/javascript"
-        src="/++resource++popup_help-20071218.js">&#160;</script>
+        tal:define="widgets view/widgets; 
+          button string:#form\\.actions\\.change"
+        tal:content="provider:groupserver.RequiredWidgetsJavaScript">
+        alert("I have not been replaced.");
+      </script>
       <script type="text/javascript"
-        tal:define="rws python:[w for w in view.widgets if w.required];
-          rwIds python:['\'#%s\''%w.name.replace('.','\\\\.') for w in rws];
-          arr python:'%s' % ', '.join(rwIds);">
+        src="/++resource++popup_help-20071218.js">&#160;</script>
+      <script type="text/javascript">
         jQuery.noConflict()
         jQuery(document).ready( function () {
-            var gsRequiredWidgets = new Array(<span tal:replace="arr" />);
-            //GSCheckRequired.init(
-            //  gsRequiredWidgets, 
-            //  '#form\\.actions\\.edit');
-              
             GSPopupFormHelp.init('#editpage');
+        });
+      </script>
+      <script type="text/javascript" 
+        src="/++resource++wymeditor-20090204/jquery.wymeditor.js">&#160;</script>
+      <!--script type="text/javascript" 
+        src="/++resource++wymeditor-20080123/init.js">&#160;</script-->
+      <script type="text/javascript">
+        jQuery(document).ready( function() {
+            jQuery('#form\\.actions\\.change').addClass('wymupdate');
+            jQuery('.wymeditor').wymeditor();
         });
       </script>
     </tal:block>
