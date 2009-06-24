@@ -9,7 +9,7 @@ from zope.formlib import form
 from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
 from Products.XWFCore.XWFUtils import comma_comma_and
 from Products.GSGroup.changebasicprivacy import radio_widget
-from interfaces import *
+from interfaces import IGSChangePagePrivacy
 from utils import *
 from page_history import GSPageHistory
 
@@ -27,16 +27,34 @@ class ChangePrivacyForm(PageForm):
         self.folder = folder
         self.siteInfo = createObject('groupserver.SiteInfo', folder)
         self.hist = GSPageHistory(folder)
+        self.perms = Permissions(folder)
+        
         self.form_fields['view'].custom_widget = radio_widget
         self.form_fields['change'].custom_widget = radio_widget
 
-    @property
-    def title(self):
-        return self.hist.published.title
-    
+    def setUpWidgets(self, ignore_request=False):
+        self.adapters = {}
+        data = {
+          'view': self.perms.view,
+          'change': self.perms.change,
+        }
+        self.widgets = form.setUpWidgets(
+            self.form_fields, self.prefix, self.folder,
+            self.request, form=self, data=data,
+            ignore_request=ignore_request)
+
     @form.action(label=u'Change', failure='action_failure')
     def handle_change(self, action, data):
-        self.status = u'I cannot handle change!'
+        self.status = u'' 
+        if self.perms.view != data['view']:
+            self.perms.view = data['view']
+            # --=mpj17=-- TODO: make better
+            self.status = u'Altered who can view the page.' 
+        if self.perms.change != data['change']:
+            self.perms.change = data['change']
+            # --=mpj17=-- TODO: make better
+            self.status = u'%s Altered who can change the page.' %\
+              self.status
         assert self.status
         assert type(self.status) == unicode
         
@@ -46,6 +64,10 @@ class ChangePrivacyForm(PageForm):
         else:
             self.status = u'<p>There are errors:</p>'
 
+    @property
+    def title(self):
+        return self.hist.published.title
+    
     @property
     def changePermissionRoles(self):
         retval = rolesForPermissionOn('Change permissions', self.context)
@@ -57,4 +79,69 @@ class ChangePrivacyForm(PageForm):
     def changePermissionRolesDescription(self):
         return rolesToDescriptions(self.changePermissionRoles)
 
+class Permissions(object):
+    roleMap = {
+      'Anonymous':      'anyone',
+      'DivisionMember': 'members',
+      'GroupMember':    'members',
+      'DivisionAdmin':  'administrators',
+      'GroupAdmin':     'administrators',
+    }
+    anyone = ('Anonymous', 'Authenticated', 
+      'DivisionMember', 'DivisionAdmin',
+      'GroupMember', 'GroupAdmin', 
+      'Manager')
+    members = ('DivisionMember', 'DivisionAdmin',
+      'GroupMember', 'GroupAdmin', 
+      'Manager')
+    administrators = ('DivisionAdmin', 'GroupAdmin', 'Manager')
+      
+    reverseRoleMap = {
+      'anyone':  anyone,
+      'members': members,
+      'administrators': administrators,
+    }
+
+    def __init__(self, page):
+        self.page = page
+    
+    def get_view(self):
+        roles = rolesForPermissionOn('View', self.page)
+        retval = self.reduce_roles(roles)
+        return retval
+        
+    def reduce_roles(self, roles):
+        k = self.roleMap.keys()  
+        mapedRoles = [self.roleMap[r] for r in roles if r in k]
+        if ('anyone' in mapedRoles):
+            retval = 'anyone'
+        elif ('members' in mapedRoles):
+            retval = 'members'
+        elif ('admins' in mapedRoles):
+            retval = 'admins'
+        else:
+            retval = 'other'
+        return retval
+        
+    def set_view(self, v):
+        assert v in self.reverseRoleMap.keys()
+        roles = self.reverseRoleMap[v]
+        self.page.manage_permission('View', roles)
+        self.page.manage_permission('Access contents information', 
+          roles)
+        
+    view = property(get_view, set_view)
+    
+    def get_change(self):
+        roles = rolesForPermissionOn('Manage properties', self.page)
+        retval = self.reduce_roles(roles)
+        return retval
+
+    def set_change(self, v):
+        assert v in self.reverseRoleMap.keys()
+        roles = self.reverseRoleMap[v]
+        self.page.manage_permission('Manage properties', roles)
+        self.page.manage_permission('View History', roles) # --=Split=--
+    
+    change = property(get_change, set_change)
 

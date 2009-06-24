@@ -96,6 +96,7 @@ administrators  = SimpleTerm(
   'administrators', 'administrators',
   u'Only administrators.'
 )
+
 viewLevels   = SimpleVocabulary([anyone, members, administrators])
 changeLevels = SimpleVocabulary(        [members, administrators])
 
