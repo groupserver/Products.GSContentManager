@@ -4,9 +4,9 @@ import os, zope
 from interfaces import *
 from zope.interface import implements
 from zope.component import adapts, createObject
-from Products.XWFCore.XWFUtils import comma_comma_and
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
 import interfaces
+from utils import rolesToDescriptions
 
 class GSContentPagePrivacyContentProvider(object):
     """ Provides the privacy description of a page """
@@ -39,21 +39,7 @@ class GSContentPagePrivacyContentProvider(object):
     #########################################
 
     def rolesToDescriptions(self, roles):
-        roleMap = {
-          'Anonymous':      'anyone',
-          'Authenticated':  'people who are logged in',
-          'DivisionMember': 'members of this site',
-          'GroupMember':    'members of this group',
-          'admins':  'administrators',
-        }
-        k = roleMap.keys()
-        rs = [r.strip() for r in roles if (r.strip() in k)]
-        if (('GroupAdmin' in roles) or ('DivisionAdmin' in roles)):
-            rs.append('admins')
-
-        ds = [r for r in [roleMap.get(r, '') for r in rs] if r]
-        retval = comma_comma_and(ds)
-        return retval
+        return rolesToDescriptions(roles)
         
 class GSPagePrivacy(object):
     

@@ -2,6 +2,7 @@
 from datetime import datetime
 import pytz
 from interfaces import IGSContentPageVersion
+from Products.XWFCore.XWFUtils import comma_comma_and
 
 CONTENT_TEMPLATE = 'content_en'
 
@@ -27,5 +28,30 @@ def new_version_id():
     retval = '%s_%s' % (CONTENT_TEMPLATE, t)
     assert type(retval) == str
     assert retval
+    return retval
+
+roleMap = {
+  'Anonymous':      'anyone',
+  'Authenticated':  'people who are logged in',
+  'DivisionMember': 'members of this site',
+  'GroupMember':    'members of this group',
+  'admins':         'the site administrators',
+  'Manager':        'the system administrators',
+}
+
+def rolesToDescriptions(roles):
+    k = roleMap.keys()
+    rs = [r.strip() for r in roles if (r.strip() in k)]
+    if len(rs) > 1:
+        try:
+            rs.remove('Manager')
+        except ValueError, e:
+            pass
+            
+    if (('GroupAdmin' in roles) or ('DivisionAdmin' in roles)):
+        rs.append('admins')
+
+    ds = [r for r in [roleMap.get(r, '') for r in rs] if r]
+    retval = comma_comma_and(ds)
     return retval
 

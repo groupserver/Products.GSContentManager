@@ -1,31 +1,23 @@
 # coding=utf-8
 '''Implementation of the Page Privacy form.
 '''
+from AccessControl.PermissionRole import rolesForPermissionOn
 from Products.Five.formlib.formbase import PageForm
 from zope.component import createObject, adapts
-from zope.component.interfaces import IFactory
-from zope.interface import implements, providedBy, implementedBy,\
-  directlyProvidedBy, alsoProvides
+from zope.interface import implements, providedBy, implementedBy
 from zope.formlib import form
-from zope.copypastemove import ItemNotFoundError
-from zope.exceptions import DuplicationError
-from zope.app.container.interfaces import IContainer, IOrderedContainer
 from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
-from zope.app.form.browser import MultiCheckBoxWidget, SelectWidget,\
-  TextAreaWidget
-from zope.app.apidoc.interface import getFieldsInOrder
-from zope.schema import *
-from Products.XWFCore.XWFUtils import comma_comma_and, \
-  add_marker_interfaces
+from Products.XWFCore.XWFUtils import comma_comma_and
+from Products.GSGroup.changebasicprivacy import radio_widget
 from interfaces import *
 from utils import *
-from pagetree import *
+from page_history import GSPageHistory
 
-class ChangePivacyForm(PageForm):
+class ChangePrivacyForm(PageForm):
     label = u'Change Privacy'
     pageTemplateFileName = 'browser/templates/change_privacy.pt'
     template = ZopeTwoPageTemplateFile(pageTemplateFileName)
-    form_fields = form.Fields(IGSP,
+    form_fields = form.Fields(IGSChangePagePrivacy,
         render_context=False, omit_readonly=False)
 
     implements(IGSChangePagePrivacy)
@@ -34,7 +26,14 @@ class ChangePivacyForm(PageForm):
         PageForm.__init__(self, folder, request)
         self.folder = folder
         self.siteInfo = createObject('groupserver.SiteInfo', folder)
+        self.hist = GSPageHistory(folder)
+        self.form_fields['view'].custom_widget = radio_widget
+        self.form_fields['change'].custom_widget = radio_widget
 
+    @property
+    def title(self):
+        return self.hist.published.title
+    
     @form.action(label=u'Change', failure='action_failure')
     def handle_change(self, action, data):
         self.status = u'I cannot handle change!'
@@ -46,4 +45,16 @@ class ChangePivacyForm(PageForm):
             self.status = u'<p>There is an error:</p>'
         else:
             self.status = u'<p>There are errors:</p>'
+
+    @property
+    def changePermissionRoles(self):
+        retval = rolesForPermissionOn('Change permissions', self.context)
+        assert type(retval) in (tuple, list),\
+          'retval is a %s, not a tuple or list: %s' % (type(retval), retval) 
+        return retval
+
+    @property
+    def changePermissionRolesDescription(self):
+        return rolesToDescriptions(self.changePermissionRoles)
+
 

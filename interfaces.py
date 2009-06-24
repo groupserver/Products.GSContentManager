@@ -88,25 +88,25 @@ class IGSMangePages(Interface):
 
 anyone = SimpleTerm(
   'anyone', 'anyone',
-  u'Anyone: Anyone, including those that are not logged in.')
+  u'Anyone, including those that are not logged in.')
 members = SimpleTerm(
   'members', 'members',
-  u'Members: Only logged in members.')
+  u'Only logged in members.')
 administrators  = SimpleTerm(
   'administrators', 'administrators',
-  u'Administrators: Only administrators.'
+  u'Only administrators.'
 )
 viewLevels   = SimpleVocabulary([anyone, members, administrators])
 changeLevels = SimpleVocabulary(        [members, administrators])
 
 class IGSChangePagePrivacy(Interface):
-    view = Choice(title=u'View',
-      description=u'Who can view the page.',
+    view = Choice(title=u'View the page',
+      description=u'Which group of users can view the page.',
       required=True,
       vocabulary=viewLevels)
       
-    change = Choice(title=u'Change',
-      description=u'Who can change the page.',
+    change = Choice(title=u'Change the page',
+      description=u'Which group of users can change the page.',
       required=True,
       vocabulary=changeLevels)
 

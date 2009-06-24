@@ -77,9 +77,15 @@
   
   <browser:page 
     for=".interfaces.IGSContentManagerFolderMarker"
-    name="edit_page.html"
+    name="change.html"
     class=".edit_page.EditPageForm"
     permission="zope2.ManageProperties" />
+
+  <browser:page 
+    for=".interfaces.IGSContentManagerFolderMarker"
+    name="privacy.html"
+    class=".changeprivacy.ChangePrivacyForm"
+    permission="zope2.ChangePermissions" />
 
   <browser:page 
     for=".interfaces.IGSContentManagerFolderMarker"
@@ -138,15 +144,21 @@
       order="1"
       permission="zope2.View"/>
     <browser:menuItem 
-      action="edit_page.html"
+      action="change.html"
       title="Change"
       description="Change the contents of the page"
       order="2"
       permission="zope2.ManageProperties"/>
     <browser:menuItem 
+      action="privacy.html"
+      title="Privacy"
+      description="Change the privacy of the page"
+      order="3"
+      permission="zope2.ChangePermissions"/>
+    <browser:menuItem 
       action="history.html"
       title="History"
-      order="3"
+      order="4"
       permission="zope2.ViewHistory"/>
   </browser:menuItems>
 </configure>
