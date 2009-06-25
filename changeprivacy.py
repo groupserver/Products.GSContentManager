@@ -86,14 +86,13 @@ class Permissions(object):
       'GroupMember':    'members',
       'DivisionAdmin':  'administrators',
       'GroupAdmin':     'administrators',
+      'Manager':        'administrators',
     }
     anyone = ('Anonymous', 'Authenticated', 
       'DivisionMember', 'DivisionAdmin',
-      'GroupMember', 'GroupAdmin', 
-      'Manager')
+      'GroupMember', 'GroupAdmin', 'Manager')
     members = ('DivisionMember', 'DivisionAdmin',
-      'GroupMember', 'GroupAdmin', 
-      'Manager')
+      'GroupMember', 'GroupAdmin', 'Manager')
     administrators = ('DivisionAdmin', 'GroupAdmin', 'Manager')
       
     reverseRoleMap = {
@@ -112,13 +111,13 @@ class Permissions(object):
         
     def reduce_roles(self, roles):
         k = self.roleMap.keys()  
-        mapedRoles = [self.roleMap[r] for r in roles if r in k]
+        mapedRoles = set([self.roleMap[r] for r in roles if r in k])
         if ('anyone' in mapedRoles):
             retval = 'anyone'
         elif ('members' in mapedRoles):
             retval = 'members'
-        elif ('admins' in mapedRoles):
-            retval = 'admins'
+        elif ('administrators' in mapedRoles):
+            retval = 'administrators'
         else:
             retval = 'other'
         return retval
@@ -127,8 +126,6 @@ class Permissions(object):
         assert v in self.reverseRoleMap.keys()
         roles = self.reverseRoleMap[v]
         self.page.manage_permission('View', roles)
-        self.page.manage_permission('Access contents information', 
-          roles)
         
     view = property(get_view, set_view)
     

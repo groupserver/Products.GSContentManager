@@ -54,6 +54,7 @@ class GSPageVersion(object):
         retval = utext.encode('ascii', 'xmlcharrefreplace')
         assert type(retval) == str
         return retval
+        
     def set_content(self, data):
         IGSContentPageVersion['content'].bind(self).validate(data)
         self.dataTemplate.write(data)
