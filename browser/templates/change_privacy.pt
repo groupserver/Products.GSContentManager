@@ -55,8 +55,25 @@
         src="/++resource++popup_help-20071218.js">&#160;</script>
       <script type="text/javascript">
         jQuery.noConflict()
+        
+        var view_change_interlock = function (e) {
+          var foo = 0;
+          var bar = jQuery('#form\\.view\\.2').attr('checked');
+          if  (jQuery('#form\\.view\\.2').attr('checked')) {
+            jQuery('#form\\.change\\.0')
+              .attr('disabled', 'disabled')
+              .attr('checked', false);
+            jQuery("#form\\.change\\.0").next('label').css('color', '#aaa');
+            jQuery('#form\\.change\\.1').attr('checked', true).change();
+          } else {
+            jQuery('#form\\.change\\.0').removeAttr('disabled');
+            jQuery("#form\\.change\\.0").next('label').removeAttr('style');
+          }
+        };
+        
         jQuery(document).ready( function () {
             GSPopupFormHelp.init('#changeprivacy');
+            jQuery('#widget-form\\.view input').change(view_change_interlock);
         });
       </script>
     </tal:block>
