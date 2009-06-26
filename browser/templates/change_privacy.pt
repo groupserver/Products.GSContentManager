@@ -56,7 +56,7 @@
         However, the group of people that can view the page must be
         the same size or larger than the group of people who can
         change the page.
-        (Please don't make me draw a Ven diagram&#8230;)
+        (Please don't make me draw a Venn diagram&#8230;)
       </p>
       <form enctype="multipart/form-data"  method="post" action="."
         tal:attributes="action request/URL" id="changeprivacy">
