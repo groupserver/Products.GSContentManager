@@ -35,7 +35,7 @@
       			<span tal:condition="entry/changing">Changing</span>
       			<a tal:condition="not:entry/changing" 
       			  href="#"
-      			  tal:attributes="href string:edit_page.html?form.edited_version=${entry/id}">Change</a>
+      			  tal:attributes="href string:change.html?form.edited_version=${entry/id}">Change</a>
     			</tal:block>
     			<a href="#"
     			  tal:attributes="href string:?form.version=${entry/id}">View&#8230;</a>
@@ -73,7 +73,7 @@
         			<span tal:condition="child/changing">Changing</span>
         			<a tal:condition="not:child/changing" 
         			  href="#"
-        			  tal:attributes="href string:edit_page.html?form.edited_version=${child/id}">Change</a>
+        			  tal:attributes="href string:change.html?form.edited_version=${child/id}">Change</a>
       			</tal:block>
       			<a href="#"
       			  tal:attributes="href string:?form.version=${child/id}">View&#8230;</a>

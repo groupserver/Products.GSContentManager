@@ -55,7 +55,7 @@ class ChangePrivacyForm(PageForm):
             # --=mpj17=-- TODO: make better
             self.status = u'%s Altered who can change the page.' %\
               self.status
-        assert self.status
+        # assert self.status
         assert type(self.status) == unicode
         
     def action_failure(self, action, data, errors):

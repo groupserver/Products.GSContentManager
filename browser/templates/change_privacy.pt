@@ -8,6 +8,24 @@
       <span tal:replace="view/title"/>:
       <span tal:replace="view/siteInfo/name"/>
     </title>
+    <style metal:fill-slot="style">
+      #widget-form\.view {
+        float: left;
+        margin: 0px 1.39em 1.39em 0px;
+      }
+      #widget-form\.view label {
+        margin: 0px 0px 1.39em 0px;
+      }
+      #widget-form\.change label {
+        margin: 0px 0px 2.78em 0px;
+      }
+      #widget-form\.view .value label, #widget-form\.change .value label {
+        margin: 0px;
+      }
+      .disabledLabel {
+        color: #aaa;
+      }
+    </style>
   </head>
   <body>
     <div metal:fill-slot="messages" tal:condition="view/status" 
@@ -32,6 +50,14 @@
       </tal:block>
       <h1><span tal:content="view/label"/> of 
       <cite tal:content="view/title">Page</cite></h1>
+      <p>
+        You can change who can view the page and who can change the
+        page. 
+        However, the group of people that can view the page must be
+        the same size or larger than the group of people who can
+        change the page.
+        (Please don't make me draw a Ven diagram&#8230;)
+      </p>
       <form enctype="multipart/form-data"  method="post" action="."
         tal:attributes="action request/URL" id="changeprivacy">
         <tal:block define="widgets view/widgets">
@@ -55,25 +81,35 @@
         src="/++resource++popup_help-20071218.js">&#160;</script>
       <script type="text/javascript">
         jQuery.noConflict()
-        
-        var view_change_interlock = function (e) {
-          var foo = 0;
-          var bar = jQuery('#form\\.view\\.2').attr('checked');
-          if  (jQuery('#form\\.view\\.2').attr('checked')) {
-            jQuery('#form\\.change\\.0')
-              .attr('disabled', 'disabled')
-              .attr('checked', false);
-            jQuery("#form\\.change\\.0").next('label').css('color', '#aaa');
-            jQuery('#form\\.change\\.1').attr('checked', true).change();
+        var VIEW_ANYONE    = jQuery('#form\\.view\\.0');
+        var VIEW_MEMBERS   = jQuery('#form\\.view\\.1');
+        var VIEW_ADMINS    = jQuery('#form\\.view\\.2');
+        var CHANGE_MEMBERS = jQuery('#form\\.change\\.0');
+        var CHANGE_ADMINS  = jQuery('#form\\.change\\.1');
+        var view_interlock = function (e) {
+          if (VIEW_ADMINS.attr('checked')) {
+            CHANGE_MEMBERS.attr('disabled', 'disabled');
+            CHANGE_MEMBERS.next('label').addClass('disabledLabel');
           } else {
-            jQuery('#form\\.change\\.0').removeAttr('disabled');
-            jQuery("#form\\.change\\.0").next('label').removeAttr('style');
+            CHANGE_MEMBERS.removeAttr('disabled');
+            CHANGE_MEMBERS.next('label').removeClass('disabledLabel');
           }
         };
-        
+        var change_interlock = function (e) {
+          if (CHANGE_MEMBERS.attr('checked')) {
+            VIEW_ADMINS.attr('disabled', 'disabled');
+            VIEW_ADMINS.next('label').addClass('disabledLabel');
+          } else {
+            VIEW_ADMINS.removeAttr('disabled');
+            VIEW_ADMINS.next('label').removeClass('disabledLabel');
+          }
+        };
         jQuery(document).ready( function () {
             GSPopupFormHelp.init('#changeprivacy');
-            jQuery('#widget-form\\.view input').change(view_change_interlock);
+            jQuery('#widget-form\\.view input').change(view_interlock);
+            jQuery('#widget-form\\.change input').change(change_interlock);
+            VIEW_ANYONE.change();
+            CHANGE_MEMBERS.change();
         });
       </script>
     </tal:block>
