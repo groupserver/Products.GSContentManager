@@ -120,14 +120,8 @@
       </script>
       <script type="text/javascript" 
         src="/++resource++wymeditor-20090204/jquery.wymeditor.js">&#160;</script>
-      <!--script type="text/javascript" 
-        src="/++resource++wymeditor-20080123/init.js">&#160;</script-->
-      <script type="text/javascript">
-        jQuery(document).ready( function() {
-            jQuery('#form\\.actions\\.change').addClass('wymupdate');
-            jQuery('.wymeditor').wymeditor();
-        });
-      </script>
+      <script type="text/javascript"
+        src="/++resource++gswym.js">&#160;</script>
     </tal:block>
   </body>
 </html>

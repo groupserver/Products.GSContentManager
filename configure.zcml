@@ -8,6 +8,13 @@
   <browser:resourceDirectory name="gscontenteditor-20080125"
     directory="./browser/" 
     permission="zope2.Public" />
+  <browser:resourceDirectory name="gswymskin"
+    directory="./browser/wymeditor_skins" 
+    permission="zope2.Public" />
+  <browser:resource
+    name="gswym.js"
+    file="./browser/javascript/gswym.js" 
+    permission="zope2.Public" />
     
   <!-- declare a marker interface on the Folder class to allow us 
     to add marker Interfaces, views and adaptation -->
