@@ -1,4 +1,8 @@
-WYMeditor.SKINS['gs'] = {
+// GroupServer Skin for WYMeditor. Based on WYMeditor default skin
+//
+// Michael JasonSmith, OnlineGroups.Net 2009
+//
+WYMeditor.SKINS['default'] = {
 
     init: function(wym) {
 
@@ -22,13 +26,7 @@ WYMeditor.SKINS['gs'] = {
           .parents("div.wym_area_left").show()
           .parents(wym._options.boxSelector)
           .find("div.wym_area_main")
-          .css({"margin-left": "8.34em"});
+          .css({"margin-left": "155px"});
 
-        //make hover work under IE < 7
-        jQuery(wym._box).find(".wym_section").hover(function(){
-          jQuery(this).addClass("hover");
-        },function(){
-          jQuery(this).removeClass("hover");
-        });
     }
 };
