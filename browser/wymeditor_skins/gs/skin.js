@@ -2,7 +2,7 @@
 //
 // Michael JasonSmith, OnlineGroups.Net 2009
 //
-WYMeditor.SKINS['default'] = {
+WYMeditor.SKINS['gs'] = {
 
     init: function(wym) {
 
@@ -20,7 +20,7 @@ WYMeditor.SKINS['default'] = {
           .parents("div.wym_area_right").show()
           .parents(wym._options.boxSelector)
           .find("div.wym_area_main")
-          .css({"margin-right": "8.34em"});
+          .css({"margin-right": "10.05em"});
 
         jQuery(wym._box).find("div.wym_area_left ul")
           .parents("div.wym_area_left").show()

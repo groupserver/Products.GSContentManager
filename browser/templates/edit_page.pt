@@ -11,17 +11,11 @@
       <span tal:replace="string:${view/siteInfo/name}"/>
     </title>
     <tal:block metal:fill-slot="style">
-     <link rel="stylesheet" 
-      type="text/css" media="screen" 
-      href="/++resource++wymeditor-20080123/skins/default/screen.css" />
-    <style type="text/css">
-        .history td, .history th {
-          padding: 0.69em 1.39em;
-        }
-        .wym_skin_default .wym_iframe iframe {
-          height: 60em;
-        }
-    </style>
+      <style type="text/css">
+          .history td, .history th {
+            padding: 0.69em 1.39em;
+          }
+      </style>
     </tal:block>
   </head>
   <body>
