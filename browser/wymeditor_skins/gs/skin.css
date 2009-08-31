@@ -75,13 +75,9 @@
 .wym_skin_gs .wym_section {
   margin-bottom: 0.69em;
 }
-
-.wym_skin_gs .wym_html, .wym_skin_gs .wym_html textarea{ 
-  width: 100%;
+.wym_skin_gs .wym_html, .wym_skin_gs .wym_html textarea {
   margin: 0.69em 0px 1.39em 0px;
-  
 }
-
 .wym_dialog {
   font-size: small;
 }
