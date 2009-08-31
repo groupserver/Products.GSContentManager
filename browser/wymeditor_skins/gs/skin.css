@@ -21,160 +21,120 @@
   border: none;
   list-style: none;
 }
-
+.wym_skin_gs, .wym_dialog {
+  font-family: Trebuchet,'Trebuchet MS',arial,helvetica,clean,sans-serif;
+  line-height: 1.39em;
+}
+/**********/
+/* Layout */
+/**********/
 
 /*HIDDEN BY DEFAULT*/
-.wym_skin_gs .wym_area_left { 
+.wym_skin_gs .wym_area_left, .wym_box .wym_area_top .wym_tools h2, .wym_box .wym_area_main .wym_status h2, .wym_skin_gs .wym_dropdown ul, .wym_classes {
   display: none;
 }
-.wym_skin_gs .wym_area_right {
-  display: block;
-}
 
-/*WYM_BOX*/
-.wym_skin_gs { 
-  border: thin solid #41638B;
-  background: white;
+.wym_skin_gs, .wym_dialog {
   padding: 0.69em;
 }
 
-/*auto-clear the wym_box*/
-.wym_skin_gs:after {
-  content: "."; 
-  display: block; 
-  height: 0; 
-  clear: both; 
-  visibility: hidden; 
+.wym_skin_gs .wym_area_left, .wym_skin_gs .wym_area_right {
+  width: 9.38em; 
 }
-
-* html .wym_skin_gs { 
-  height: 1%; /*--=mpj17=-- Eh? */
-}
-/*WYM_HTML*/
-.wym_skin_gs .wym_html { 
-  width: 98%;
-}
-.wym_skin_gs .wym_html textarea {
-  width: 100%; 
-  height: 33.36em; 
-  border: thin solid #41638B;
-  background: white;
-}
-
-
-/*WYM_IFRAME*/
-.wym_skin_gs .wym_iframe { 
-  width: 100%;
-  border: thin solid #41638B;
-}
-.wym_skin_gs .wym_iframe iframe { 
-  width: 100%; 
-  border: none;
-  height: 33.36em; 
-  background: white;
-}
-
-
-/*AREAS*/
-.wym_skin_gs .wym_area_left { 
-  width: 8.34em; 
+.wym_skin_gs .wym_area_left, .wym_skin_gs .wym_buttons li { 
   float: left;
 }
-.wym_skin_gs .wym_area_right {
-  width: 9.38em; 
+.wym_skin_gs .wym_area_right, a.wym_wymeditor_link {
   float: right;
 }
-.wym_skin_gs .wym_area_bottom        {
-  height: 1%; 
+.wym_skin_gs .wym_area_bottom {
   clear: both;
 }
-* html .wym_skin_gs .wym_area_main {
-  height: 1%;
+.wym_skin_gs .wym_area_bottom, * html .wym_skin_gs .wym_area_main, * html .wym_skin_gs .wym_area_top, *+html .wym_skin_gs .wym_area_top, * html .wym_skin_gs, * html .wym_skin_gs .wym_section ul { 
+  height: 1%; /*--=mpj17=-- Eh? */
 }
-* html .wym_skin_gs .wym_area_top { 
-  height: 1%;
+.wym_skin_gs .wym_html textarea, .wym_skin_gs .wym_iframe, .wym_skin_gs .wym_iframe iframe  {
+  width: 100%; 
+  height: 33.36em; 
 }
-*+html .wym_skin_gs .wym_area_top {
-  height: 1%;
+.wym_skin_gs .wym_section a, .wym_dialog div.row label, a.wym_wymeditor_link {
+  display: block; 
 }
-
-/*SECTIONS SYSTEM*/
-
-/*common defaults for all sections*/
+.wym_skin_gs .wym_section h2, .wym_skin_gs .wym_section h3, .wym_skin_gs .wym_section a {
+  font-size: 100%;
+  padding: 0.34em 0.69em 0.34em 0.69em ;
+  margin: 0px;
+}
+.wym_dialog div.row label {
+  margin: 0px 0px 0.69em 1.39em;
+}
+.wym_dialog div.row-indent {
+  padding: 0px;
+  margin: 2.87em 0px 0px 0px;
+}
 .wym_skin_gs .wym_section {
   margin-bottom: 0.69em;
 }
-.wym_skin_gs .wym_section h2, .wym_skin_gs .wym_section h3 {
-  display: block;
-  padding: 0px 0.69em 0px 0.69em;
-  margin: 0px;
+
+.wym_skin_gs .wym_html, .wym_skin_gs .wym_html textarea{ 
+  width: 100%;
+  margin: 0.69em 0px 1.39em 0px;
+  
 }
-.wym_box .wym_area_top .wym_tools h2, .wym_box .wym_area_main .wym_status h2 {
-  display: none;
+
+.wym_dialog {
+  font-size: small;
 }
-.wym_skin_gs .wym_section a {
-  padding: 0.34em 0.69em 0.34em 0.69em  ; 
-  display: block; 
+.wym_dialog legend {
+  font-size: 153.9%;
+  margin: 0px 0px 0.9em 0px;
+}
+.wym_dialog fieldset {
+  border: none;
+}
+.wym_dialog div.row {
+  margin-bottom: 1.39em;
+}
+.wym_dialog div.row input {
+  margin: 0px 0px 0px 2.78em;
+}
+.wym_dialog .row .wym_submit {
+  margin-left: 0px;
+}
+
+/*********/
+/* Style */
+/*********/
+.wym_skin_gs, .wym_skin_gs .wym_html textarea, .wym_skin_gs .wym_iframe, .wym_skin_gs .wym_area_top .wym_buttons ul li a:hover, .wym_skin_gs .wym_section h2 { 
+  border: thin solid #41638B;
+}
+.wym_skin_gs .wym_section h2 {
+  border-width: 0 0 thin 0;
+}
+.wym_skin_gs .wym_iframe iframe, .wym_dialog fieldset { 
+  border: none;
+}
+.wym_section h3, .wym_skin_gs .wym_section a, .wym_dialog label, .wym_dialog legend {
   text-decoration: none; 
   color: #01375B;
   background: none;
 }
-.wym_skin_gs .wym_section a:hover {
-  background-color: none;
-}
-.wym_skin_gs .wym_containers a:hover { 
+.wym_skin_gs .wym_containers a:hover, .wym_skin_gs .wym_section h2 { 
   color: #F0ECD8;
   background-color: #839AB8;
 }
-/*auto-clear sections*/
-.wym_skin_gs .wym_section ul:after { 
-  content: "."; 
-  display: block; 
-  height: 0; 
-  clear: both; 
-  visibility: hidden;
-}
-* html .wym_skin_gs .wym_section ul { 
-  height: 1%;
-}
 
-/*option: add this class to a section to make it render as a panel*/
-.wym_skin_gs .wym_panel              { }
-.wym_skin_gs .wym_panel h2 {
-  display: block;
+a.wym_wymeditor_link, .wym_skin_gs .wym_buttons li a { 
+  overflow: hidden; 
+  text-indent: -9999px;
 }
-
-/*option: add this class to a section to make it render as a dropdown menu*/
-.wym_skin_gs .wym_dropdown h2        { display: block; }
-.wym_skin_gs .wym_dropdown ul        {
-  display: none; 
-  position: absolute; 
-  background: white;
-}
-.wym_skin_gs .wym_dropdown:hover ul,
-.wym_skin_gs .wym_dropdown.hover ul  { display: block; }
-
-/*option: add this class to a section to make its elements render buttons (icons are only available for the wym_tools section for now)*/
-.wym_skin_gs .wym_buttons li { 
-  float:left;
-}
-.wym_skin_gs .wym_buttons a { 
+.wym_skin_gs .wym_buttons li a { 
   width: 20px; 
   height: 20px; 
-  overflow: hidden; 
   padding: 2px;
-}
-/*image replacements*/
-.wym_skin_gs .wym_buttons li a { 
   background: url(icons.png) no-repeat; 
-  text-indent: -9999px;
   border: thin solid white;
 }
-
-.wym_skin_gs .wym_area_top .wym_buttons ul li a:hover {
-  background-color: none;
-  border: thin solid #41638B;
-} 
 .wym_skin_gs .wym_buttons li.wym_tools_strong a        { background-position: 0 -382px;}
 .wym_skin_gs .wym_buttons li.wym_tools_emphasis a      { background-position: 0 -22px;}
 .wym_skin_gs .wym_buttons li.wym_tools_superscript a   { background-position: 0 -430px;}
@@ -193,91 +153,19 @@
 .wym_skin_gs .wym_buttons li.wym_tools_html a          { background-position: 0 -193px;}
 .wym_skin_gs .wym_buttons li.wym_tools_preview a       { background-position: 0 -408px;}
 
-/*DECORATION*/
-.wym_skin_gs .wym_section h2 { 
-  font-size: 100%;
-  color: #F0ECD8;
-  background: #839AB8; 
-  border: thin solid #41638B;
-  border-width: 0 0 thin 0;
-}
-.wym_skin_gs .wym_panel { padding: 0px; 
-  border: thin solid #41638B;;
-  background: white;
+a.wym_wymeditor_link { 
+  width: 50px; 
+  height: 15px; 
+  background: url(/++resource++wymeditor-20090204/skins/wymeditor_icon.png);  
+  text-decoration: none;
 }
 
-/*--=mpj17=-- Unused */
-.wym_skin_gs .wym_panel ul {
-  margin: 2px 0 5px;   /*--=mpj17=-- Unused */
-}
-.wym_skin_gs .wym_dropdown { padding: 0; 
-  border: solid gray; 
-  border-width: 1px 1px 0 1px;
-}
-.wym_skin_gs .wym_dropdown ul { border: solid gray; 
-  border-width: 0 1px 1px 1px; 
-  margin-left: -1px; 
-  padding: 5px 10px 5px 3px;
-}
-
-/*DIALOGS*/
-.wym_dialog {
-  font-family: Trebuchet,'Trebuchet MS',arial,helvetica,clean,sans-serif;
-  line-height: 1.39em;
-  font-size: small;
-  padding: 0.69em;
-}
-.wym_dialog label, .wym_dialog legend {
-  color: #01375B;
-  background: none;
-}
-.wym_dialog legend {
-  font-size: 153.9%;
-  margin: 0px 0px 0.9em 0px;
-}
-.wym_dialog fieldset {
-  border: none;
-}
-.wym_dialog div.row {
-  margin-bottom: 1.39em;
-}
-.wym_dialog div.row label {
-  display: block; 
-  margin: 0px 0px 0.69em 1.39em;
-}
-.wym_dialog div.row input {
-  margin: 0px 0px 0px 2.78em;
-}
-.wym_dialog div.row-indent  {
-  display: block;
-  padding: 0px;
-  margin: 2.87em 0px 0px 0px;
-}
-.wym_dialog .row .wym_submit {
-  margin-left: 0px;
-}
 /*autoclearing*/        
-.wym_dialog div.row:after {
+.wym_dialog div.row:after, .wym_skin_gs:after, .wym_skin_gs .wym_section ul:after {
   content: "."; 
   display: block; 
   height: 0; 
   clear: both; 
-  visibility: hidden;
-}
-
-/*WYMEDITOR_LINK*/
-a.wym_wymeditor_link { 
-  text-indent: -9999px; 
-  float: right; 
-  display: block; 
-  width: 50px; 
-  height: 15px; 
-  background: url(/++resource++wymeditor-20090204/skins/wymeditor_icon.png);  
-  overflow: hidden; 
-  text-decoration: none;
-}
-
-.wym_classes {
-  display: none;
+  visibility: hidden; 
 }
 
