@@ -49,10 +49,8 @@ class GSPageVersion(object):
         # Zope Five cannot handle Unicode everywhere yet. So we 
         #   ensure that we hand back ASCII, with XML character
         #   references replacing the Unicode characters.
-        utext = self.dataTemplate().decode('utf-8')
-        assert type(utext) == unicode
-        retval = utext.encode('ascii', 'xmlcharrefreplace')
-        assert type(retval) == str
+        utext = self.dataTemplate()
+        retval = utext.encode('utf-8','xmlcharrefreplace')
         return retval
         
     def set_content(self, data):
