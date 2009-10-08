@@ -1,4 +1,4 @@
-version='0.98'
+version='1.0'
 release=False
 
 import commands, glob, os
