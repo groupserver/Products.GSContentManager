@@ -1,8 +1,12 @@
 # coding=utf-8
 '''Implementation of the Page Privacy form.
 '''
+try:
+    from five.formlib.formbase import PageForm
+except ImportError:
+    from Products.Five.formlib.formbase import PageForm
+
 from AccessControl.PermissionRole import rolesForPermissionOn
-from Products.Five.formlib.formbase import PageForm
 from zope.component import createObject, adapts
 from zope.interface import implements, providedBy, implementedBy
 from zope.formlib import form

@@ -1,11 +1,15 @@
 # coding=utf-8
 '''Implementation of the Edit Page form.
 '''
+try:
+    from Products.Five.formlib.formbase import PageForm
+except ImportError:
+    from five.formlib.formbase import PageForm
+
 from time import strftime, gmtime, time
 import difflib, pytz
 from datetime import datetime
 from base64 import b64encode
-from Products.Five.formlib.formbase import PageForm
 from zope.component import createObject, adapts
 from zope.interface import implements, providedBy, implementedBy,\
   directlyProvidedBy, alsoProvides
