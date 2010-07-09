@@ -1,7 +1,10 @@
 # coding=utf-8
 '''Implementation of the Edit Page form.
 '''
-from Products.Five.formlib.formbase import PageForm
+try:
+    from five.formlib.formbase import PageForm
+except ImportError:
+    from Products.Five.formlib.formbase import PageForm
 from zope.component import createObject, adapts
 from zope.component.interfaces import IFactory
 from zope.interface import implements, providedBy, implementedBy,\
