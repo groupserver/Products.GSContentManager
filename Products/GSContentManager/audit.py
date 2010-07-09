@@ -177,7 +177,6 @@ class EditContentEvent(BasicAuditEvent):
           u'%s (%s)\n%s' %\
           (self.userInfo.name, self.userInfo.id, title, url,
            self.siteInfo.name, self.siteInfo.id, uDiff)
-        print retval
         return retval
     
     @property
@@ -325,7 +324,6 @@ class RenamePageEvent(BasicAuditEvent):
           (cssClass, self.instanceDatum, self.instanceDatum,
            self.supplementaryDatum, self.supplementaryDatum,
            munge_date(self.context, self.date))
-        print 'Here'
         assert retval
         return retval
 

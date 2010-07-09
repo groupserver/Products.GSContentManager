@@ -66,8 +66,8 @@ if not sys.modules.has_key('Testing'):
             break
         p, d = s and ('','') or os.path.split(p)
     else:
-        print 'Unable to locate Testing package.',
-        print 'You might need to set SOFTWARE_HOME.'
+        sys.stderr.write('Unable to locate Testing package.\n')
+        sys.stderr.write('You might need to set SOFTWARE_HOME.\n')
         sys.exit(1)
 
 import Testing, unittest
@@ -80,8 +80,8 @@ if 1:   # Create a new scope
     p = os.path.join(os.path.dirname(Testing.__file__), 'ZopeTestCase')
 
     if not os.path.isdir(p):
-        print 'Unable to locate ZopeTestCase package.',
-        print 'You might need to install ZopeTestCase.'
+        sys.stderr.write('Unable to locate ZopeTestCase package.\n')
+        sys.stderr.write('You might need to install ZopeTestCase.\n')
         sys.exit(1)
 
     ztc_common = 'ztc_common.py'
@@ -96,12 +96,12 @@ if 1:   # Create a new scope
         f = 1
 
     if not f:
-        print 'Unable to locate %s.' % ztc_common
+        sys.stderr.write('Unable to locate %s.\n' % ztc_common)
         sys.exit(1)
 
 # Debug
 #
-print 'SOFTWARE_HOME: %s' % os.environ.get('SOFTWARE_HOME', 'Not set')
-print 'INSTANCE_HOME: %s' % os.environ.get('INSTANCE_HOME', 'Not set')
+sys.stderr.write('SOFTWARE_HOME: %s\n' % os.environ.get('SOFTWARE_HOME', 'Not set'))
+sys.stderr.write('INSTANCE_HOME: %s\n' % os.environ.get('INSTANCE_HOME', 'Not set'))
 sys.stdout.flush()
 
