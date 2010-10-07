@@ -12,7 +12,7 @@ from zope.interface import implements, providedBy, implementedBy
 from zope.formlib import form
 from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
 from Products.XWFCore.XWFUtils import comma_comma_and
-from Products.GSGroup.changebasicprivacy import radio_widget
+from gs.content.form.radio import radio_widget
 from interfaces import IGSChangePagePrivacy
 from utils import *
 from page_history import GSPageHistory
