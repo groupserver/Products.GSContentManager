@@ -43,7 +43,7 @@
         </tal:block>
       </dl>
     </div>
-    <tal:block metal:fill-slot="body">
+    <div metal:fill-slot="body" id="products-gscontentmanager-privacy">
       <tal:block 
         replace="structure provider:groupserver.ContentManagerTabMenu">
         Tab Menu
@@ -60,9 +60,19 @@
       </p>
       <form enctype="multipart/form-data"  method="post" action="."
         tal:attributes="action request/URL" id="changeprivacy">
-        <tal:block define="widgets view/widgets">
-          <tal:block replace="structure provider:groupserver.FormWidgets"/>
-        </tal:block>
+        <div class="cols">
+          <div class="rightColumn" 
+            tal:define="widgets python:[view.widgets['change']]"
+            tal:content="structure provider:groupserver.FormWidgets">
+            Who can change.
+          </div>
+          <div class="leftColumn"
+            tal:define="widgets python:[view.widgets['view']]"
+            tal:content="structure provider:groupserver.FormWidgets">
+            Who can view.
+          </div>
+        </div>
+        <div class="noFloat">&#160;</div>
         <p>The privacy settings can be changed by
           <span 
             tal:content="view/changePermissionRolesDescription">no 
@@ -75,7 +85,7 @@
           </tal:block>
         </div><!--buttons-->
       </form>
-    </tal:block>
+    </div><!--products-gscontentmanager-privacy-->
     <tal:block metal:fill-slot="javascript">
       <script type="text/javascript"
         src="/++resource++popup_help-20071218.js">&#160;</script>
