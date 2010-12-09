@@ -53,9 +53,9 @@ class GSContentManagerTabMenuContentProvider(object):
     
     def page_class(self, page):
         if page['selected']:
-            retval = 'current'
+            retval = 'ui-state-default ui-corner-top ui-tabs-selected ui-state-active'
         else:
-            retval = 'not-current'
+            retval = 'ui-state-default ui-corner-top'
         assert retval
         return retval
         
