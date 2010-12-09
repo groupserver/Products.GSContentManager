@@ -1,4 +1,3 @@
-
 var options = {
   skinPath: '/++resource++gswymskin/gs/',
   skin: 'gs',

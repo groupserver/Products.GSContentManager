@@ -1,3 +1,5 @@
+/* Group Server uses the WYMeditor to provide rich-text editing of */
+/* pages. */
 /*
  * WYMeditor skin for GroupServer.
  *
@@ -12,7 +14,6 @@
  *      http://www.wymeditor.org/
  *
 */
-
 /*TRYING TO RESET STYLES THAT MAY INTERFERE WITH WYMEDITOR*/
 .wym_skin_gs p, .wym_skin_gs h2, .wym_skin_gs h3, .wym_skin_gs ul, .wym_skin_gs li {
   background: transparent url(); 
@@ -23,23 +24,21 @@
 }
 .wym_skin_gs, .wym_dialog {
   font-family: Trebuchet,'Trebuchet MS',arial,helvetica,clean,sans-serif;
-  line-height: 1.39em;
+  line-height: 1.385em;
 }
-/**********/
 /* Layout */
-/**********/
-
 /*HIDDEN BY DEFAULT*/
 .wym_skin_gs .wym_area_left, .wym_box .wym_area_top .wym_tools h2, .wym_box .wym_area_main .wym_status h2, .wym_skin_gs .wym_dropdown ul, .wym_classes {
   display: none;
 }
-
-.wym_skin_gs, .wym_dialog {
-  padding: 0.69em;
+.wym_box {
+  margin: 0.692em 0 1.385em 2.077em;
 }
-
+.wym_skin_gs, .wym_dialog {
+  padding: 0.692em;
+}
 .wym_skin_gs .wym_area_left, .wym_skin_gs .wym_area_right {
-  width: 9.38em; 
+  width: 9.692em; /* 6u */
 }
 .wym_skin_gs .wym_area_left, .wym_skin_gs .wym_buttons li { 
   float: left;
@@ -51,32 +50,32 @@
   clear: both;
 }
 .wym_skin_gs .wym_area_bottom, * html .wym_skin_gs .wym_area_main, * html .wym_skin_gs .wym_area_top, *+html .wym_skin_gs .wym_area_top, * html .wym_skin_gs, * html .wym_skin_gs .wym_section ul { 
-  height: 1%; /*--=mpj17=-- Eh? */
+  height: 1%; /*--=mpj17=-- Opera hack? */
 }
 .wym_skin_gs .wym_html textarea, .wym_skin_gs .wym_iframe, .wym_skin_gs .wym_iframe iframe  {
   width: 100%; 
-  height: 33.36em; 
+  height: 33.231em; /* 24u */
 }
 .wym_skin_gs .wym_section a, .wym_dialog div.row label, a.wym_wymeditor_link {
   display: block; 
 }
 .wym_skin_gs .wym_section h2, .wym_skin_gs .wym_section h3, .wym_skin_gs .wym_section a {
   font-size: 100%;
-  padding: 0.34em 0.69em 0.34em 0.69em ;
+  padding: 0.346em 0.692em; /* 0.25u 0.5u */
   margin: 0px;
 }
 .wym_dialog div.row label {
-  margin: 0px 0px 0.69em 1.39em;
+  margin: 0 0 0.692em 1.385em;
 }
 .wym_dialog div.row-indent {
   padding: 0px;
-  margin: 2.87em 0px 0px 0px;
+  margin: 2.769em 0 0 0;
 }
 .wym_skin_gs .wym_section {
-  margin-bottom: 0.69em;
+  margin-bottom: 0.692em;
 }
 .wym_skin_gs .wym_html, .wym_skin_gs .wym_html textarea {
-  margin: 0.69em 0px 1.39em 0px;
+  margin: 0.692em 0 1.385em 0;
 }
 .wym_dialog {
   font-size: small;
@@ -89,20 +88,16 @@
   border: none;
 }
 .wym_dialog div.row {
-  margin-bottom: 1.39em;
+  margin-bottom: 1.385em;
 }
 .wym_dialog div.row input {
-  margin: 0px 0px 0px 2.78em;
+  margin: 0 0 0 2.769em;
 }
 .wym_dialog .row .wym_submit {
-  margin-left: 0px;
+  margin-left: 0;
 }
-
-/*********/
-/* Style */
-/*********/
 .wym_skin_gs, .wym_skin_gs .wym_html textarea, .wym_skin_gs .wym_iframe, .wym_skin_gs .wym_area_top .wym_buttons ul li a:hover, .wym_skin_gs .wym_section h2 { 
-  border: thin solid #41638B;
+  border: thin solid black;
 }
 .wym_skin_gs .wym_section h2 {
   border-width: 0 0 thin 0;
@@ -112,14 +107,8 @@
 }
 .wym_section h3, .wym_skin_gs .wym_section a, .wym_dialog label, .wym_dialog legend {
   text-decoration: none; 
-  color: #01375B;
   background: none;
 }
-.wym_skin_gs .wym_containers a:hover, .wym_skin_gs .wym_section h2 { 
-  color: #F0ECD8;
-  background-color: #839AB8;
-}
-
 a.wym_wymeditor_link, .wym_skin_gs .wym_buttons li a { 
   overflow: hidden; 
   text-indent: -9999px;
@@ -155,8 +144,6 @@ a.wym_wymeditor_link {
   background: url(/++resource++wymeditor-20090831/skins/wymeditor_icon.png);  
   text-decoration: none;
 }
-
-/*autoclearing*/        
 .wym_dialog div.row:after, .wym_skin_gs:after, .wym_skin_gs .wym_section ul:after {
   content: "."; 
   display: block; 

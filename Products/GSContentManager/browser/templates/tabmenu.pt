@@ -1,6 +1,6 @@
 <tal:block define="view options/view;">
   <div id="tabmenu" 
-    class="tabs ui-tabs ui-widget ui-widget-content ui-corner-all"
+    class="tabs ui-tabs ui-widget ui-corner-all"
     tal:condition="view/show">
     <ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">
       <!--tal:block repeat="page view/pages"-->
