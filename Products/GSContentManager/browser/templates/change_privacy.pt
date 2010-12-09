@@ -8,41 +8,11 @@
       <span tal:replace="view/title"/>:
       <span tal:replace="view/siteInfo/name"/>
     </title>
-    <style metal:fill-slot="style">
-      #widget-form\.view {
-        float: left;
-        margin: 0px 1.39em 1.39em 0px;
-      }
-      #widget-form\.view label {
-        margin: 0px 0px 1.39em 0px;
-      }
-      #widget-form\.change label {
-        margin: 0px 0px 2.78em 0px;
-      }
-      #widget-form\.view .value label, #widget-form\.change .value label {
-        margin: 0px;
-      }
-      .disabledLabel {
-        color: #aaa;
-      }
-    </style>
   </head>
   <body>
-    <div metal:fill-slot="messages" tal:condition="view/status" 
-      class="message-error"
-      tal:define="e view/errors"
-      tal:attributes="class python:e and 'message-error' or 'message-result'">
-      <p class="form-status" tal:content="structure view/status"/>
-      <dl tal:condition="view/errors">
-        <tal:block repeat="widget view/widgets">
-          <tal:block tal:condition="widget/error">
-            <dt tal:content="widget/label">Widget Name</dt>
-            <dd class="error" 
-              tal:content="structure widget/error">Error message</dd>
-          </tal:block>
-        </tal:block>
-      </dl>
-    </div>
+    <tal:block content="structure provider:groupserver.FormStatusMessage"
+      define="errors view/errors; status view/status; widgets view/widgets"
+      metal:fill-slot="messages">&#160;</tal:block>
     <div metal:fill-slot="body" id="products-gscontentmanager-privacy">
       <tal:block 
         replace="structure provider:groupserver.ContentManagerTabMenu">
