@@ -1,3 +1,4 @@
+# coding=utf-8
 import os
 from zope.component import adapts, createObject
 from interfaces import *
@@ -11,7 +12,7 @@ from lxml import etree
 from StringIO import StringIO
 import interfaces
 from Products.Five import BrowserView
-
+from changeprivacy import Permissions
 from page_history import GSPageHistory
 
 class GSContentPage(BrowserView):
@@ -29,7 +30,7 @@ class GSContentPage(BrowserView):
         self.siteInfo = createObject('groupserver.SiteInfo',
           context)
         self.pageHistory = GSPageHistory(context)
-        self.__userInfo = None
+        self.__userInfo = self.__showChangeLink = None
     
     @property
     def userInfo(self):
@@ -39,7 +40,21 @@ class GSContentPage(BrowserView):
         retval = self.__userInfo
         assert retval
         return retval
-        
+
+    @property
+    def showChangeLink(self):
+        '''The Change link is a bit special. It is *only* shown to the
+            anonymous user iff members can edit the page. This is
+            because the person viewing the page can easily acquire
+            the privilages required to edit the page.'''
+        if self.__showChangeLink == None:
+            perms = Permissions(self.context)
+            memberChange = perms.get_change() == 'members'
+            anon = self.userInfo.anonymous
+            self.__showChangeLink = memberChange and anon
+        assert type(self.__showChangeLink) == bool
+        return self.__showChangeLink
+    
     @property
     def version(self):
         '''The version of the page to display. 
