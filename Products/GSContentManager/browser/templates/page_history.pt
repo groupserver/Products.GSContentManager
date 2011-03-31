@@ -37,8 +37,9 @@
       			  href="#"
       			  tal:attributes="href string:change.html?form.edited_version=${entry/id}">Change</a>
     			</tal:block>
-    			<a href="#"
-    			  tal:attributes="href string:?form.version=${entry/id}">View&#8230;</a>
+    			<a class="view-link"
+    			  tal:attributes="href string:${view/request/URL1}/?form.version=${entry/id}"
+    			   href="#">View&#8230;</a>
     		  <a href="#" class="fn"
     		    tal:define="c python:bool(entry['children']);
     		      a entry/editor/anonymous;"
