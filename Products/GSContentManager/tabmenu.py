@@ -7,6 +7,8 @@ from Products.CustomUserFolder.interfaces import IGSUserInfo
 from interfaces import *
 from zope.app.publisher.browser.menu import getMenu
 
+from AccessControl.security import newInteraction
+
 import logging
 log = logging.getLogger('GSContentManagerTabMenuContentProvider')
 
@@ -26,6 +28,8 @@ class GSContentManagerTabMenuContentProvider(object):
         self.context = context
         self.request = request
         self.__userInfo = None
+
+        newInteraction()
         
     def update(self):
         self.__updated = True
