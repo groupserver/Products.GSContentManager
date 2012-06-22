@@ -235,8 +235,7 @@ class EditAttributeEvent(BasicAuditEvent):
           siteInfo, None,  instanceDatum, supplementaryDatum, 
           SUBSYSTEM)
           
-        da = context.zsqlalchemy
-        self.query = EnrolmentQuery(context, da)
+        self.query = EnrolmentQuery(context)
         self.__offeringName = None
             
     def __str__(self):
@@ -297,8 +296,7 @@ class RenamePageEvent(BasicAuditEvent):
           siteInfo, None,  instanceDatum, supplementaryDatum, 
           SUBSYSTEM)
           
-        da = context.zsqlalchemy
-        self.query = EnrolmentQuery(context, da)
+        self.query = EnrolmentQuery(context)
         self.__offeringName = None
             
     def __str__(self):
@@ -386,9 +384,7 @@ class PageEditAuditor(object):
         self.userInfo = createObject('groupserver.LoggedInUser',page)
         self.siteInfo = createObject('groupserver.SiteInfo', page)
 
-        da = page.zsqlalchemy
-        assert da, 'ZSQLAlchemy data adaptor not found'
-        self.queries = AuditQuery(da)
+        self.queries = AuditQuery()
       
         self.factory = EditPageAuditEventFactory()
         
