@@ -18,7 +18,6 @@
     name="gswym.js"
     file="./browser/javascript/gswym.js" 
     permission="zope2.Public" />
-  </class>
   
   <adapter 
     factory=".pageversion.GSPageVersion"
