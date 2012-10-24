@@ -1,10 +1,11 @@
 # coding=utf-8
 from AccessControl.PermissionRole import rolesForPermissionOn
-from interfaces import *
-from zope.interface import implements
-from zope.component import adapts
+from zope.interface import implements, Interface
+from zope.component import adapts, provideAdapter
+from zope.contentprovider.interfaces import UpdateNotCalled, IContentProvider
 from zope.pagetemplate.pagetemplatefile import PageTemplateFile
-import interfaces
+from zope.publisher.interfaces.browser import IDefaultBrowserLayer
+from interfaces import IGSContentPagePrivacyContentProvider
 from utils import rolesToDescriptions
 
 
@@ -12,9 +13,7 @@ class GSContentPagePrivacyContentProvider(object):
     """ Provides the privacy description of a page """
 
     implements(IGSContentPagePrivacyContentProvider)
-    adapts(zope.interface.Interface,
-        zope.publisher.interfaces.browser.IDefaultBrowserLayer,
-        zope.interface.Interface)
+    adapts(Interface, IDefaultBrowserLayer, Interface)
 
     def __init__(self, context, request, view):
         self.__parent__ = self.view = view
@@ -30,7 +29,7 @@ class GSContentPagePrivacyContentProvider(object):
 
     def render(self):
         if not self.__updated:
-            raise interfaces.UpdateNotCalled
+            raise UpdateNotCalled
 
         pageTemplate = PageTemplateFile(self.pageTemplateFileName)
         return pageTemplate(view=self)
@@ -68,6 +67,5 @@ class GSPagePrivacy(object):
           'retval is a %s, not a tuple or list: %s' % (type(retval), retval)
         return retval
 
-zope.component.provideAdapter(GSContentPagePrivacyContentProvider,
-    provides=zope.contentprovider.interfaces.IContentProvider,
-    name="groupserver.ContentPagePrivacy")
+provideAdapter(GSContentPagePrivacyContentProvider, provides=IContentProvider,
+                name="groupserver.ContentPagePrivacy")
