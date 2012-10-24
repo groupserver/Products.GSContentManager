@@ -2,7 +2,7 @@
 from zope.component import createObject
 from interfaces import *
 from zope.interface import implements
-from gs.content.base import SitePage
+from gs.content.base.page import SitePage
 from changeprivacy import Permissions
 from page_history import GSPageHistory
 

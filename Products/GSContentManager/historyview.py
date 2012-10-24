@@ -1,5 +1,5 @@
 # coding=utf-8
-from gs.content.base import SitePage
+from gs.content.base.page import SitePage
 from page_history import GSPageHistory
 
 
