@@ -1,18 +1,13 @@
 # coding=utf-8
-from Products.Five import BrowserView
-from zope.component import adapts, createObject
+from gs.content.base import SitePage
 from page_history import GSPageHistory
-from interfaces import IGSContentPage
 
-class GSPHistoryView(BrowserView):
+
+class GSPHistoryView(SitePage):
     def __init__(self, folder, request):
-        self.context = self.folder = folder
-        self.request = request
-        self.siteInfo = createObject('groupserver.SiteInfo', folder)
-        self.__userInfo = None
-
+        super(GSPHistoryView, self).__init__(folder, request)
         self.hist = GSPageHistory(folder)
-        
+
     @property
     def title(self):
         return self.hist.published.title
@@ -21,17 +16,11 @@ class GSPHistoryView(BrowserView):
     def showChange(self):
         uo = self.userInfo.user
         p = uo.has_permission('Manage properties', self.folder)
-        retval = p != None
+        retval = p is not None
         assert type(retval) == bool, \
           'Returning %s, not bool.' % retval
         return retval
 
     @property
     def userInfo(self):
-        if self.__userInfo == None:
-            self.__userInfo = createObject('groupserver.LoggedInUser',
-              self.folder)
-        retval = self.__userInfo
-        assert retval
-        return retval
-
+        return self.loggedInUser

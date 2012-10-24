@@ -6,6 +6,7 @@ from Products.XWFCore.XWFUtils import comma_comma_and
 
 CONTENT_TEMPLATE = 'content_en'
 
+
 def new_version(folder, newId):
     '''Create a new (blank) version of a document'''
     manageAdd = folder.manage_addProduct['PageTemplates']
@@ -13,7 +14,7 @@ def new_version(folder, newId):
     #   try and acquire the text from its parent when the form
     #   tries to set the text. (I know, do not get me started.)
     #   By setting the text here we stop the madness.
-    manageAdd.manage_addPageTemplate(newId, title='', 
+    manageAdd.manage_addPageTemplate(newId, title='',
       text='GSNotSet', REQUEST=None)
     template = getattr(folder, newId)
     assert template.getId() == newId
@@ -21,6 +22,7 @@ def new_version(folder, newId):
     retval = IGSContentPageVersion(template)
     assert retval
     return retval
+
 
 def new_version_id():
     now = datetime.utcnow().replace(tzinfo=pytz.utc)
@@ -30,14 +32,16 @@ def new_version_id():
     assert retval
     return retval
 
+
 roleMap = {
-  'Anonymous':      'anyone',
-  'Authenticated':  'people who are logged in',
+  'Anonymous': 'anyone',
+  'Authenticated': 'people who are logged in',
   'DivisionMember': 'members of this site',
-  'GroupMember':    'members of this group',
-  'admins':         'the site administrators',
-  'Manager':        'the system administrators',
+  'GroupMember': 'members of this group',
+  'admins': 'the site administrators',
+  'Manager': 'the system administrators',
 }
+
 
 def rolesToDescriptions(roles):
     k = roleMap.keys()
@@ -45,13 +49,12 @@ def rolesToDescriptions(roles):
     if len(rs) > 1:
         try:
             rs.remove('Manager')
-        except ValueError, e:
+        except ValueError:
             pass
-            
+
     if (('GroupAdmin' in roles) or ('DivisionAdmin' in roles)):
         rs.append('admins')
 
     ds = [r for r in [roleMap.get(r, '') for r in rs] if r]
     retval = comma_comma_and(ds)
     return retval
-

@@ -1,45 +1,28 @@
 # coding=utf-8
-import os
-from zope.component import adapts, createObject
+from zope.component import createObject
 from interfaces import *
-from time import gmtime, time, strftime
-from zope.interface import implements, alsoProvides
-from zope.component import adapts
-from Products.GSContent.interfaces import IGSContentFolder
-from Products.GSProfile.utils import enforce_schema
-from OFS.OrderedFolder import OrderedFolder
-from lxml import etree
-from StringIO import StringIO
-import interfaces
-from Products.Five import BrowserView
+from zope.interface import implements
+from gs.content.base import SitePage
 from changeprivacy import Permissions
 from page_history import GSPageHistory
 
-class GSContentPage(BrowserView):
+
+class GSContentPage(SitePage):
     """The view of a version-controlled content page."""
-    
+
     implements(IGSContentPage)
-    
+
     CONTENT_TEMPLATE = 'content_en'
     initial_content_file = 'content.html'
-    
+
     def __init__(self, context, request):
-        assert context
-        assert request
-        BrowserView.__init__(self, context, request)
-        self.siteInfo = createObject('groupserver.SiteInfo',
-          context)
+        super(GSContentPage, self).__init__(context, request)
         self.pageHistory = GSPageHistory(context)
         self.__userInfo = self.__showChangeLink = None
-    
+
     @property
     def userInfo(self):
-        if self.__userInfo == None:
-            self.__userInfo = createObject('groupserver.LoggedInUser',
-              self.context)
-        retval = self.__userInfo
-        assert retval
-        return retval
+        return self.loggedInUserInfo
 
     @property
     def showChangeLink(self):
@@ -47,22 +30,22 @@ class GSContentPage(BrowserView):
             anonymous user iff members can edit the page. This is
             because the person viewing the page can easily acquire
             the privilages required to edit the page.'''
-        if self.__showChangeLink == None:
+        if self.__showChangeLink is None:
             perms = Permissions(self.context)
             memberChange = perms.get_change() == 'members'
             anon = self.userInfo.anonymous
             self.__showChangeLink = memberChange and anon
         assert type(self.__showChangeLink) == bool
         return self.__showChangeLink
-    
+
     @property
     def version(self):
-        '''The version of the page to display. 
-        
+        '''The version of the page to display.
+
         If the user can view the page history then he or she will be
         shown the requested version (set in form.version), or the
         published version of the page.
-        
+
         If the user cannot view the page history then the user will
         be shown only the published version of the page.
         '''
@@ -70,14 +53,14 @@ class GSContentPage(BrowserView):
         uo = self.userInfo.user
         canViewOld = uo.has_permission('View History', self.context)
         if canViewOld:
-            vid = self.request.form.get('form.version',  retval.id)
+            vid = self.request.form.get('form.version', retval.id)
             try:
                 retval = self.pageHistory[vid]
-            except KeyError, e:
-                pass # --=mpj17=-- Because we have already set retval
+            except KeyError:
+                pass  # --=mpj17=-- Because we have already set retval
         assert retval, 'Return value not set'
         return retval
-        
+
     @property
     def content(self):
         '''Gets the content from the requested version of the page.
@@ -91,7 +74,7 @@ class GSContentPage(BrowserView):
         the page.
         '''
         return self.context.id
-    
+
     @property
     def title(self):
         '''Gets the title from the requested version of the page.
@@ -108,7 +91,7 @@ class GSContentPage(BrowserView):
         retval = self.context.hidden
         assert type(retval) == bool
         return retval
-                
+
     @property
     def editor(self):
         '''Returns the name of the last editor.
@@ -117,18 +100,19 @@ class GSContentPage(BrowserView):
         assert type(retval) in (str, unicode)
         return retval
 
+
 class Page(object):
 
     def __init__(self, folder):
         self.context = self.folder = folder
         self.pageHistory = GSPageHistory(folder)
-        
+
     @property
     def version(self):
         retval = self.pageHistory.published
         assert retval
         return retval
-        
+
     @property
     def content(self):
         '''Gets the content from the requested version of the page.
@@ -143,7 +127,7 @@ class Page(object):
         the page.
         '''
         return self.folder.id
-    
+
     @property
     def name(self):
         retval = self.version.title
@@ -158,7 +142,7 @@ class Page(object):
         retval = self.folder.hidden
         assert type(retval) == bool
         return retval
-                
+
     @property
     def editor(self):
         '''Returns the name of the last editor.
@@ -171,8 +155,7 @@ class Page(object):
     def date(self):
         retval = self.version.creationDate
         return retval
-        
+
     @property
     def url(self):
         return self.folder.absolute_url()
-

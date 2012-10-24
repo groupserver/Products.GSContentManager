@@ -1,30 +1,18 @@
 # coding=utf-8
 '''Implementation of the Edit Page form.
 '''
-try:
-    from five.formlib.formbase import PageForm
-except ImportError:
-    from Products.Five.formlib.formbase import PageForm
-from zope.component import createObject, adapts
-from zope.component.interfaces import IFactory
-from zope.interface import implements, providedBy, implementedBy,\
-  directlyProvidedBy, alsoProvides
+from zope.interface import implements
 from zope.formlib import form
-from zope.copypastemove import ItemNotFoundError
-from zope.exceptions import DuplicationError
-from zope.app.container.interfaces import IContainer, IOrderedContainer
 from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
-from zope.app.form.browser import MultiCheckBoxWidget, SelectWidget,\
-  TextAreaWidget
-from zope.app.apidoc.interface import getFieldsInOrder
 from zope.schema import *
-from Products.XWFCore.XWFUtils import comma_comma_and, \
-  add_marker_interfaces
+from Products.XWFCore.XWFUtils import add_marker_interfaces
+from gs.content.form import SiteForm
 from interfaces import *
 from utils import *
 from pagetree import *
 
-class ManagePagesForm(PageForm):
+
+class ManagePagesForm(SiteForm):
     label = u'Manage Pages'
     pageTemplateFileName = 'browser/templates/manage_pages.pt'
     template = ZopeTwoPageTemplateFile(pageTemplateFileName)
@@ -32,17 +20,16 @@ class ManagePagesForm(PageForm):
         render_context=False, omit_readonly=False)
 
     implements(IGSContentPageVersion)
-    
+
     def __init__(self, folder, request):
-        PageForm.__init__(self, folder, request)
+        super(ManagePagesForm, self).__init__(folder, request)
         self.folder = folder
-        self.siteInfo = createObject('groupserver.SiteInfo', folder)
 
         # I set this here, because Zope hates me later.
         self.pageTree = PageTree(folder)
-        
+
         self.auditor = None
-    
+
     @form.action(label=u'Add', failure='action_failure')
     def handle_add(self, action, data):
         newPage = data.get('pageId', '')
@@ -54,17 +41,19 @@ class ManagePagesForm(PageForm):
         newFolder = getattr(self.folder, newPage)
         assert newFolder, '%s not in %s' %\
           (newPage, self.folder.getId())
-        add_marker_interfaces(newFolder, 
-          ('Products.GSContentManager.interfaces.IGSContentManagerFolderMarker',))
+        markerName = \
+             'Products.GSContentManager.interfaces.'\
+             'IGSContentManagerFolderMarker'
+        add_marker_interfaces(newFolder, (markerName,))
 
         nvId = new_version_id()
         newVersion = new_version(newFolder, nvId)
         newVersion.content = \
           u'<p> </p>'
         newVersion.title = data.get('title', '').encode('utf-8')
-        newFolder.manage_addProperty('published_revision', nvId, 
+        newFolder.manage_addProperty('published_revision', nvId,
           'string')
-        
+
         self.status = u'Added <a href="%s">%s</a>.' %\
           (newPage, data.get('title', ''))
         assert type(self.status) == unicode
@@ -78,21 +67,21 @@ class ManagePagesForm(PageForm):
         sourceFolder = \
           self.get_folder_from_id(url_to_nodeId('foo-', source))
         srcParent = sourceFolder.aq_parent
-        copy = srcParent.manage_copyObjects([sourceFolder.getId()], 
+        copy = srcParent.manage_copyObjects([sourceFolder.getId()],
             None)
 
         # Paste into the destination
-        destination = self.nodeId_to_url(data['copyDestination'])
+        #destination = self.nodeId_to_url(data['copyDestination'])
         destinationFolder = \
           self.get_folder_from_id(data['copyDestination'])
         pasteResult = destinationFolder.manage_pasteObjects(copy, None)
-        
+
         # Rename
         copyId = pasteResult[0]['new_id']
         newId = data['newPageId']
         destinationFolder.manage_renameObject(copyId, newId, None)
         copied = getattr(destinationFolder, newId).absolute_url()
-        
+
         self.status = u'Copied '\
           u'(<code><a href="%(src)s">%(src)s</a></code>) '\
           u'to '\
@@ -104,7 +93,7 @@ class ManagePagesForm(PageForm):
     @form.action(label=u'Rename', failure='action_failure')
     def handle_rename(self, action, data):
         # <rant author="mpj17">
-        #   I should be using IContainerItemRenamer here, but some 
+        #   I should be using IContainerItemRenamer here, but some
         #   web-footed drool factory did not implement the "get"
         #   method, even though the Drool Factory did state that
         #   the folder implements IContainer.
@@ -120,7 +109,7 @@ class ManagePagesForm(PageForm):
         assert hasattr(parent, newName), \
           '%s not renamed to %s in %s' % \
           (oldName, newName, parent.getId())
-        self.status = u'Renamed <code>%s</code> to <code>%s</code>.'%\
+        self.status = u'Renamed <code>%s</code> to <code>%s</code>.' % \
           (oldName, newName)
         assert type(self.status) == unicode
         assert self.status
@@ -131,7 +120,7 @@ class ManagePagesForm(PageForm):
         retval = 'http://%s' % retval
         assert retval
         return retval
-        
+
     @form.action(label=u'Move', failure='action_failure')
     def handle_move(self, action, data):
         source = self.folder.absolute_url()
@@ -152,7 +141,7 @@ class ManagePagesForm(PageForm):
             sourceFolder = \
               self.get_folder_from_id(url_to_nodeId('foo-', source))
             srcParent = sourceFolder.aq_parent
-            cut = srcParent.manage_cutObjects([sourceFolder.getId()], 
+            cut = srcParent.manage_cutObjects([sourceFolder.getId()],
                 None)
             # Paste into the destination
             destinationFolder = \
@@ -183,4 +172,3 @@ class ManagePagesForm(PageForm):
             self.status = u'<p>There is an error:</p>'
         else:
             self.status = u'<p>There are errors:</p>'
-
