@@ -18,13 +18,6 @@
     name="gswym.js"
     file="./browser/javascript/gswym.js" 
     permission="zope2.Public" />
-      
-  <!-- Add an interface to the XML Templates we use to store 
-     - the versions. -->
-  <class 
-    class="Products.DataTemplates.XMLTemplate.XMLTemplate">
-    <implements 
-      interface=".interfaces.IGSDataTemplate" />
   </class>
   
   <adapter 
