@@ -3,20 +3,18 @@
 '''
 import difflib
 from base64 import b64encode
+from zope.app.form.browser import TextAreaWidget
+from zope.cachedescriptors.property import Lazy
 from zope.component import createObject
-from zope.interface import implements
 from zope.formlib import form
 from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
-from zope.app.form.browser import TextAreaWidget
-from zope.schema import *
 from Products.XWFCore.XWFUtils import munge_date
 from gs.content.form import SiteForm
-from interfaces import *
-from audit import PageEditAuditor, EDIT_CONTENT
-from page_history import GSPageHistory
 from Products.CustomUserFolder.userinfo import userInfo_to_anchor
-from utils import *
-
+from audit import PageEditAuditor, EDIT_CONTENT
+from interfaces import IGSContentPageVersion
+from page_history import GSPageHistory
+from utils import new_version, new_version_id
 import logging
 log = logging.getLogger('GSContentManager')
 
@@ -31,26 +29,31 @@ class EditPageForm(SiteForm):
     label = u'Edit Page'
     pageTemplateFileName = 'browser/templates/edit_page.pt'
     template = ZopeTwoPageTemplateFile(pageTemplateFileName)
-    form_fields = form.Fields(IGSContentPageVersion,
-        render_context=True, omit_readonly=False)
-
-    implements(IGSContentPageVersion)
 
     def __init__(self, folder, request):
-        super(PageForm, self).__init__(folder, request)
-        self.form_fields['content'].custom_widget = wym_editor_widget
-
+        super(EditPageForm, self).__init__(folder, request)
         self.folder = folder
-
-        # Get the version of the page for editing; default to HEAD
-        self.hist = GSPageHistory(folder)
-        ev = request.form.get('form.edited_version',
-          self.hist.current.id)
-        assert ev in self.hist, \
-          u'%s not in %s' % (ev, self.hist.keys())
-        self.versionForChange = self.hist[ev]
-
         self.auditor = None
+
+    @Lazy
+    def form_fields(self):
+        retval = form.Fields(IGSContentPageVersion, render_context=True,
+                                omit_readonly=False)
+        retval['content'].custom_widget = wym_editor_widget
+        return retval
+
+    @Lazy
+    def hist(self):
+        retval = GSPageHistory(self.folder)
+        return retval
+
+    @Lazy
+    def versionForChange(self):
+        # Get the version of the page for editing; default to HEAD
+        ev = self.request.form.get('form.edited_version', self.hist.current.id)
+        assert ev in self.hist, u'%s not in %s' % (ev, self.hist.keys())
+        retval = self.hist[ev]
+        return retval
 
     def setUpWidgets(self, ignore_request=False):
         # There is a litle voodoo here. A PageForm normally wraps

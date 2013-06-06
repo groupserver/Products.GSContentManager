@@ -68,9 +68,12 @@
       interface=".interfaces.IGSContentPageVersion" />
   </class>
   
+  <class class=".edit_page.EditPageForm">
+    <implements interface=".interfaces.IGSContentPageVersion" />
+  </class>
   <browser:page 
-    for=".interfaces.IGSContentManagerFolderMarker"
     name="change.html"
+    for=".interfaces.IGSContentManagerFolderMarker"
     class=".edit_page.EditPageForm"
     permission="zope2.ManageProperties" />
 
