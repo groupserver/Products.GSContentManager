@@ -1,12 +1,18 @@
 # coding=utf-8
-from gs.content.base.page import SitePage
+from zope.cachedescriptors.property import Lazy
+from gs.content.base import SitePage
 from page_history import GSPageHistory
 
 
 class GSPHistoryView(SitePage):
     def __init__(self, folder, request):
         super(GSPHistoryView, self).__init__(folder, request)
-        self.hist = GSPageHistory(folder)
+        self.folder = folder
+
+    @Lazy
+    def hist(self):
+        retval = GSPageHistory(self.folder)
+        return retval
 
     @property
     def title(self):
@@ -14,7 +20,7 @@ class GSPHistoryView(SitePage):
 
     @property
     def showChange(self):
-        uo = self.userInfo.user
+        uo = self.loggedInUserInfo.user
         p = uo.has_permission('Manage properties', self.folder)
         retval = p is not None
         assert type(retval) == bool, \
