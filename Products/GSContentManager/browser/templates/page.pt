@@ -9,22 +9,14 @@
     </title>
   </head>
   <body>
-    <tal:block metal:fill-slot="body">
+    <div class="gs-products-gscontentmanager" metal:fill-slot="body">
       <tal:block 
         replace="structure provider:groupserver.ContentManagerTabMenu">
         Tab Menu
       </tal:block>
       <h1 tal:content="view/title">Page o' Stuff</h1>
-      <p tal:condition="view/showChangeLink"
-        class="ui-state-default"
-        style="padding: 1.385em">
-        <a href="change.html">
-        <span class="ui-icon ui-icon-info" 
-          style="float: left;padding-right:0.689em;">&#160;</span>
-        Login to <strong>change</strong> this page.</a>
-      </p>
       <div tal:replace="structure view/content">Stuff</div>
-    </tal:block>
+    </div><!--gs-products-gscontentmanager-->
     <tal:block metal:fill-slot="javascript">
       <tal:block
         define="jsFile string:javascript.xml"
