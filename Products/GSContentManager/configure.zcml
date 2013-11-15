@@ -9,153 +9,152 @@
   </class>
 
   <browser:resourceDirectory name="gscontenteditor-20080125"
-    directory="./browser/" 
+    directory="./browser/"
     permission="zope2.Public" />
   <browser:resourceDirectory name="gswymskin"
-    directory="./browser/wymeditor_skins" 
+    directory="./browser/wymeditor_skins"
     permission="zope2.Public" />
   <browser:resource
     name="gswym.js"
-    file="./browser/javascript/gswym.js" 
+    file="./browser/javascript/gswym.js"
     permission="zope2.Public" />
-  
-  <adapter 
+
+  <adapter
     factory=".pageversion.GSPageVersion"
     for=".interfaces.IGSDataTemplate"
     provides=".interfaces.IGSContentPageVersion" />
-  <adapter 
+  <adapter
     factory=".pageversion.GSPageVersion"
     for="zope.pagetemplate.interfaces.IPageTemplate"
     provides=".interfaces.IGSContentPageVersion" />
-  <adapter 
+  <adapter
     factory=".pageversion.GSPageVersionSize"
     for=".interfaces.IGSContentPageVersion"
     provides="zope.size.interfaces.ISized" />
 
   <!-- Marker interfaces and views -->
-  <interface 
-    interface=".interfaces.IGSContentPage" 
+  <interface
+    interface=".interfaces.IGSContentPage"
     type="zope.app.content.interfaces.IContentType" />
 
-  <interface 
-    interface=".interfaces.IGSContentPage" 
+  <interface
+    interface=".interfaces.IGSContentPage"
     type="zope.app.content.interfaces.IContentType" />
-    
-  <interface 
+
+  <interface
     interface=".interfaces.IGSContentManagerContextMenuContentProvider"
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
 
-  <interface 
+  <interface
     interface=".interfaces.IGSContentPageHistoryContentProvider"
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
 
-  <interface 
+  <interface
     interface=".interfaces.IGSContentPagePrivacyContentProvider"
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
 
-  <interface 
+  <interface
     interface=".interfaces.IGSContentManagerFolderMarker"
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
 
-  <interface 
+  <interface
     interface=".interfaces.IGSPageTreeContentProvider"
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
 
   <!--Edit Page-->
-  <class 
+  <class
     class=".edit_page.EditPageForm">
-    <implements 
+    <implements
       interface=".interfaces.IGSContentPageVersion" />
   </class>
-  
+
   <class class=".edit_page.EditPageForm">
     <implements interface=".interfaces.IGSContentPageVersion" />
   </class>
-  <browser:page 
+  <browser:page
     name="change.html"
     for=".interfaces.IGSContentManagerFolderMarker"
     class=".edit_page.EditPageForm"
     permission="zope2.ManageProperties" />
 
-  <browser:page 
+  <browser:page
     for=".interfaces.IGSContentManagerFolderMarker"
     name="privacy.html"
     class=".changeprivacy.ChangePrivacyForm"
     permission="zope2.ChangePermissions" />
 
-  <browser:page 
+  <browser:page
     for=".interfaces.IGSContentManagerFolderMarker"
     name="manage.html"
     class=".managepages.ManagePagesForm"
     permission="zope2.ManageProperties" />
-    
-   <browser:page 
+
+   <browser:page
     for=".interfaces.IGSContentManagerFolderMarker"
     name="history.html"
     class=".historyview.GSPHistoryView"
     template="browser/templates/historyview.pt"
     permission="zope2.ViewHistory" />
 
-  <browser:page 
+  <browser:page
     for=".interfaces.IGSContentManagerFolderMarker"
     name="index.html"
     class=".page.GSContentPage"
     template="browser/templates/page.pt"
-    permission="zope2.View" />  
+    permission="zope2.View" />
 
 
   <adapter provides=".interfaces.IGSContentManagerFolderMarker"
                 for="Products.GSContent.interfaces.IGSContentFolder"
                 permission="zope2.Public"
                 factory=".page.GSContentPage"
-                /> 
-  <utility 
+                />
+  <utility
     factory=".audit.EditPageAuditEventFactory"
     name="groupserver.PageEditor"
     permission="zope.Public" />
-    
+
   <adapter
     factory=".tabmenu.GSContentManagerTabMenuContentProvider"
     provides="zope.contentprovider.interfaces.IContentProvider"
     name="groupserver.ContentManagerTabMenu"/>
 
   <!-- Tab Menu -->
-   <interface 
+   <interface
     interface=".interfaces.IGSContentManagerTabMenuContentProvider"
     type="zope.contentprovider.interfaces.ITALNamespaceData"/>
   <adapter
     factory=".privacy.GSContentPagePrivacyContentProvider"
     provides=".interfaces.IGSContentPagePrivacyContentProvider"
     name="groupserver.ContentPagePrivacy"/>
-  <browser:menu 
+  <browser:menu
     id="page_change_menu"
     title="Page Change" />
  <browser:menuItems
     menu="page_change_menu"
     for=".interfaces.IGSContentManagerFolderMarker">
-    <browser:menuItem 
+    <browser:menuItem
       action="index.html"
       title="View"
       description="View the page"
       order="1"
       permission="zope2.View"/>
-    <browser:menuItem 
+    <browser:menuItem
       action="change.html"
       title="Change"
       description="Change the contents of the page"
       order="2"
       permission="zope2.ManageProperties"/>
-    <browser:menuItem 
+    <browser:menuItem
       action="privacy.html"
       title="Privacy"
       description="Change the privacy of the page"
       order="3"
       permission="zope2.ChangePermissions"/>
-    <browser:menuItem 
+    <browser:menuItem
       action="history.html"
       title="History"
       order="4"
       permission="zope2.ViewHistory"/>
   </browser:menuItems>
 </configure>
-
