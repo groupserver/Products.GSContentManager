@@ -1,67 +1,67 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
-  xmlns:tal="http://xml.zope.org/namespaces/tal"
-  xmlns:metal="http://xml.zope.org/namespaces/metal"
-  metal:use-macro="context/@@groupserver_layout/page">
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal"
+      metal:use-macro="context/@@groupserver_layout/page">
   <head>
     <title metal:fill-slot="title"
-      tal:define="munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date;">
+           tal:define="munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date;">
       Change
-      <span tal:replace="string:${view/title}"/> 
+      <span tal:replace="string:${view/title}"/>
       (<span tal:replace="python:munge_date(view.context, view.versionForChange.creationDate)"/>):
       <span tal:replace="string:${view/siteInfo/name}"/>
     </title>
   </head>
   <body>
     <tal:block content="structure provider:groupserver.FormStatusMessage"
-      define="errors view/errors; status view/status; widgets view/widgets"
-      metal:fill-slot="messages">&#160;</tal:block>
+               define="errors view/errors; status view/status; widgets view/widgets"
+               metal:fill-slot="messages">&#160;</tal:block>
     <tal:block metal:fill-slot="body"
-      tal:define="munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date;">
+               tal:define="munge_date python:modules['Products.XWFCore.XWFUtils'].munge_date;">
       <form enctype="multipart/form-data"  method="post" action="."
-        tal:attributes="action request/URL" id="editpage"
-        class="editpageclass">
+            tal:attributes="action request/URL" id="editpage"
+            class="editpageclass gs-content-js-required">
 
-        <tal:block 
+        <tal:block
           replace="structure provider:groupserver.ContentManagerTabMenu">
           Tab Menu
         </tal:block>
-    
+
         <h1>Change
-          <cite tal:content="view/title">Page</cite>
-          (<span class="date" 
-            tal:content="python:munge_date(view.context, view.versionForChange.creationDate)"/>)</h1>
-        
+        <cite tal:content="view/title">Page</cite>
+        (<span class="date"
+        tal:content="python:munge_date(view.context, view.versionForChange.creationDate)"/>)</h1>
+
         <!-- Page History -->
         <p class="label">History</p>
         <tal:block
           define="changedVersion view/versionForChange/id;
-            showChange python:True;
-            startId view/earliestVersionInHistory;"
+                  showChange python:True;
+                  startId view/earliestVersionInHistory;"
           replace="structure provider:groupserver.ContentPageHistory"/>
         <p tal:define="l python:len(view.hist)">
           <span class="val" tal:content="l">1</span>
           version<tal:block condition="python:l&gt;1">s</tal:block>
           in total.
           <a tal:attributes="title string:Historty of ${view/title}"
-            href="history.html">View more&#8230;</a>
+             href="history.html">View more&#8230;</a>
         </p>
-        
+
         <!-- Widgets -->
-        <tal:block 
+        <tal:block
           define="allWidgets python:[w for w in view.widgets]">
           <span tal:define="w python:allWidgets[0]"
-            tal:replace="structure w/hidden">Widget</span>
+                tal:replace="structure w/hidden">Widget</span>
           <tal:block define="widgets python:allWidgets[1:4]">
-            <tal:block 
+            <tal:block
               replace="structure provider:groupserver.FormWidgets"/>
           </tal:block>
-          <tal:block 
+          <tal:block
             repeat="widget python:allWidgets[4:]">
             <span tal:replace="structure widget/hidden">Widget</span>
           </tal:block>
         </tal:block>
         <div class="noFloat">&#160;</div>
-        <span 
+        <span
           tal:replace="structure provider:groupserver.ContentPagePrivacy">
           Privacy Statement
         </span>
@@ -76,28 +76,11 @@
         </div><!--buttons-->
       </form>
     </tal:block>
-    <tal:block metal:fill-slot="javascript">
-      <script type="text/javascript"
-        src="/++resource++check_required-20071214.js">&#160;</script>
-      <script type="text/javascript"
-        tal:define="widgets view/widgets; 
-          button string:#form\\.actions\\.change"
-        tal:content="provider:groupserver.RequiredWidgetsJavaScript">
-        alert("I have not been replaced.");
-      </script>
-      <script type="text/javascript"
-        src="/++resource++popup_help-20071218.js">&#160;</script>
-      <script type="text/javascript">
-        jQuery.noConflict()
-        jQuery(document).ready( function () {
-            GSPopupFormHelp.init('#editpage');
-        });
-      </script>
-      <script type="text/javascript" 
-        src="/++resource++wymeditor-20090831/jquery.wymeditor.js">&#160;</script>
-      <script type="text/javascript"
-        src="/++resource++gswym.js">&#160;</script>
-    </tal:block>
+    <script metal:fill-slot="javascript" class="gs-content-js-wymeditor"
+            type="text/javascript"
+            data-text-element="#form\.content"
+            data-submit="#form\.actions\.change"
+            src="/++resource++wymeditor-1.0.0b5/gswymeditor-min.js"
+            defer="true"> </script>
   </body>
 </html>
-
