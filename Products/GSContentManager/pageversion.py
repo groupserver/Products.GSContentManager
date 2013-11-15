@@ -1,12 +1,33 @@
-# coding=utf-8
-'''Implementation of the Edit Page form.
-'''
+# -*- coding: utf-8 -*-
+##############################################################################
+#
+# Copyright © 2013 E-Democracy.org and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+from __future__ import absolute_import
 from datetime import datetime
-import pytz
-from interfaces import IGSContentPageVersion
+from pytz import utc
 from zope.interface import implements
 from zope.schema.fieldproperty import FieldProperty
 from zope.size.interfaces import ISized
+from .interfaces import IGSContentPageVersion
+
+
+def to_unicode_or_bust(obj, encoding='utf-8'):
+    'http://farmdev.com/talks/unicode/'
+    #FIXME: Move to gs.utils
+    if isinstance(obj, basestring):
+        if not isinstance(obj, unicode):
+            obj = unicode(obj, encoding)
+    return obj
 
 
 class GSPageVersion(object):
@@ -58,12 +79,13 @@ class GSPageVersion(object):
         #   ensure that we hand back ASCII, with XML character
         #   references replacing the Unicode characters.
         utext = self.dataTemplate()
-        retval = utext.encode('utf-8', 'xmlcharrefreplace')
+        retval = to_unicode_or_bust(utext)
         return retval
 
     def set_content(self, data):
         IGSContentPageVersion['content'].bind(self).validate(data)
-        self.dataTemplate.write(data)
+        d = to_unicode_or_bust(data)
+        self.dataTemplate.write(d)
 
     content = property(get_content, set_content, doc=__content_doc)
 
@@ -128,7 +150,7 @@ class GSPageVersion(object):
         y, m, d, h, mi, s = [int(s) for s in
                             (dt[0:4], dt[4:6], dt[6:8],
                              dt[8:10], dt[10:12], dt[12:])]
-        retval = datetime(y, m, d, h, mi, s).replace(tzinfo=pytz.utc)
+        retval = datetime(y, m, d, h, mi, s).replace(tzinfo=utc)
         return retval
 
     def set_creationDate(self, data):
