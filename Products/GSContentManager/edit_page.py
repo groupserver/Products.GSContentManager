@@ -1,6 +1,18 @@
-# coding=utf-8
-'''Implementation of the Edit Page form.
-'''
+# -*- coding: utf-8 -*-
+##############################################################################
+#
+# Copyright © 2013 E-Democracy.org and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+from __future__ import absolute_import
 import difflib
 from base64 import b64encode
 from zope.app.form.browser import TextAreaWidget
@@ -11,10 +23,11 @@ from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
 from Products.XWFCore.XWFUtils import munge_date
 from gs.content.form import SiteForm
 from Products.CustomUserFolder.userinfo import userInfo_to_anchor
-from audit import PageEditAuditor, EDIT_CONTENT
-from interfaces import IGSContentPageVersion
-from page_history import GSPageHistory
-from utils import new_version, new_version_id
+from .audit import PageEditAuditor, EDIT_CONTENT
+from .interfaces import IGSContentPageVersion
+from .page_history import GSPageHistory
+from .utils import new_version, new_version_id
+
 import logging
 log = logging.getLogger('GSContentManager')
 
