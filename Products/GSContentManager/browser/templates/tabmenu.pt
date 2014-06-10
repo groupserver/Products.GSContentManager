@@ -13,5 +13,5 @@
       </tal:block>
     </ul>
   </div><!--tabmenu-->
-  <div style="clear:left;"/>
+  <div style="clear:left;"></div>
 </tal:block>
