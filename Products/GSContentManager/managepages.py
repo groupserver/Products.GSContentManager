@@ -1,15 +1,16 @@
 # coding=utf-8
 '''Implementation of the Edit Page form.
 '''
+from __future__ import absolute_import, unicode_literals
 from zope.interface import implements
 from zope.formlib import form
 from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
 from zope.schema import *
 from Products.XWFCore.XWFUtils import add_marker_interfaces
-from gs.content.form import SiteForm
-from interfaces import *
-from utils import *
-from pagetree import *
+from gs.content.form.base import SiteForm
+from .interfaces import *
+from .utils import *
+from .pagetree import *
 
 
 class ManagePagesForm(SiteForm):

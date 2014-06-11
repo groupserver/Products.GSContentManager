@@ -1,15 +1,15 @@
 # coding=utf-8
 '''Implementation of the Page Privacy form.
 '''
+from __future__ import absolute_import, unicode_literals
 from AccessControl.PermissionRole import rolesForPermissionOn
 from zope.interface import implements
 from zope.formlib import form
 from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
-from gs.content.form.radio import radio_widget
-from gs.content.form import SiteForm
-from interfaces import IGSChangePagePrivacy
-from utils import *
-from page_history import GSPageHistory
+from gs.content.form.base import (radio_widget, SiteForm)
+from .interfaces import IGSChangePagePrivacy
+from .utils import *
+from .page_history import GSPageHistory
 
 
 class ChangePrivacyForm(SiteForm):

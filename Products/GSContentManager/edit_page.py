@@ -21,7 +21,7 @@ from zope.component import createObject
 from zope.formlib import form
 from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
 from Products.XWFCore.XWFUtils import munge_date
-from gs.content.form import SiteForm
+from gs.content.form.base import SiteForm
 from Products.CustomUserFolder.userinfo import userInfo_to_anchor
 from .audit import PageEditAuditor, EDIT_CONTENT
 from .interfaces import IGSContentPageVersion
