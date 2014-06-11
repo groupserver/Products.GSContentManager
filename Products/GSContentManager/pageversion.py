@@ -12,22 +12,14 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 from datetime import datetime
 from pytz import utc
 from zope.interface import implements
 from zope.schema.fieldproperty import FieldProperty
 from zope.size.interfaces import ISized
+from gs.core import to_unicode_or_bust
 from .interfaces import IGSContentPageVersion
-
-
-def to_unicode_or_bust(obj, encoding='utf-8'):
-    'http://farmdev.com/talks/unicode/'
-    #FIXME: Move to gs.utils
-    if isinstance(obj, basestring):
-        if not isinstance(obj, unicode):
-            obj = unicode(obj, encoding)
-    return obj
 
 
 class GSPageVersion(object):
@@ -43,7 +35,7 @@ class GSPageVersion(object):
         self.context = self.dataTemplate = dataTemplate
 
     # ID
-    __id_doc = u'ID of the version'
+    __id_doc = 'ID of the version'
 
     def get_id(self):
         retval = self.dataTemplate.getId()
@@ -55,10 +47,10 @@ class GSPageVersion(object):
     id = property(get_id, set_id, doc=__id_doc)  # lint:ok
 
     # Title
-    __title_doc = u'Title of the page'
+    __title_doc = 'Title of the page'
 
     def get_title(self):
-        retval = getattr(self.dataTemplate, 'title', u'')
+        retval = getattr(self.dataTemplate, 'title', '')
         return retval
 
     def set_title(self, data):
@@ -72,7 +64,7 @@ class GSPageVersion(object):
     title = property(get_title, set_title, doc=__title_doc)
 
     # Content
-    __content_doc = u'The contents of the page'
+    __content_doc = 'The contents of the page'
 
     def get_content(self):
         # Zope Five cannot handle Unicode everywhere yet. So we
@@ -90,7 +82,7 @@ class GSPageVersion(object):
     content = property(get_content, set_content, doc=__content_doc)
 
     # Published
-    __published_doc = u'If published'
+    __published_doc = 'If published'
 
     def get_published(self):
         retval = getattr(self.dataTemplate, 'published', True)
@@ -108,7 +100,7 @@ class GSPageVersion(object):
                           doc=__published_doc)
 
     # Editor
-    __editor_doc = u'The Editor'
+    __editor_doc = 'The Editor'
 
     def get_editor(self):
         retval = getattr(self.dataTemplate, 'editor', '')
@@ -125,7 +117,7 @@ class GSPageVersion(object):
     editor = property(get_editor, set_editor, doc=__editor_doc)
 
     # Parent Version
-    __parentVersion_doc = u'The version that this is based on'
+    __parentVersion_doc = 'The version that this is based on'
 
     def get_parentVersion(self):
         retval = getattr(self.dataTemplate, 'parentVersion', '')
@@ -143,7 +135,7 @@ class GSPageVersion(object):
                                 doc=__parentVersion_doc)
 
     # Creation Date
-    __creationDate_doc = u'Creation Date'
+    __creationDate_doc = 'Creation Date'
 
     def get_creationDate(self):
         dt = self.id.split('_')[-1]
@@ -175,11 +167,11 @@ class GSPageVersionSize(object):
     def sizeForDisplay(self):
         size = self.sizeForSorting()[1]
         if size < 5000:
-            retval = u'%.2fKB' % (size / 1024.0)
+            retval = '%.2fKB' % (size / 1024.0)
         elif size < 1000000:
-            retval = u'%.1fKB' % (size / 1024.0)
+            retval = '%.1fKB' % (size / 1024.0)
         else:
-            retval = u'%.2fMB' % (size / (1024 * 1024.0))
+            retval = '%.2fMB' % (size / (1024 * 1024.0))
 
         assert type(retval) == unicode
         return retval
