@@ -1,25 +1,35 @@
-# coding=utf-8
-'''Implementation of the Page Privacy form.
-'''
+# -*- coding: utf-8 -*-
+##############################################################################
+#
+# Copyright © 2013 E-Democracy.org and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
 from __future__ import absolute_import, unicode_literals
 from AccessControl.PermissionRole import rolesForPermissionOn
-from zope.interface import implements
+from zope.interface import implementer
 from zope.formlib import form
 from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
 from gs.content.form.base import (radio_widget, SiteForm)
 from .interfaces import IGSChangePagePrivacy
-from .utils import *
+from .utils import rolesToDescriptions
 from .page_history import GSPageHistory
 
 
+@implementer(IGSChangePagePrivacy)
 class ChangePrivacyForm(SiteForm):
-    label = u'Change Privacy'
+    label = 'Change Privacy'
     pageTemplateFileName = 'browser/templates/change_privacy.pt'
     template = ZopeTwoPageTemplateFile(pageTemplateFileName)
     form_fields = form.Fields(IGSChangePagePrivacy,
         render_context=False, omit_readonly=False)
-
-    implements(IGSChangePagePrivacy)
 
     def __init__(self, folder, request):
         super(ChangePrivacyForm, self).__init__(folder, request)
@@ -41,26 +51,25 @@ class ChangePrivacyForm(SiteForm):
             self.request, form=self, data=data,
             ignore_request=ignore_request)
 
-    @form.action(label=u'Change', failure='action_failure')
+    @form.action(label='Change', failure='action_failure')
     def handle_change(self, action, data):
-        self.status = u''
+        self.status = ''
         if self.perms.view != data['view']:
             self.perms.view = data['view']
             # --=mpj17=-- TODO: make better
-            self.status = u'Altered who can view the page.'
+            self.status = 'Altered who can view the page.'
         if self.perms.change != data['change']:
             self.perms.change = data['change']
             # --=mpj17=-- TODO: make better
-            self.status = u'%s Altered who can change the page.' %\
+            self.status = '%s Altered who can change the page.' %\
               self.status
         # assert self.status
-        assert type(self.status) == unicode
 
     def action_failure(self, action, data, errors):
         if len(errors) == 1:
-            self.status = u'<p>There is an error:</p>'
+            self.status = '<p>There is an error:</p>'
         else:
-            self.status = u'<p>There are errors:</p>'
+            self.status = '<p>There are errors:</p>'
 
     @property
     def title(self):
@@ -109,7 +118,7 @@ class Permissions(object):
         return retval
 
     def reduce_roles(self, roles):
-        k = self.roleMap.keys()
+        k = list(self.roleMap.keys())
         mapedRoles = set([self.roleMap[r] for r in roles if r in k])
         if ('anyone' in mapedRoles):
             retval = 'anyone'
@@ -122,7 +131,7 @@ class Permissions(object):
         return retval
 
     def set_view(self, v):
-        assert v in self.reverseRoleMap.keys()
+        assert v in list(self.reverseRoleMap.keys())
         roles = self.reverseRoleMap[v]
         self.page.manage_permission('View', roles)
 
@@ -134,7 +143,7 @@ class Permissions(object):
         return retval
 
     def set_change(self, v):
-        assert v in self.reverseRoleMap.keys()
+        assert v in list(self.reverseRoleMap.keys())
         roles = self.reverseRoleMap[v]
         self.page.manage_permission('Manage properties', roles)
         self.page.manage_permission('View History', roles)  # --=Split=--

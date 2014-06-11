@@ -1,15 +1,33 @@
 # -*- coding: utf-8 -*-
+##############################################################################
+#
+# Copyright © 2014 OnlineGroups.net and Contributors.
+# All Rights Reserved.
+#
+# This software is subject to the provisions of the Zope Public License,
+# Version 2.1 (ZPL).  A copy of the ZPL should accompany this distribution.
+# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY AND ALL EXPRESS OR IMPLIED
+# WARRANTIES ARE DISCLAIMED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF TITLE, MERCHANTABILITY, AGAINST INFRINGEMENT, AND FITNESS
+# FOR A PARTICULAR PURPOSE.
+#
+##############################################################################
+import codecs
 import os
 from setuptools import setup, find_packages
 from version import get_version
 
 version = get_version()
 
+with codecs.open('README.txt', encoding='utf-8') as f:
+    long_description = f.read()
+with codecs.open(os.path.join("docs", "HISTORY.txt"), encoding='utf-8') as f:
+    long_description += '\n' + f.read()
+
 setup(name='Products.GSContentManager',
       version=version,
-      description="",
-      long_description=open("README.txt").read() + "\n" +
-                       open(os.path.join("docs", "HISTORY.txt")).read(),
+      description="The (basic) CMS for GroupServer.",
+      long_description=long_description,
       classifiers=[
         'Development Status :: 5 - Production/Stable',
         "Environment :: Web Environment",
@@ -17,14 +35,14 @@ setup(name='Products.GSContentManager',
         "Intended Audience :: Developers",
         'License :: OSI Approved :: Zope Public License',
         "Natural Language :: English",
-        "Operating System :: POSIX :: Linux"
+        "Operating System :: POSIX :: Linux",
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
         ],
-      keywords='',
+      keywords='Page, CMS, Content, Version control, History',
       author='Michael JasonSmith',
       author_email='mpj17@onlinegroups.net',
-      url='http://groupserver.org',
+      url='https://source.iopen.net/groupserver/Products.GSContentManager/',
       license='ZPL 2.1',
       packages=find_packages(exclude=['ez_setup']),
       namespace_packages=['Products'],
@@ -36,6 +54,8 @@ setup(name='Products.GSContentManager',
             'zope.app.apidoc',
             'zope.app.form',
             'zope.app.publisher',
+            'zope.browserpage',
+            'zope.browserresource',
             'zope.component',
             'zope.contentprovider',
             'zope.formlib',
@@ -44,12 +64,15 @@ setup(name='Products.GSContentManager',
             'zope.publisher',
             'zope.schema',
             'zope.size',
+            'zope.tal',
+            'zope.tales',
             'zope.viewlet',
-            'Zope2',
             'AccessControl',
+            'Zope2',
+            'gs.core',
             'gs.content.base',
             'gs.content.layout',
-            'gs.content.form',
+            'gs.content.form.base',
             'gs.content.js.wymeditor[zope]',
             'Products.GSAuditTrail',
             'Products.CustomUserFolder',

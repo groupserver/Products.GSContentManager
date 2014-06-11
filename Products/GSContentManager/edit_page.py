@@ -12,7 +12,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 import difflib
 from base64 import b64encode
 from zope.app.form.browser import TextAreaWidget
@@ -39,7 +39,7 @@ def wym_editor_widget(field, request):
 
 
 class EditPageForm(SiteForm):
-    label = u'Edit Page'
+    label = 'Edit Page'
     pageTemplateFileName = 'browser/templates/edit_page.pt'
     template = ZopeTwoPageTemplateFile(pageTemplateFileName)
 
@@ -64,7 +64,7 @@ class EditPageForm(SiteForm):
     def versionForChange(self):
         # Get the version of the page for editing; default to HEAD
         ev = self.request.form.get('form.edited_version', self.hist.current.id)
-        assert ev in self.hist, u'%s not in %s' % (ev, self.hist.keys())
+        assert ev in self.hist, '%s not in %s' % (ev, list(self.hist.keys()))
         retval = self.hist[ev]
         return retval
 
@@ -123,11 +123,11 @@ class EditPageForm(SiteForm):
 
     def action_failure(self, action, data, errors):
         if len(errors) == 1:
-            self.status = u'<p>There is an error:</p>'
+            self.status = '<p>There is an error:</p>'
         else:
-            self.status = u'<p>There are errors:</p>'
+            self.status = '<p>There are errors:</p>'
 
-    @form.action(label=u'Change', failure='action_failure')
+    @form.action(label='Change', failure='action_failure')
     def handle_set(self, action, data):
         '''Change the data that is being
         '''
@@ -162,26 +162,23 @@ class EditPageForm(SiteForm):
         # Handle publishing here
         if data['published']:
             self.folder.published_revision = newVersion.id
-        self.status = u'%s %s' % \
-          (data['published'] and 'Published' or 'Changed',
+        self.status = '%s %s' % \
+          ('Published' if data['published'] else 'Changed',
            data['title'])
         assert self.status
-        assert type(self.status) == unicode
 
     def get_auditDatums(self, oldVer, newVer):
         url = self.folder.absolute_url(0)
-        instanceDatum = u','.join((b64encode(url),
+        instanceDatum = ','.join((b64encode(url),
             b64encode(oldVer.title), b64encode(oldVer.id),
             b64encode(newVer.title), b64encode(newVer.id)))
 
         textDiff = self.get_text_diff(oldVer, newVer)
         htmlDiff = self.get_html_diff(oldVer, newVer)
-        supplementaryDatum = u','.join((b64encode(textDiff),
+        supplementaryDatum = ','.join((b64encode(textDiff),
                                         b64encode(htmlDiff)))
         retval = (instanceDatum, supplementaryDatum)
         assert len(retval) == 2
-        assert type(retval[0]) == unicode
-        assert type(retval[1]) == unicode
         return retval
 
     def get_text_diff(self, oldVer, newVer):
@@ -191,7 +188,7 @@ class EditPageForm(SiteForm):
         ovt = oldVer.content.decode('utf-8').split('\n')
         nvt = newVer.content.decode('utf-8').split('\n')
         d = difflib.unified_diff(ovt, nvt, oldVer.id, newVer.id)
-        retval = u'\n'.join(d).encode('utf-8')
+        retval = '\n'.join(d).encode('utf-8')
         # And convert it back to utf-8, so we can Base64 encode it.
         assert type(retval) == str
         return retval
@@ -231,9 +228,8 @@ class EditPageForm(SiteForm):
         dt = munge_date(self.folder,
           ver.creationDate, '%Y %b %d %H:%M:%S')
         if vUI.anonymous:
-            retval = u'an %s (%s)' % (vUI.name.lower(), dt)
+            retval = 'an %s (%s)' % (vUI.name.lower(), dt)
         else:
-            retval = u'%s (%s)' % (userInfo_to_anchor(vUI), dt)
+            retval = '%s (%s)' % (userInfo_to_anchor(vUI), dt)
         assert retval
-        assert type(retval) == unicode
         return retval

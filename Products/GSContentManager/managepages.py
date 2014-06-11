@@ -2,25 +2,23 @@
 '''Implementation of the Edit Page form.
 '''
 from __future__ import absolute_import, unicode_literals
-from zope.interface import implements
+from zope.interface import implementer
 from zope.formlib import form
 from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
-from zope.schema import *
 from Products.XWFCore.XWFUtils import add_marker_interfaces
 from gs.content.form.base import SiteForm
-from .interfaces import *
-from .utils import *
-from .pagetree import *
+from .interfaces import IGSMangePages, IGSContentPageVersion
+from .utils import new_version_id, new_version
+from .pagetree import PageTree, url_to_nodeId
 
 
+@implementer(IGSContentPageVersion)
 class ManagePagesForm(SiteForm):
-    label = u'Manage Pages'
+    label = 'Manage Pages'
     pageTemplateFileName = 'browser/templates/manage_pages.pt'
     template = ZopeTwoPageTemplateFile(pageTemplateFileName)
-    form_fields = form.Fields(IGSMangePages,
-        render_context=False, omit_readonly=False)
-
-    implements(IGSContentPageVersion)
+    form_fields = form.Fields(IGSMangePages, render_context=False,
+                                omit_readonly=False)
 
     def __init__(self, folder, request):
         super(ManagePagesForm, self).__init__(folder, request)
@@ -31,7 +29,7 @@ class ManagePagesForm(SiteForm):
 
         self.auditor = None
 
-    @form.action(label=u'Add', failure='action_failure')
+    @form.action(label='Add', failure='action_failure')
     def handle_add(self, action, data):
         newPage = data.get('pageId', '')
         assert newPage
@@ -40,8 +38,7 @@ class ManagePagesForm(SiteForm):
         self.folder.manage_addFolder(newPage)
 
         newFolder = getattr(self.folder, newPage)
-        assert newFolder, '%s not in %s' %\
-          (newPage, self.folder.getId())
+        assert newFolder, '%s not in %s' % (newPage, self.folder.getId())
         markerName = \
              'Products.GSContentManager.interfaces.'\
              'IGSContentManagerFolderMarker'
@@ -50,17 +47,16 @@ class ManagePagesForm(SiteForm):
         nvId = new_version_id()
         newVersion = new_version(newFolder, nvId)
         newVersion.content = \
-          u'<p> </p>'
+          '<p> </p>'
         newVersion.title = data.get('title', '').encode('utf-8')
         newFolder.manage_addProperty('published_revision', nvId,
           'string')
 
-        self.status = u'Added <a href="%s">%s</a>.' %\
+        self.status = 'Added <a href="%s">%s</a>.' %\
           (newPage, data.get('title', ''))
-        assert type(self.status) == unicode
         assert self.status
 
-    @form.action(label=u'Copy', failure='action_failure')
+    @form.action(label='Copy', failure='action_failure')
     def handle_copy(self, action, data):
         source = self.folder.absolute_url()
 
@@ -83,15 +79,14 @@ class ManagePagesForm(SiteForm):
         destinationFolder.manage_renameObject(copyId, newId, None)
         copied = getattr(destinationFolder, newId).absolute_url()
 
-        self.status = u'Copied '\
-          u'(<code><a href="%(src)s">%(src)s</a></code>) '\
-          u'to '\
-          u'(<code><a href="%(dest)s">%(dest)s</a></code>).' %\
+        self.status = 'Copied '\
+          '(<code><a href="%(src)s">%(src)s</a></code>) '\
+          'to '\
+          '(<code><a href="%(dest)s">%(dest)s</a></code>).' %\
           {'src': source, 'dest': copied}
-        assert type(self.status) == unicode
         assert self.status
 
-    @form.action(label=u'Rename', failure='action_failure')
+    @form.action(label='Rename', failure='action_failure')
     def handle_rename(self, action, data):
         # <rant author="mpj17">
         #   I should be using IContainerItemRenamer here, but some
@@ -110,9 +105,8 @@ class ManagePagesForm(SiteForm):
         assert hasattr(parent, newName), \
           '%s not renamed to %s in %s' % \
           (oldName, newName, parent.getId())
-        self.status = u'Renamed <code>%s</code> to <code>%s</code>.' % \
+        self.status = 'Renamed <code>%s</code> to <code>%s</code>.' % \
           (oldName, newName)
-        assert type(self.status) == unicode
         assert self.status
 
     def nodeId_to_url(self, nodeId):
@@ -122,20 +116,20 @@ class ManagePagesForm(SiteForm):
         assert retval
         return retval
 
-    @form.action(label=u'Move', failure='action_failure')
+    @form.action(label='Move', failure='action_failure')
     def handle_move(self, action, data):
         source = self.folder.absolute_url()
         destination = self.nodeId_to_url(data['moveDestination'])
         if source == destination:
-            self.status = u'Cannot move a page '\
-              u'(<code><a href="%(src)s">%(src)s</a></code>) '\
-              u'to itself.' %\
+            self.status = 'Cannot move a page '\
+              '(<code><a href="%(src)s">%(src)s</a></code>) '\
+              'to itself.' %\
               {'src': source, 'dest': destination}
         elif source in destination:
-            self.status = u'Cannot move a parent-page '\
-              u'(<code><a href="%(src)s">%(src)s</a></code>) '\
-              u'into a child page '\
-              u'(<code><a href="%(dest)s">%(dest)s</a></code>).' %\
+            self.status = 'Cannot move a parent-page '\
+              '(<code><a href="%(src)s">%(src)s</a></code>) '\
+              'into a child page '\
+              '(<code><a href="%(dest)s">%(dest)s</a></code>).' %\
               {'src': source, 'dest': destination}
         else:
             # Cut the source
@@ -148,12 +142,11 @@ class ManagePagesForm(SiteForm):
             destinationFolder = \
               self.get_folder_from_id(data['moveDestination'])
             destinationFolder.manage_pasteObjects(cut, None)
-            self.status = u'Moved '\
-              u'(<code><a href="%(src)s">%(src)s</a></code>) '\
-              u'to '\
-              u'(<code><a href="%(dest)s">%(dest)s</a></code>).' %\
+            self.status = 'Moved '\
+              '(<code><a href="%(src)s">%(src)s</a></code>) '\
+              'to '\
+              '(<code><a href="%(dest)s">%(dest)s</a></code>).' %\
               {'src': source, 'dest': destination}
-        assert type(self.status) == unicode
         assert self.status
 
     def get_folder_from_id(self, folderId):
@@ -170,6 +163,6 @@ class ManagePagesForm(SiteForm):
 
     def action_failure(self, action, data, errors):
         if len(errors) == 1:
-            self.status = u'<p>There is an error:</p>'
+            self.status = '<p>There is an error:</p>'
         else:
-            self.status = u'<p>There are errors:</p>'
+            self.status = '<p>There are errors:</p>'
