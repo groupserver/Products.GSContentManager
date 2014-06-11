@@ -39,7 +39,7 @@ class IGSContentPageVersion(Interface):
         description='The identifier of the version.',
         required=True)
 
-    title = ASCIILine(title='Title',
+    title = TextLine(title='Title',
         description='The title of the page, which will appear in '
           'the title bar of the browser.',
         required=True)
@@ -54,13 +54,13 @@ class IGSContentPageVersion(Interface):
         required=True,
         default=True)
 
-    editor = ASCIILine(title='Editor ID',
+    editor = TextLine(title='Editor ID',
         description='The identifier of the user who last edited '
           'this Page',
         required=False,
         default='')
 
-    parentVersion = ASCIILine(title='Parent Version ID',
+    parentVersion = TextLine(title='Parent Version ID',
         description='The identifier of the page version that this '
           'version was based on.',
         required=False,
