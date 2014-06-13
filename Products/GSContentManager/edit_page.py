@@ -20,8 +20,9 @@ from zope.cachedescriptors.property import Lazy
 from zope.component import createObject
 from zope.formlib import form
 from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
-from Products.XWFCore.XWFUtils import munge_date
 from gs.content.form.base import SiteForm
+from gs.core import to_ascii, to_unicode_or_bust
+from Products.XWFCore.XWFUtils import munge_date
 from Products.CustomUserFolder.userinfo import userInfo_to_anchor
 from .audit import PageEditAuditor, EDIT_CONTENT
 from .interfaces import IGSContentPageVersion
@@ -76,7 +77,7 @@ class EditPageForm(SiteForm):
         #   widgets.
         self.adapters = {}
         data = {
-          'id': self.versionForChange.id,
+          'id': to_ascii(self.versionForChange.id),
           'title': self.versionForChange.title,
           'published': self.defaultPublishedOption,  # --=mpj17=--
           'editor': self.versionForChange.editor,
@@ -150,10 +151,10 @@ class EditPageForm(SiteForm):
         fields = self.form_fields.omit('id', 'parentVersion',
           'editor', 'creationDate')
         form.applyChanges(newVersion, fields, data)
-        newVersion.parentVersion = self.versionForChange.id
+        newVersion.parentVersion = to_ascii(self.versionForChange.id)
         userInfo = createObject('groupserver.LoggedInUser',
           self.folder)
-        newVersion.editor = userInfo.id
+        newVersion.editor = to_unicode_or_bust(userInfo.id)
 
         i, s = self.get_auditDatums(self.versionForChange,
           newVersion)
@@ -181,16 +182,14 @@ class EditPageForm(SiteForm):
         assert len(retval) == 2
         return retval
 
-    def get_text_diff(self, oldVer, newVer):
-        assert oldVer
-        assert newVer
+    @staticmethod
+    def get_text_diff(oldVer, newVer):
         # Note we have to convert the text to Unicode, from UTF-8
-        ovt = oldVer.content.decode('utf-8').split('\n')
-        nvt = newVer.content.decode('utf-8').split('\n')
+        ovt = to_unicode_or_bust(oldVer.content).split('\n')
+        nvt = to_unicode_or_bust(newVer.content).split('\n')
         d = difflib.unified_diff(ovt, nvt, oldVer.id, newVer.id)
         retval = '\n'.join(d).encode('utf-8')
         # And convert it back to utf-8, so we can Base64 encode it.
-        assert type(retval) == str
         return retval
 
     def get_html_diff(self, oldVer, newVer):
@@ -207,12 +206,12 @@ class EditPageForm(SiteForm):
         assert newVer
 
         ovt = [t.encode('ascii', 'xmlcharrefreplace')
-               for t in oldVer.content.decode('utf-8').split('\n')]
+               for t in to_unicode_or_bust(oldVer.content).split('\n')]
         d = self.get_version_description(oldVer)
         ovDesc = d.encode('ascii', 'xmlcharrefreplace')
 
         nvt = [t.encode('ascii', 'xmlcharrefreplace')
-               for t in newVer.content.decode('utf-8').split('\n')]
+               for t in to_unicode_or_bust(newVer.content).split('\n')]
         d = self.get_version_description(newVer)
         nvDesc = d.encode('ascii', 'xmlcharrefreplace')
 

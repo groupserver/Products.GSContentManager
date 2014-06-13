@@ -13,6 +13,7 @@
 #
 ##############################################################################
 from __future__ import unicode_literals
+from gs.core import to_ascii
 from zope.interface.interface import Interface
 from zope.schema import (ASCIILine, Bool, Choice, Datetime, Dict, Text,
     TextLine)
@@ -60,11 +61,11 @@ class IGSContentPageVersion(Interface):
         required=False,
         default='')
 
-    parentVersion = TextLine(title='Parent Version ID',
+    parentVersion = ASCIILine(title='Parent Version ID',
         description='The identifier of the page version that this '
           'version was based on.',
         required=False,
-        default='')
+        default=to_ascii(''))
 
     creationDate = Datetime(title='Creation Date',
         description='The date that the version was created',
@@ -161,7 +162,7 @@ class IGSContentPageHistoryContentProvider(IContentProvider):
       required=False,
       default="browser/templates/page_history.pt")
 
-    changedVersion = Text(title='Changed Version',
+    changedVersion = ASCIILine(title='Changed Version',
       description='The identifier of the version that is being '
         'changed',
       required=False)

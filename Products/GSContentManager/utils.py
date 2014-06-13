@@ -15,7 +15,7 @@
 from __future__ import absolute_import, unicode_literals
 from datetime import datetime
 import pytz
-from gs.core import comma_comma_and
+from gs.core import comma_comma_and, to_ascii
 from .interfaces import IGSContentPageVersion
 CONTENT_TEMPLATE = 'content_en'
 
@@ -27,7 +27,7 @@ def new_version(folder, newId):
     #   try and acquire the text from its parent when the form
     #   tries to set the text. (I know, do not get me started.)
     #   By setting the text here we stop the madness.
-    manageAdd.manage_addPageTemplate(newId, title='',
+    manageAdd.manage_addPageTemplate(to_ascii(newId), title='',
       text='GSNotSet', REQUEST=None)
     template = getattr(folder, newId)
     assert template.getId() == newId
@@ -40,7 +40,7 @@ def new_version(folder, newId):
 def new_version_id():
     now = datetime.utcnow().replace(tzinfo=pytz.utc)
     t = now.strftime("%Y%m%d%H%M%S")
-    retval = '%s_%s' % (CONTENT_TEMPLATE, t)
+    retval = to_ascii('%s_%s' % (CONTENT_TEMPLATE, t))
     assert retval
     return retval
 
