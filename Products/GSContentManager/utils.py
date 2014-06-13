@@ -17,7 +17,6 @@ from datetime import datetime
 import pytz
 from gs.core import comma_comma_and
 from .interfaces import IGSContentPageVersion
-
 CONTENT_TEMPLATE = 'content_en'
 
 
@@ -42,7 +41,6 @@ def new_version_id():
     now = datetime.utcnow().replace(tzinfo=pytz.utc)
     t = now.strftime("%Y%m%d%H%M%S")
     retval = '%s_%s' % (CONTENT_TEMPLATE, t)
-    assert type(retval) == str
     assert retval
     return retval
 
@@ -58,7 +56,7 @@ roleMap = {
 
 
 def rolesToDescriptions(roles):
-    k = roleMap.keys()
+    k = list(roleMap.keys())
     rs = [r.strip() for r in roles if (r.strip() in k)]
     if len(rs) > 1:
         try:
