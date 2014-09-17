@@ -2,4 +2,5 @@ recursive-include Products *
 recursive-include docs *
 include version.py
 include *.txt
+include *.rst
 
